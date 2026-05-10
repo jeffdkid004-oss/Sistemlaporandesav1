@@ -1578,37 +1578,71 @@
             wrapper.innerHTML = '';
             const thn = safeGetVal('in_tahun');
             const startNo = getStartingKwitansiNo(currentEditId || Date.now());
+            
+            const record = currentEditId ? savedRecords.find(x => x.id === currentEditId) : null;
+            const count = currentEditId ? (record?.noSpp || '001') : (savedRecords.length + 1).toString().padStart(3, '0');
+            const namaKeg = (safeGetVal('in_kegiatan_select') || '').replace(/^[0-9.]+\s*/, '').trim();
 
             belanjaItems.forEach((item, idx) => {
                 const kwtNo = (startNo + idx).toString().padStart(4, '0');
                 const tgl = safeGetVal('in_tanggal') ? new Date(safeGetVal('in_tanggal')).toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'}) : `.......... ${thn}`;
+                
+                const p = item.pajak || {}; 
+                const potItem = (p.ppn||0) + (p.pph21||0) + (p.pph22||0) + (p.pph23||0) + (p.restoran||0) + (p.galian_c||0);
+                const netItem = item.jumlah - potItem;
 
                 wrapper.innerHTML += `
-                <div class="mb-8 p-[1cm] bg-white shadow-xl print:shadow-none border border-black" style="page-break-inside: avoid;">
-                    <div class="text-center font-bold text-lg mb-4 underline uppercase">KWITANSI / BUKTI PEMBAYARAN</div>
-                    <table class="w-full text-sm mb-4 leading-relaxed">
-                        <tr><td class="w-40 font-semibold">No. Kwitansi</td><td>: ${kwtNo}/KWT/02.2011/${thn}</td></tr>
-                        <tr><td class="font-semibold">Sudah terima dari</td><td>: Bendahara Desa Pangek</td></tr>
-                        <tr><td class="font-semibold">Jumlah Uang</td><td class="font-bold">: Rp ${formatRp(item.jumlah)}</td></tr>
-                        <tr><td class="font-semibold">Terbilang</td><td class="italic font-bold bg-gray-100 p-1">: ${angkaTerbilang(item.jumlah)} Rupiah</td></tr>
-                        <tr><td class="align-top font-semibold">Untuk Pembayaran</td><td class="align-top">: ${item.uraian}</td></tr>
-                    </table>
-                    <div class="flex justify-between text-sm text-center mt-12">
-                        <div>
-                            <p>Setuju Dibayar,</p>
-                            <p>Kepala Desa Pangek</p>
-                            <div class="h-20"></div>
-                            <p class="font-bold underline uppercase">${safeGetVal('in_namaKades')}</p>
+                <div class="page-break bg-white p-[1.5cm] shadow-xl mb-6 print:shadow-none print:mb-0 border border-black max-w-[210mm] mx-auto" style="font-family: Arial, Helvetica, sans-serif; page-break-inside: avoid;">
+                    <div class="mb-1 leading-tight relative min-h-[40px] flex items-center">
+                        <div class="w-full">
+                            <h1 class="font-bold text-[14px] uppercase text-black">PEMERINTAH DESA PANGEK</h1>
+                            <h2 class="font-bold text-[14px] uppercase text-black">KABUPATEN BANGKA BARAT</h2>
                         </div>
-                        <div>
-                            <p>Lunas Dibayar,</p>
-                            <p>Bendahara Desa</p>
+                    </div>
+                    <div class="border-b-[3px] border-black mt-2 mb-1"></div>
+                    <div class="border-b-[1px] border-black mb-4"></div>
+                    
+                    <div class="text-center mb-2 mt-2">
+                        <h4 class="font-bold text-[14px] uppercase tracking-wide text-black">TANDA BUKTI PENGELUARAN UANG</h4>
+                    </div>
+                    <div class="border-b-[1px] border-black mb-4"></div>
+                    
+                    <div class="flex justify-center mb-6 mt-4">
+                        <div class="border border-black px-8 py-0.5 font-bold text-[12px] text-black tracking-wide">NO : ${kwtNo}/KWT/02.2011/${thn}</div>
+                    </div>
+                    
+                    <div class="text-right text-[11px] mb-3 text-black">Sumberdana : ${safeGetVal('in_sumberDana')}</div>
+                    
+                    <table class="w-full text-[12px] leading-relaxed border-none text-black">
+                        <tr><td class="w-36 align-top">Sudah terima dari</td><td class="w-3 align-top">:</td><td class="align-top uppercase">KAUR KEUANGAN</td></tr>
+                        <tr><td class="align-top">Uang Sebesar</td><td class="align-top">:</td><td class="align-top font-bold">Rp ${formatRp(item.jumlah)}</td></tr>
+                        <tr><td></td><td class="align-top">:</td><td class="italic align-top">${angkaTerbilang(item.jumlah)} Rupiah</td></tr>
+                        <tr><td class="align-top">Sebagai pembayaran</td><td class="align-top">:</td><td class="align-top text-justify pr-2">${item.uraian} Kegiatan ${namaKeg}<br>SPP Nomor ${count} dari ${safeGetVal('in_sumberDana')}</td></tr>
+                        <tr><td class="align-top pt-4">Catatan Keuangan</td><td class="align-top pt-4">:</td><td class="align-top pt-4">Potongan Pajak, Pajak Daerah dan potongan Lainnya :
+                            <table class="w-[280px] mt-2 text-[12px] leading-snug">
+                                <tr><td class="w-32">Nilai</td><td class="w-8">: Rp.</td><td class="text-right border-b border-black">${formatRp(item.jumlah)}</td></tr>
+                                <tr><td class="leading-tight py-1">Pot Pajak<br>PPN/PPD</td><td class="align-bottom py-1">: Rp.</td><td class="text-right border-b border-black align-bottom py-1">${fmtPjk(p.ppn)}</td></tr>
+                                <tr><td class="py-1">Pot Pajak PPh 21</td><td class="py-1">: Rp.</td><td class="text-right border-b border-black py-1">${fmtPjk(p.pph21)}</td></tr>
+                                <tr><td class="py-1">Pot Pajak PPh 22</td><td class="py-1">: Rp.</td><td class="text-right border-b border-black py-1">${fmtPjk(p.pph22)}</td></tr>
+                                <tr><td class="py-1">Pot Pajak PPh 23</td><td class="py-1">: Rp.</td><td class="text-right border-b border-black py-1">${fmtPjk(p.pph23)}</td></tr>
+                                <tr><td class="py-1">Total potongan</td><td class="py-1">: Rp.</td><td class="text-right border-b border-black py-1">${fmtPjk(potItem)}</td></tr>
+                                <tr><td class="font-bold py-1">Dibayarkan</td><td class="font-bold py-1">: Rp.</td><td class="text-right font-bold border-b-[2px] border-black py-1">${formatRp(netItem)}</td></tr>
+                            </table>
+                        </td></tr>
+                    </table>
+                    
+                    <div class="flex justify-between text-[11px] mt-8 text-center text-black px-4">
+                        <div class="w-1/2">
+                            <p>&nbsp;</p>
+                            <p>Yang Memberi,</p>
+                            <p class="font-bold uppercase">KAUR KEUANGAN</p>
                             <div class="h-20"></div>
                             <p class="font-bold underline uppercase">${safeGetVal('in_namaKaurKeuangan')}</p>
                         </div>
-                        <div>
-                            <p>Pangek, ${tgl}</p>
-                            <p>Penerima / PPKD</p>
+                        <div class="w-1/2">
+                            <p>PANGEK, ................................ ${thn}</p>
+                            <p>Yang Menerima,</p>
+                            <p class="font-bold uppercase">${safeGetVal('in_jabatanPpkd')}</p>
                             <div class="h-20"></div>
                             <p class="font-bold underline uppercase">${safeGetVal('in_namaPpkd')}</p>
                         </div>
