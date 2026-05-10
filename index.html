@@ -619,11 +619,71 @@
             <!-- VIEW BKP -->
             <div id="bkpView" class="hidden max-w-7xl mx-auto px-4 md:px-6 lg:px-10 py-6 mt-2 print:p-0 print:m-0 print:min-h-0 print-landscape">
                 <div class="bg-white shadow-xl rounded-lg overflow-hidden border border-slate-200 print:shadow-none print:border-none">
-                    <div class="bg-blue-800 text-white p-4 flex justify-between items-center no-print"><div><h1 class="text-lg font-bold uppercase">Buku Pembantu Pajak</h1><p class="text-xs text-blue-200 opacity-80">Pencatatan rincian potongan pajak dari SPP yang tersimpan</p></div><button onclick="cetakBukuKas()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold shadow-md transition flex items-center gap-2 border border-blue-500">🖨️ Cetak BKP</button></div>
-                    <div class="hidden print:block text-center mt-6 mb-6 text-black"><h1 class="font-bold text-xl uppercase tracking-wide">Buku Pembantu Pajak</h1><h2 class="font-bold text-lg uppercase tracking-wide">Pemerintah Desa Pangek</h2></div>
-                    <div class="p-6 print:p-0">
-                        <div class="p-3 bg-blue-50 text-blue-800 border border-blue-200 rounded text-sm mb-4 no-print">💡 Saldo pajak di bawah ini otomatis terakumulasi dari nilai potongan pajak yang Anda input di masing-masing item belanja SPP.</div>
-                        <div class="overflow-x-auto print:overflow-visible text-black"><table class="w-full text-left text-sm border-collapse border border-slate-300 print:border-black"><thead class="bg-slate-100 print:bg-transparent text-xs uppercase text-slate-600 print:text-black"><tr><th class="p-2 border border-slate-300 print:border-black text-center w-12">No.</th><th class="p-2 border border-slate-300 print:border-black w-24">Tanggal</th><th class="p-2 border border-slate-300 print:border-black">No. Bukti / Uraian</th><th class="p-2 border border-slate-300 print:border-black text-right w-32">Pemotongan (Rp)</th><th class="p-2 border border-slate-300 print:border-black text-right w-32">Penyetoran (Rp)</th><th class="p-2 border border-slate-300 print:border-black text-right w-32 print:bg-transparent bg-blue-50">Saldo Pajak (Rp)</th></tr></thead><tbody id="bkpDataList"></tbody></table></div>
+                    <div class="bg-blue-800 text-white p-4 flex justify-between items-center no-print">
+                        <div>
+                            <h1 class="text-lg font-bold uppercase">Buku Pembantu Pajak</h1>
+                            <p class="text-xs text-blue-200 opacity-80">Pencatatan rincian potongan dan penyetoran pajak</p>
+                        </div>
+                        <button onclick="cetakBukuKas()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold shadow-md transition flex items-center gap-2 border border-blue-500">🖨️ Cetak BKP</button>
+                    </div>
+                    <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-8 print:block print:p-0">
+                        <div class="lg:col-span-1 space-y-4 no-print">
+                            <h3 class="font-bold text-slate-700 uppercase border-b pb-2 text-sm">Input Penyetoran Pajak Baru</h3>
+                            <div class="p-3 bg-blue-50 text-blue-800 border border-blue-200 rounded text-xs mb-4">
+                                💡 Saldo pemotongan pajak dari SPP otomatis masuk ke tabel. Gunakan form ini untuk mencatat <b>Penyetoran/Pembayaran Pajak</b>.
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Tanggal Setor</label>
+                                <input type="date" id="in_pajak_tgl" class="form-input">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Jenis Pajak</label>
+                                <select id="in_pajak_jenis" class="form-input">
+                                    <option value="PPN">PPN</option>
+                                    <option value="PPh 21">PPh 21</option>
+                                    <option value="PPh 22">PPh 22</option>
+                                    <option value="PPh 23">PPh 23</option>
+                                    <option value="Pajak Restoran">Pajak Restoran</option>
+                                    <option value="Pajak Galian C">Pajak Galian C</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Uraian / NTPN (Tanda Terima)</label>
+                                <textarea id="in_pajak_uraian" class="form-input text-xs" rows="2" placeholder="Contoh: NTPN 1234567890 / Setoran PPN..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-blue-800 mb-1">Nominal Disetor (Rp)</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-2.5 text-xs text-gray-400 font-bold">Rp</span>
+                                    <input type="number" id="in_pajak_nominal" class="form-input pl-8 font-bold text-lg text-blue-800" value="0">
+                                </div>
+                            </div>
+                            <div class="pt-4 border-t">
+                                <button id="btnSavePajak" onclick="saveSetoranPajakData()" class="action-btn w-full bg-blue-800 text-white py-3 rounded-lg font-bold shadow hover:bg-blue-900 transition">Simpan Penyetoran</button>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-2 print:col-span-full">
+                            <div class="hidden print:block text-center mt-6 mb-6 text-black">
+                                <h1 class="font-bold text-xl uppercase tracking-wide">Buku Pembantu Pajak</h1>
+                                <h2 class="font-bold text-lg uppercase tracking-wide">Pemerintah Desa Pangek</h2>
+                            </div>
+                            <div class="overflow-x-auto print:overflow-visible text-black bg-slate-50 border rounded-lg p-2 print:p-0 print:border-none">
+                                <table class="w-full text-left text-sm border-collapse border border-slate-300 print:border-black">
+                                    <thead class="bg-slate-100 print:bg-transparent text-xs uppercase text-slate-600 print:text-black sticky top-0">
+                                        <tr>
+                                            <th class="p-2 border border-slate-300 print:border-black text-center w-10">No.</th>
+                                            <th class="p-2 border border-slate-300 print:border-black w-24">Tanggal</th>
+                                            <th class="p-2 border border-slate-300 print:border-black">No. Bukti / Uraian</th>
+                                            <th class="p-2 border border-slate-300 print:border-black text-right w-24">Potongan (Rp)</th>
+                                            <th class="p-2 border border-slate-300 print:border-black text-right w-24">Setoran (Rp)</th>
+                                            <th class="p-2 border border-slate-300 print:border-black text-right w-28 print:bg-transparent bg-blue-50">Saldo (Rp)</th>
+                                            <th class="p-2 border border-slate-300 text-center w-16 no-print">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="bkpDataList" class="text-xs"></tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -758,7 +818,7 @@
         }
 
         let belanjaItems = [{ id: Date.now(), uraian: '', jumlah: 0, pajak: {ppn:0, pph21:0, pph22:0, pph23:0, restoran:0, galian_c:0} }];
-        let savedRecords = [], paguRecords = [], pendapatanRecords = [], penarikanRecords = [], pembiayaanRecords = [];
+        let savedRecords = [], paguRecords = [], pendapatanRecords = [], penarikanRecords = [], pembiayaanRecords = [], setoranPajakRecords = [];
         let currentEditId = null, currentIsAcc = false, currentUserRole = '';
 
         function handleLogin() {
@@ -767,7 +827,7 @@
             initDropdowns(); applyRolePermissions();
             document.getElementById('loginView').classList.add('hidden'); document.getElementById('mainAppContainer').classList.remove('hidden');
             switchMainPage('spp'); 
-            loadDataFromCloud(); loadPaguFromCloud(); loadPendapatanFromCloud(); loadPenarikanFromCloud(); loadPembiayaanFromCloud();
+            loadDataFromCloud(); loadPaguFromCloud(); loadPendapatanFromCloud(); loadPenarikanFromCloud(); loadPembiayaanFromCloud(); loadSetoranPajakFromCloud();
         }
 
         function logout() {
@@ -855,6 +915,62 @@
             if (!document.getElementById('bksdView').classList.contains('hidden')) renderBKSD();
             if (!document.getElementById('bkpView').classList.contains('hidden')) renderBKP();
             if (!document.getElementById('laporanView').classList.contains('hidden')) renderLaporan();
+        }
+
+        async function loadSetoranPajakFromCloud() {
+            if(!SCRIPT_URL) return;
+            try { 
+                const res = await fetch(SCRIPT_URL + '?action=get_setoran_pajak'); 
+                if(!res.ok) throw new Error("Fetch error"); 
+                const data = await res.json(); 
+                if (data && data.status === 'error') throw new Error(data.message);
+                setoranPajakRecords = Array.isArray(data) ? data : []; 
+                renderBKP(); 
+                refreshSemuaLaporan();
+            } catch(e) { 
+                setoranPajakRecords = []; 
+                renderBKP(); 
+                refreshSemuaLaporan();
+            }
+        }
+
+        async function saveSetoranPajakData() {
+            const tgl = safeGetVal('in_pajak_tgl'), jenis = safeGetVal('in_pajak_jenis'), uraian = safeGetVal('in_pajak_uraian'), nominal = parseFloat(safeGetVal('in_pajak_nominal')) || 0;
+            if(!tgl || !uraian || nominal <= 0) return alert('Data tidak valid! Lengkapi semua kolom.');
+            const btnSave = document.getElementById('btnSavePajak'); const origText = btnSave.innerHTML; btnSave.innerHTML = '⏳ Menyimpan ke Cloud...'; btnSave.disabled = true;
+            const rec = { id: Date.now(), tanggal: tgl, jenis: jenis, uraian: uraian, nominal: nominal };
+            
+            if(SCRIPT_URL) { 
+                try { 
+                    let res = await fetch(SCRIPT_URL + '?action=save_setoran_pajak', { method: 'POST', body: JSON.stringify(rec), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); 
+                    if(!res.ok) throw new Error("Gagal"); 
+                    setoranPajakRecords.unshift(rec); 
+                    renderBKP();
+                    refreshSemuaLaporan();
+                    alert('Berhasil disimpan ke Database Google Sheet!'); 
+                } catch(e) { 
+                    alert('⚠️ PERINGATAN: Gagal tersambung ke Google Sheet! (Data akan hilang saat halaman di-refresh jika SCRIPT_URL belum dikonfigurasi).');
+                    setoranPajakRecords.unshift(rec); renderBKP(); refreshSemuaLaporan();
+                } 
+            }
+            btnSave.innerHTML = origText; btnSave.disabled = false; document.getElementById('in_pajak_uraian').value = ''; document.getElementById('in_pajak_nominal').value = '0';
+        }
+
+        async function deleteSetoranPajakRec(id) {
+            if(confirm('Yakin hapus data penyetoran pajak ini dari Cloud?')) {
+                if (SCRIPT_URL) { 
+                    try { 
+                        let res = await fetch(SCRIPT_URL + '?action=delete_setoran_pajak', { method: 'POST', body: JSON.stringify({ id: id }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); 
+                        if(!res.ok) throw new Error("gagal"); 
+                        setoranPajakRecords = setoranPajakRecords.filter(x => x.id.toString() !== id.toString()); 
+                        renderBKP();
+                        refreshSemuaLaporan();
+                        alert("Berhasil dihapus dari Database.");
+                    } catch(e) { 
+                        alert('⚠️ PERINGATAN: Gagal menghapus dari Database Google Sheet! Proses dibatalkan.'); 
+                    } 
+                }
+            }
         }
 
         async function loadDataFromCloud() {
@@ -1434,7 +1550,11 @@
             pendapatanRecords.forEach(p => { let nom = parseFloat(p.nominal) || 0; totalMasukGlobal += nom; saldoBank += nom; });
             pembiayaanRecords.forEach(p => { let nom = parseFloat(p.nominal) || 0; if (p.jenis === 'Penerimaan') { totalMasukGlobal += nom; saldoBank += nom; } else { totalKeluarGlobal += nom; saldoBank -= nom; const lbl = 'Pembiayaan (' + p.sumberDana + ')'; keluarPerSumber[lbl] = (keluarPerSumber[lbl] || 0) + nom; let blnStr = p.tanggal ? new Date(p.tanggal).toLocaleString('id-ID', {month: 'long'}) : 'Desember'; if (keluarPerBulan[blnStr] !== undefined) keluarPerBulan[blnStr] += nom; } });
             penarikanRecords.forEach(p => { let nom = parseFloat(p.nominal) || 0; saldoBank -= nom; saldoTunai += nom; let sumber = p.sumberDana || 'Lainnya'; saldoTunaiPerSumber[sumber] = (saldoTunaiPerSumber[sumber] || 0) + nom; });
-            savedRecords.forEach(s => { if (s.statusAcc === true || s.statusAcc === "true") { let sumSpp = 0, sumPajakSPP = 0; (s.items || []).forEach(item => { sumSpp += parseFloat(item.jumlah) || 0; const p = item.pajak || {}; sumPajakSPP += (p.ppn||0) + (p.pph21||0) + (p.pph22||0) + (p.pph23||0) + (p.restoran||0) + (p.galian_c||0); }); totalKeluarGlobal += sumSpp; saldoTunai -= sumSpp; totalPajakPotong += sumPajakSPP; let sumber = s.sumberDana || 'Lainnya'; saldoTunaiPerSumber[sumber] = (saldoTunaiPerSumber[sumber] || 0) - sumSpp; keluarPerSumber[sumber] = (keluarPerSumber[sumber] || 0) + sumSpp; let bln = s.bulan; if(bln && bln.includes(' S.D ')) bln = 'Desember'; if (keluarPerBulan[bln] !== undefined) keluarPerBulan[bln] += sumSpp; } });
+            setoranPajakRecords.forEach(s => { let nom = parseFloat(s.nominal) || 0; totalPajakSetor += nom; saldoTunai -= nom; });
+            
+            savedRecords.forEach(s => { if (s.statusAcc === true || s.statusAcc === "true") { let sumSpp = 0, sumPajakSPP = 0; (s.items || []).forEach(item => { sumSpp += parseFloat(item.jumlah) || 0; const p = item.pajak || {}; sumPajakSPP += (parseFloat(p.ppn)||0) + (parseFloat(p.pph21)||0) + (parseFloat(p.pph22)||0) + (parseFloat(p.pph23)||0) + (parseFloat(p.restoran)||0) + (parseFloat(p.galian_c)||0); }); totalKeluarGlobal += sumSpp; saldoTunai -= sumSpp; totalPajakPotong += sumPajakSPP; let sumber = s.sumberDana || 'Lainnya'; saldoTunaiPerSumber[sumber] = (saldoTunaiPerSumber[sumber] || 0) - sumSpp; keluarPerSumber[sumber] = (keluarPerSumber[sumber] || 0) + sumSpp; let bln = s.bulan; if(bln && bln.includes(' S.D ')) bln = 'Desember'; if (keluarPerBulan[bln] !== undefined) keluarPerBulan[bln] += sumSpp; } });
+
+            saldoTunai += totalPajakPotong; // Karena uang pajak dipotong dari kuitansi tunai, uang fisiknya tertinggal di brankas sampai disetorkan
 
             safeSetText('lap_total_masuk', 'Rp ' + formatRp(totalMasukGlobal)); safeSetText('lap_total_keluar', 'Rp ' + formatRp(totalKeluarGlobal)); safeSetText('lap_saldo', 'Rp ' + formatRp(totalMasukGlobal - totalKeluarGlobal)); safeSetText('lap_saldo_bank', 'Rp ' + formatRp(saldoBank)); safeSetText('lap_saldo_tunai', 'Rp ' + formatRp(saldoTunai)); safeSetText('lap_pajak_potong', 'Rp ' + formatRp(totalPajakPotong)); safeSetText('lap_pajak_setor', 'Rp ' + formatRp(totalPajakSetor));
 
@@ -1456,7 +1576,23 @@
             pendapatanRecords.forEach(p => { transactions.push({ id: p.id, date: new Date(p.tanggal), ref: 'BKM-' + String(p.id).slice(-4), uraian: p.uraian, sumber: p.sumberDana, masuk: parseFloat(p.nominal) || 0, keluar: 0 }); });
             pembiayaanRecords.forEach(p => { let isPenerimaan = p.jenis === 'Penerimaan'; transactions.push({ id: 'PB-' + p.id, date: new Date(p.tanggal), ref: (isPenerimaan ? 'SILPA-' : 'BMDS-') + String(p.id).slice(-4), uraian: p.uraian, sumber: p.sumberDana, masuk: isPenerimaan ? (parseFloat(p.nominal) || 0) : 0, keluar: !isPenerimaan ? (parseFloat(p.nominal) || 0) : 0 }); });
             const kwtStartMap = {}; let kwtCounter = 0; [...savedRecords].sort((a, b) => a.id - b.id).forEach(r => { kwtStartMap[r.id] = kwtCounter + 1; kwtCounter += (r.items ? r.items.length : 0); });
-            savedRecords.forEach(s => { if(s.statusAcc === true || s.statusAcc === "true") { const startNo = kwtStartMap[s.id]; (s.items || []).forEach((item, idx) => { transactions.push({ id: s.id + '-' + idx, date: new Date(s.tanggal || s.bulan + " 1, " + s.tahun), ref: `${(startNo + idx).toString().padStart(4, '0')}/KWT/02.2011/${s.tahun}`, uraian: item.uraian || s.kegiatan, sumber: s.sumberDana, masuk: 0, keluar: parseFloat(item.jumlah) || 0 }); }); } });
+            savedRecords.forEach(s => { 
+                if(s.statusAcc === true || s.statusAcc === "true") { 
+                    const startNo = kwtStartMap[s.id]; 
+                    const namaKeg = (s.kegiatan || '').replace(/^[0-9.]+\s*/, '').trim();
+                    (s.items || []).forEach((item, idx) => { 
+                        transactions.push({ 
+                            id: s.id + '-' + idx, 
+                            date: new Date(s.tanggal || s.bulan + " 1, " + s.tahun), 
+                            ref: `${(startNo + idx).toString().padStart(4, '0')}/KWT/02.2011/${s.tahun}`, 
+                            uraian: `${item.uraian} Kegiatan ${namaKeg}`, 
+                            sumber: s.sumberDana, 
+                            masuk: 0, 
+                            keluar: parseFloat(item.jumlah) || 0 
+                        }); 
+                    }); 
+                } 
+            });
             
             const res = processBukuKasTransactions(transactions, tbody, tfoot);
             const bkuFooterContainer = document.getElementById('bkuPrintFooter'); if(bkuFooterContainer) bkuFooterContainer.innerHTML = getBukuKasHelperHTML(res.totalIn, res.totalOut, res.saldo, false);
@@ -1467,7 +1603,22 @@
             let transactions = [];
             penarikanRecords.forEach(p => { transactions.push({ id: p.id, date: new Date(p.tanggal), ref: 'TARIK-' + String(p.id).slice(-4), uraian: p.uraian + ' (Dari Rek. Desa)', masuk: parseFloat(p.nominal) || 0, keluar: 0 }); });
             const kwtStartMap = {}; let kwtCounter = 0; [...savedRecords].sort((a, b) => a.id - b.id).forEach(r => { kwtStartMap[r.id] = kwtCounter + 1; kwtCounter += (r.items ? r.items.length : 0); });
-            savedRecords.forEach(s => { if(s.statusAcc === true || s.statusAcc === "true") { const startNo = kwtStartMap[s.id]; (s.items || []).forEach((item, idx) => { transactions.push({ id: s.id + '-' + idx, date: new Date(s.tanggal || s.bulan + " 1, " + s.tahun), ref: `${(startNo + idx).toString().padStart(4, '0')}/KWT/02.2011/${s.tahun}`, uraian: item.uraian || s.kegiatan, masuk: 0, keluar: parseFloat(item.jumlah) || 0 }); }); } });
+            savedRecords.forEach(s => { 
+                if(s.statusAcc === true || s.statusAcc === "true") { 
+                    const startNo = kwtStartMap[s.id]; 
+                    const namaKeg = (s.kegiatan || '').replace(/^[0-9.]+\s*/, '').trim();
+                    (s.items || []).forEach((item, idx) => { 
+                        transactions.push({ 
+                            id: s.id + '-' + idx, 
+                            date: new Date(s.tanggal || s.bulan + " 1, " + s.tahun), 
+                            ref: `${(startNo + idx).toString().padStart(4, '0')}/KWT/02.2011/${s.tahun}`, 
+                            uraian: `${item.uraian} Kegiatan ${namaKeg}`, 
+                            masuk: 0, 
+                            keluar: parseFloat(item.jumlah) || 0 
+                        }); 
+                    }); 
+                } 
+            });
             
             const res = processBukuKasTransactions(transactions, tbody, tfoot);
             const bktFooterContainer = document.getElementById('bktPrintFooter'); if(bktFooterContainer) bktFooterContainer.innerHTML = getBukuKasHelperHTML(res.totalIn, res.totalOut, res.saldo, true);
@@ -1480,7 +1631,23 @@
             pendapatanRecords.forEach(p => { if (filterVal === '' || p.sumberDana === filterVal) transactions.push({ id: p.id, date: new Date(p.tanggal), ref: 'BKM-' + String(p.id).slice(-4), sumber: p.sumberDana, uraian: p.uraian, masuk: parseFloat(p.nominal) || 0, keluar: 0 }); });
             pembiayaanRecords.forEach(p => { if (filterVal === '' || p.sumberDana === filterVal) { let isPenerimaan = p.jenis === 'Penerimaan'; transactions.push({ id: 'PB-' + p.id, date: new Date(p.tanggal), ref: (isPenerimaan ? 'SILPA-' : 'BMDS-') + String(p.id).slice(-4), sumber: p.sumberDana, uraian: p.uraian, masuk: isPenerimaan ? (parseFloat(p.nominal) || 0) : 0, keluar: !isPenerimaan ? (parseFloat(p.nominal) || 0) : 0 }); } });
             const kwtStartMap = {}; let kwtCounter = 0; [...savedRecords].sort((a, b) => a.id - b.id).forEach(r => { kwtStartMap[r.id] = kwtCounter + 1; kwtCounter += (r.items ? r.items.length : 0); });
-            savedRecords.forEach(s => { if ((filterVal === '' || s.sumberDana === filterVal) && (s.statusAcc === true || s.statusAcc === "true")) { const startNo = kwtStartMap[s.id]; (s.items || []).forEach((item, idx) => { transactions.push({ id: s.id + '-' + idx, date: new Date(s.tanggal || s.bulan + " 1, " + s.tahun), ref: `${(startNo + idx).toString().padStart(4, '0')}/KWT/02.2011/${s.tahun}`, sumber: s.sumberDana, uraian: item.uraian || s.kegiatan, masuk: 0, keluar: parseFloat(item.jumlah) || 0 }); }); } });
+            savedRecords.forEach(s => { 
+                if ((filterVal === '' || s.sumberDana === filterVal) && (s.statusAcc === true || s.statusAcc === "true")) { 
+                    const startNo = kwtStartMap[s.id]; 
+                    const namaKeg = (s.kegiatan || '').replace(/^[0-9.]+\s*/, '').trim();
+                    (s.items || []).forEach((item, idx) => { 
+                        transactions.push({ 
+                            id: s.id + '-' + idx, 
+                            date: new Date(s.tanggal || s.bulan + " 1, " + s.tahun), 
+                            ref: `${(startNo + idx).toString().padStart(4, '0')}/KWT/02.2011/${s.tahun}`, 
+                            sumber: s.sumberDana, 
+                            uraian: `${item.uraian} Kegiatan ${namaKeg}`, 
+                            masuk: 0, 
+                            keluar: parseFloat(item.jumlah) || 0 
+                        }); 
+                    }); 
+                } 
+            });
             
             const res = processBukuKasTransactions(transactions, tbody, tfoot);
             const bksdFooterContainer = document.getElementById('bksdPrintFooter'); if(bksdFooterContainer) bksdFooterContainer.innerHTML = getBukuKasHelperHTML(res.totalIn, res.totalOut, res.saldo, false);
@@ -1495,51 +1662,92 @@
                 kwtCounter += (r.items ? r.items.length : 0); 
             });
 
-            let saldoPajak = 0, hasData = false, barisIdx = 1;
-            [...savedRecords].sort((a, b) => {
-                const timeA = new Date(a.tanggal || 0).getTime() || 0;
-                const timeB = new Date(b.tanggal || 0).getTime() || 0;
-                if (timeA !== timeB) return timeA - timeB;
-                return (a.noSpp || '').localeCompare(b.noSpp || '', 'id', { numeric: true });
-            }).forEach(r => {
+            let transactions = [];
+
+            // 1. Kumpulkan Pemotongan (dari SPP)
+            [...savedRecords].forEach(r => {
                 if(r.statusAcc !== true && r.statusAcc !== "true") return; 
-                const tgl = r.tanggal ? new Date(r.tanggal).toLocaleDateString('id-ID', {day: '2-digit', month: '2-digit', year: 'numeric'}) : '-';
+                const tgl = r.tanggal ? new Date(r.tanggal) : new Date(r.bulan + " 1, " + r.tahun);
                 const startNo = kwtStartMap[r.id];
+                const namaKeg = (r.kegiatan || '').replace(/^[0-9.]+\s*/, '').trim();
                 
                 (r.items || []).forEach((item, idx) => { 
                     const p = item.pajak || {}; 
-                    const totalPajakItem = (p.ppn||0) + (p.pph21||0) + (p.pph22||0) + (p.pph23||0) + (p.restoran||0) + (p.galian_c||0);
+                    const ppn = parseFloat(p.ppn)||0; const pph21 = parseFloat(p.pph21)||0; const pph22 = parseFloat(p.pph22)||0;
+                    const pph23 = parseFloat(p.pph23)||0; const restoran = parseFloat(p.restoran)||0; const galian_c = parseFloat(p.galian_c)||0;
+                    const totalPajakItem = ppn + pph21 + pph22 + pph23 + restoran + galian_c;
                     
                     if (totalPajakItem > 0) { 
-                        hasData = true; saldoPajak += totalPajakItem; 
                         const noKwt = `${(startNo + idx).toString().padStart(4, '0')}/KWT/02.2011/${r.tahun}`;
-                        
                         let detailPajak = '';
-                        if (p.ppn > 0) detailPajak += `<div class="text-[10px] text-slate-500 print:text-black mt-0.5">- PPN: Rp ${formatRp(p.ppn)}</div>`;
-                        if (p.pph21 > 0) detailPajak += `<div class="text-[10px] text-slate-500 print:text-black mt-0.5">- PPh 21: Rp ${formatRp(p.pph21)}</div>`;
-                        if (p.pph22 > 0) detailPajak += `<div class="text-[10px] text-slate-500 print:text-black mt-0.5">- PPh 22: Rp ${formatRp(p.pph22)}</div>`;
-                        if (p.pph23 > 0) detailPajak += `<div class="text-[10px] text-slate-500 print:text-black mt-0.5">- PPh 23: Rp ${formatRp(p.pph23)}</div>`;
-                        if (p.restoran > 0) detailPajak += `<div class="text-[10px] text-slate-500 print:text-black mt-0.5">- Pajak Restoran: Rp ${formatRp(p.restoran)}</div>`;
-                        if (p.galian_c > 0) detailPajak += `<div class="text-[10px] text-slate-500 print:text-black mt-0.5">- Pajak Galian C: Rp ${formatRp(p.galian_c)}</div>`;
+                        if (ppn > 0) detailPajak += `<div class="text-[10px] text-slate-500 print:text-black mt-0.5">- PPN: Rp ${formatRp(ppn)}</div>`;
+                        if (pph21 > 0) detailPajak += `<div class="text-[10px] text-slate-500 print:text-black mt-0.5">- PPh 21: Rp ${formatRp(pph21)}</div>`;
+                        if (pph22 > 0) detailPajak += `<div class="text-[10px] text-slate-500 print:text-black mt-0.5">- PPh 22: Rp ${formatRp(pph22)}</div>`;
+                        if (pph23 > 0) detailPajak += `<div class="text-[10px] text-slate-500 print:text-black mt-0.5">- PPh 23: Rp ${formatRp(pph23)}</div>`;
+                        if (restoran > 0) detailPajak += `<div class="text-[10px] text-slate-500 print:text-black mt-0.5">- Pajak Restoran: Rp ${formatRp(restoran)}</div>`;
+                        if (galian_c > 0) detailPajak += `<div class="text-[10px] text-slate-500 print:text-black mt-0.5">- Pajak Galian C: Rp ${formatRp(galian_c)}</div>`;
 
-                        tbody.innerHTML += `<tr class="hover:bg-slate-50 transition border-b border-slate-200 print:border-black">
-                            <td class="p-2 border-r border-slate-300 print:border-black text-center text-xs align-top whitespace-nowrap">${barisIdx++}</td>
-                            <td class="p-2 border-r border-slate-300 print:border-black whitespace-nowrap text-xs text-center align-top">${tgl}</td>
-                            <td class="p-2 border-r border-slate-300 print:border-black text-xs align-top">
-                                <span class="font-bold block text-slate-700 print:text-black">${noKwt} (SPP #${r.noSpp})</span>
-                                <span class="text-slate-600 print:text-black italic truncate print:whitespace-normal print:break-words block mb-1">${item.uraian}</span>
-                                ${detailPajak}
-                            </td>
-                            <td class="p-2 border-r border-slate-300 print:border-black text-right text-green-600 print:text-black font-medium align-top whitespace-nowrap">+ ${formatRp(totalPajakItem)}</td>
-                            <td class="p-2 border-r border-slate-300 print:border-black text-right text-slate-400 print:text-black align-top whitespace-nowrap">-</td>
-                            <td class="p-2 bg-blue-50 print:bg-transparent text-right text-blue-800 print:text-black font-bold align-top whitespace-nowrap">${formatRp(saldoPajak)}</td>
-                        </tr>`; 
+                        transactions.push({
+                            type: 'potongan',
+                            idRef: r.id,
+                            date: tgl,
+                            ref: `${noKwt} (SPP #${r.noSpp})`,
+                            uraian: `<span class="text-slate-600 print:text-black italic block mb-1">${item.uraian} Kegiatan ${namaKeg}</span>${detailPajak}`,
+                            masuk: totalPajakItem,
+                            keluar: 0,
+                            hapusBtn: ''
+                        });
                     }
                 });
             });
-            
-            if (!hasData) tbody.innerHTML = '<tr><td colspan="6" class="text-center p-6 text-slate-400">Belum ada transaksi pemotongan pajak di SPP.</td></tr>';
-            else tbody.innerHTML += `<tr><td colspan="5" class="p-3 border border-slate-300 print:border-black text-right uppercase font-bold text-slate-700 print:text-black">Total Pajak Belum Disetor</td><td class="p-3 border border-slate-300 print:border-black text-right text-blue-800 print:text-black font-bold text-base bg-blue-100 print:bg-transparent">${formatRp(saldoPajak)}</td></tr>`;
+
+            // 2. Kumpulkan Penyetoran (dari form manual Buku Pajak)
+            setoranPajakRecords.forEach(s => {
+                const hapusBtn = (currentUserRole !== 'pengunjung') ? `<button onclick="deleteSetoranPajakRec('${s.id}')" class="text-red-500 hover:text-red-700 font-bold p-1 border rounded bg-white shadow-sm no-print">Hapus</button>` : '';
+                transactions.push({
+                    type: 'setoran',
+                    idRef: s.id,
+                    date: new Date(s.tanggal),
+                    ref: `Setoran ${s.jenis}`,
+                    uraian: `<span class="text-slate-700 font-bold block print:text-black">${s.uraian}</span>`,
+                    masuk: 0,
+                    keluar: parseFloat(s.nominal) || 0,
+                    hapusBtn: hapusBtn
+                });
+            });
+
+            // 3. Urutkan berdasarkan Tanggal (Potongan diutamakan dari Setoran jika harinya sama)
+            transactions.sort((a, b) => {
+                const timeA = a.date.getTime() || 0;
+                const timeB = b.date.getTime() || 0;
+                if (timeA !== timeB) return timeA - timeB;
+                if (a.type === 'potongan' && b.type === 'setoran') return -1;
+                if (a.type === 'setoran' && b.type === 'potongan') return 1;
+                return (a.ref || '').localeCompare(b.ref || '', 'id', { numeric: true });
+            });
+
+            let saldoPajak = 0, barisIdx = 1;
+            transactions.forEach(t => {
+                saldoPajak += t.masuk;
+                saldoPajak -= t.keluar;
+                const tglStr = t.date.toLocaleDateString('id-ID', {day: '2-digit', month: '2-digit', year: 'numeric'});
+                
+                tbody.innerHTML += `<tr class="hover:bg-slate-50 transition border-b border-slate-200 print:border-black">
+                    <td class="p-2 border-r border-slate-300 print:border-black text-center text-xs align-top whitespace-nowrap">${barisIdx++}</td>
+                    <td class="p-2 border-r border-slate-300 print:border-black whitespace-nowrap text-xs text-center align-top">${tglStr}</td>
+                    <td class="p-2 border-r border-slate-300 print:border-black text-xs align-top">
+                        <span class="font-bold block text-slate-700 print:text-black mb-1">${t.ref}</span>
+                        ${t.uraian}
+                    </td>
+                    <td class="p-2 border-r border-slate-300 print:border-black text-right text-green-600 print:text-black font-medium align-top whitespace-nowrap">${t.masuk > 0 ? '+ ' + formatRp(t.masuk) : '-'}</td>
+                    <td class="p-2 border-r border-slate-300 print:border-black text-right text-red-600 print:text-black font-medium align-top whitespace-nowrap">${t.keluar > 0 ? '- ' + formatRp(t.keluar) : '-'}</td>
+                    <td class="p-2 bg-blue-50 print:bg-transparent text-right text-blue-800 print:text-black font-bold align-top whitespace-nowrap">${formatRp(saldoPajak)}</td>
+                    <td class="p-2 border-slate-300 text-center align-top no-print">${t.hapusBtn}</td>
+                </tr>`;
+            });
+
+            if (transactions.length === 0) tbody.innerHTML = '<tr><td colspan="7" class="text-center p-6 text-slate-400">Belum ada transaksi pajak.</td></tr>';
+            else tbody.innerHTML += `<tr><td colspan="5" class="p-3 border border-slate-300 print:border-black text-right uppercase font-bold text-slate-700 print:text-black">Sisa Pajak Belum Disetor</td><td class="p-3 border border-slate-300 print:border-black text-right text-blue-800 print:text-black font-bold text-base bg-blue-100 print:bg-transparent">${formatRp(saldoPajak)}</td><td class="border-slate-300 no-print"></td></tr>`;
         }
 
         // ===============================================
