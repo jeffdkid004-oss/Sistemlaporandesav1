@@ -58,7 +58,7 @@
         
         <nav class="no-print w-full md:w-64 bg-[#1e4b6e] flex-shrink-0 flex flex-col h-auto md:h-screen sticky top-0 z-50 shadow-xl transition-all">
             <div class="p-4 md:p-5 border-b border-blue-800 flex justify-between items-center shrink-0">
-                <div class="text-white font-black text-lg leading-tight tracking-wide">PELAPORAN DESA <span class="text-[10px] font-normal opacity-70 block md:inline mt-1 md:mt-0">v0.1.3</span></div>
+                <div class="text-white font-black text-lg leading-tight tracking-wide">PELAPORAN DESA <span class="text-[10px] font-normal opacity-70 block md:inline mt-1 md:mt-0">v0.1.6</span></div>
                 <div id="mobileUserRole" class="md:hidden text-[10px] bg-blue-800 text-white px-2 py-1 rounded font-bold uppercase">ROLE</div>
             </div>
             
@@ -1480,57 +1480,253 @@
         }
 
        function renderBKP() {
-    const tbody = document.getElementById('bkpDataList'); if(!tbody) return; tbody.innerHTML = '';
-    
-    const kwtStartMap = {}; let kwtCounter = 0; 
-    [...savedRecords].sort((a, b) => a.id - b.id).forEach(r => { 
-        kwtStartMap[r.id] = kwtCounter + 1; 
-        kwtCounter += (r.items ? r.items.length : 0); 
-    });
-
-    let saldoPajak = 0, hasData = false, barisIdx = 1;
-    [...savedRecords].sort((a, b) => new Date(a.tanggal || 0) - new Date(b.tanggal || 0)).forEach(r => {
-        if(r.statusAcc !== true && r.statusAcc !== "true") return; 
-        const tgl = r.tanggal ? new Date(r.tanggal).toLocaleDateString('id-ID', {day: '2-digit', month: '2-digit', year: 'numeric'}) : '-';
-        const startNo = kwtStartMap[r.id];
-        
-        (r.items || []).forEach((item, idx) => { 
-            const p = item.pajak || {}; 
-            const totalPajakItem = (p.ppn||0) + (p.pph21||0) + (p.pph22||0) + (p.pph23||0) + (p.restoran||0) + (p.galian_c||0);
+            const tbody = document.getElementById('bkpDataList'); if(!tbody) return; tbody.innerHTML = '';
             
-            if (totalPajakItem > 0) { 
-                hasData = true; saldoPajak += totalPajakItem; 
-                const noKwt = `${(startNo + idx).toString().padStart(4, '0')}/KWT/02.2011/${r.tahun}`;
+            const kwtStartMap = {}; let kwtCounter = 0; 
+            [...savedRecords].sort((a, b) => a.id - b.id).forEach(r => { 
+                kwtStartMap[r.id] = kwtCounter + 1; 
+                kwtCounter += (r.items ? r.items.length : 0); 
+            });
+
+            let saldoPajak = 0, hasData = false, barisIdx = 1;
+            [...savedRecords].sort((a, b) => new Date(a.tanggal || 0) - new Date(b.tanggal || 0)).forEach(r => {
+                if(r.statusAcc !== true && r.statusAcc !== "true") return; 
+                const tgl = r.tanggal ? new Date(r.tanggal).toLocaleDateString('id-ID', {day: '2-digit', month: '2-digit', year: 'numeric'}) : '-';
+                const startNo = kwtStartMap[r.id];
                 
-                let detailPajak = '';
-                if (p.ppn > 0) detailPajak += `<div class="text-[10px] text-slate-500 print:text-black mt-0.5">- PPN: Rp ${formatRp(p.ppn)}</div>`;
-                if (p.pph21 > 0) detailPajak += `<div class="text-[10px] text-slate-500 print:text-black mt-0.5">- PPh 21: Rp ${formatRp(p.pph21)}</div>`;
-                if (p.pph22 > 0) detailPajak += `<div class="text-[10px] text-slate-500 print:text-black mt-0.5">- PPh 22: Rp ${formatRp(p.pph22)}</div>`;
-                if (p.pph23 > 0) detailPajak += `<div class="text-[10px] text-slate-500 print:text-black mt-0.5">- PPh 23: Rp ${formatRp(p.pph23)}</div>`;
-                if (p.restoran > 0) detailPajak += `<div class="text-[10px] text-slate-500 print:text-black mt-0.5">- Pajak Restoran: Rp ${formatRp(p.restoran)}</div>`;
-                if (p.galian_c > 0) detailPajak += `<div class="text-[10px] text-slate-500 print:text-black mt-0.5">- Pajak Galian C: Rp ${formatRp(p.galian_c)}</div>`;
+                (r.items || []).forEach((item, idx) => { 
+                    const p = item.pajak || {}; 
+                    const totalPajakItem = (p.ppn||0) + (p.pph21||0) + (p.pph22||0) + (p.pph23||0) + (p.restoran||0) + (p.galian_c||0);
+                    
+                    if (totalPajakItem > 0) { 
+                        hasData = true; saldoPajak += totalPajakItem; 
+                        const noKwt = `${(startNo + idx).toString().padStart(4, '0')}/KWT/02.2011/${r.tahun}`;
+                        
+                        let detailPajak = '';
+                        if (p.ppn > 0) detailPajak += `<div class="text-[10px] text-slate-500 print:text-black mt-0.5">- PPN: Rp ${formatRp(p.ppn)}</div>`;
+                        if (p.pph21 > 0) detailPajak += `<div class="text-[10px] text-slate-500 print:text-black mt-0.5">- PPh 21: Rp ${formatRp(p.pph21)}</div>`;
+                        if (p.pph22 > 0) detailPajak += `<div class="text-[10px] text-slate-500 print:text-black mt-0.5">- PPh 22: Rp ${formatRp(p.pph22)}</div>`;
+                        if (p.pph23 > 0) detailPajak += `<div class="text-[10px] text-slate-500 print:text-black mt-0.5">- PPh 23: Rp ${formatRp(p.pph23)}</div>`;
+                        if (p.restoran > 0) detailPajak += `<div class="text-[10px] text-slate-500 print:text-black mt-0.5">- Pajak Restoran: Rp ${formatRp(p.restoran)}</div>`;
+                        if (p.galian_c > 0) detailPajak += `<div class="text-[10px] text-slate-500 print:text-black mt-0.5">- Pajak Galian C: Rp ${formatRp(p.galian_c)}</div>`;
 
-                tbody.innerHTML += `<tr class="hover:bg-slate-50 transition border-b border-slate-200 print:border-black">
-                    <td class="p-2 border-r border-slate-300 print:border-black text-center text-xs align-top whitespace-nowrap">${barisIdx++}</td>
-                    <td class="p-2 border-r border-slate-300 print:border-black whitespace-nowrap text-xs text-center align-top">${tgl}</td>
-                    <td class="p-2 border-r border-slate-300 print:border-black text-xs align-top">
-                        <span class="font-bold block text-slate-700 print:text-black">${noKwt} (SPP #${r.noSpp})</span>
-                        <span class="text-slate-600 print:text-black italic truncate print:whitespace-normal print:break-words block mb-1">${item.uraian}</span>
-                        ${detailPajak}
-                    </td>
-                    <td class="p-2 border-r border-slate-300 print:border-black text-right text-green-600 print:text-black font-medium align-top whitespace-nowrap">+ ${formatRp(totalPajakItem)}</td>
-                    <td class="p-2 border-r border-slate-300 print:border-black text-right text-slate-400 print:text-black align-top whitespace-nowrap">-</td>
-                    <td class="p-2 bg-blue-50 print:bg-transparent text-right text-blue-800 print:text-black font-bold align-top whitespace-nowrap">${formatRp(saldoPajak)}</td>
-                </tr>`; 
+                        tbody.innerHTML += `<tr class="hover:bg-slate-50 transition border-b border-slate-200 print:border-black">
+                            <td class="p-2 border-r border-slate-300 print:border-black text-center text-xs align-top whitespace-nowrap">${barisIdx++}</td>
+                            <td class="p-2 border-r border-slate-300 print:border-black whitespace-nowrap text-xs text-center align-top">${tgl}</td>
+                            <td class="p-2 border-r border-slate-300 print:border-black text-xs align-top">
+                                <span class="font-bold block text-slate-700 print:text-black">${noKwt} (SPP #${r.noSpp})</span>
+                                <span class="text-slate-600 print:text-black italic truncate print:whitespace-normal print:break-words block mb-1">${item.uraian}</span>
+                                ${detailPajak}
+                            </td>
+                            <td class="p-2 border-r border-slate-300 print:border-black text-right text-green-600 print:text-black font-medium align-top whitespace-nowrap">+ ${formatRp(totalPajakItem)}</td>
+                            <td class="p-2 border-r border-slate-300 print:border-black text-right text-slate-400 print:text-black align-top whitespace-nowrap">-</td>
+                            <td class="p-2 bg-blue-50 print:bg-transparent text-right text-blue-800 print:text-black font-bold align-top whitespace-nowrap">${formatRp(saldoPajak)}</td>
+                        </tr>`; 
+                    }
+                });
+            });
+            
+            if (!hasData) tbody.innerHTML = '<tr><td colspan="6" class="text-center p-6 text-slate-400">Belum ada transaksi pemotongan pajak di SPP.</td></tr>';
+            else tbody.innerHTML += `<tr><td colspan="5" class="p-3 border border-slate-300 print:border-black text-right uppercase font-bold text-slate-700 print:text-black">Total Pajak Belum Disetor</td><td class="p-3 border border-slate-300 print:border-black text-right text-blue-800 print:text-black font-bold text-base bg-blue-100 print:bg-transparent">${formatRp(saldoPajak)}</td></tr>`;
+        }
+
+        // ===============================================
+        // FUNGSI PENDUKUNG PREVIEW & CETAK (BARU DITAMBAHKAN)
+        // ===============================================
+
+        // Fungsi untuk men-switch / pindah tab dokumen di mode Preview
+        function switchDoc(type) {
+            // Sembunyikan semua page dokumen
+            document.querySelectorAll('.doc-page').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('block');
+            });
+            // Tampilkan page yang ditarget
+            const target = document.getElementById('doc_' + type);
+            if(target) {
+                target.classList.remove('hidden');
+                target.classList.add('block');
             }
-        });
-    });
-    
-    if (!hasData) tbody.innerHTML = '<tr><td colspan="6" class="text-center p-6 text-slate-400">Belum ada transaksi pemotongan pajak di SPP.</td></tr>';
-    else tbody.innerHTML += `<tr><td colspan="5" class="p-3 border border-slate-300 print:border-black text-right uppercase font-bold text-slate-700 print:text-black">Total Pajak Belum Disetor</td><td class="p-3 border border-slate-300 print:border-black text-right text-blue-800 print:text-black font-bold text-base bg-blue-100 print:bg-transparent">${formatRp(saldoPajak)}</td></tr>`;
-}
+            // Update warna tombol tab
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active-tab', 'text-slate-800');
+                btn.classList.add('text-slate-500');
+            });
+            const activeTab = document.getElementById('tab_' + type);
+            if(activeTab) {
+                activeTab.classList.add('active-tab');
+                activeTab.classList.remove('text-slate-500');
+            }
+        }
 
-        function hidePreview() { document.getElementById('previewView')?.classList.add('hidden'); document.getElementById('formView')?.classList.remove('hidden'); }
+        // Fungsi untuk generate HTML Kwitansi di dalam preview
+        function populateKwitansi() {
+            const wrapper = document.getElementById('kwitansi_wrapper');
+            if(!wrapper) return;
+            wrapper.innerHTML = '';
+            const thn = safeGetVal('in_tahun');
+            const startNo = getStartingKwitansiNo(currentEditId || Date.now());
+
+            belanjaItems.forEach((item, idx) => {
+                const kwtNo = (startNo + idx).toString().padStart(4, '0');
+                const tgl = safeGetVal('in_tanggal') ? new Date(safeGetVal('in_tanggal')).toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'}) : `.......... ${thn}`;
+
+                wrapper.innerHTML += `
+                <div class="mb-8 p-[1cm] bg-white shadow-xl print:shadow-none border border-black" style="page-break-inside: avoid;">
+                    <div class="text-center font-bold text-lg mb-4 underline uppercase">KWITANSI / BUKTI PEMBAYARAN</div>
+                    <table class="w-full text-sm mb-4 leading-relaxed">
+                        <tr><td class="w-40 font-semibold">No. Kwitansi</td><td>: ${kwtNo}/KWT/02.2011/${thn}</td></tr>
+                        <tr><td class="font-semibold">Sudah terima dari</td><td>: Bendahara Desa Pangek</td></tr>
+                        <tr><td class="font-semibold">Jumlah Uang</td><td class="font-bold">: Rp ${formatRp(item.jumlah)}</td></tr>
+                        <tr><td class="font-semibold">Terbilang</td><td class="italic font-bold bg-gray-100 p-1">: ${angkaTerbilang(item.jumlah)} Rupiah</td></tr>
+                        <tr><td class="align-top font-semibold">Untuk Pembayaran</td><td class="align-top">: ${item.uraian}</td></tr>
+                    </table>
+                    <div class="flex justify-between text-sm text-center mt-12">
+                        <div>
+                            <p>Setuju Dibayar,</p>
+                            <p>Kepala Desa Pangek</p>
+                            <div class="h-20"></div>
+                            <p class="font-bold underline uppercase">${safeGetVal('in_namaKades')}</p>
+                        </div>
+                        <div>
+                            <p>Lunas Dibayar,</p>
+                            <p>Bendahara Desa</p>
+                            <div class="h-20"></div>
+                            <p class="font-bold underline uppercase">${safeGetVal('in_namaKaurKeuangan')}</p>
+                        </div>
+                        <div>
+                            <p>Pangek, ${tgl}</p>
+                            <p>Penerima / PPKD</p>
+                            <div class="h-20"></div>
+                            <p class="font-bold underline uppercase">${safeGetVal('in_namaPpkd')}</p>
+                        </div>
+                    </div>
+                </div>
+                `;
+            });
+        }
+
+        // Fungsi untuk mengolah data input ke halaman preview sebelum dicetak
+        function showPreview() {
+            const kegiatanSelect = safeGetVal('in_kegiatan_select');
+            if(!kegiatanSelect) return alert('Pilih kegiatan terlebih dahulu!');
+
+            const kegiatanName = kegiatanSelect.replace(/^[0-9.]+\s*/, '').trim(); // Hapus kode angka di depan
+            const tglStr = safeGetVal('in_tanggal');
+            const tgl = tglStr ? new Date(tglStr).toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'}) : `.......... ${safeGetVal('in_tahun')}`;
+            let totalSekarang = 0;
+
+            // 1. Populate SPP Document
+            safeSetText('pr_no_spp', document.getElementById('display_spp_no').innerText);
+            safeSetText('pr_bidang', safeGetVal('in_bidang'));
+            safeSetText('pr_subBidang', safeGetVal('in_subBidang'));
+            safeSetText('pr_kegiatan', kegiatanName);
+            safeSetText('pr_waktu', safeGetVal('in_bulan') + ' ' + safeGetVal('in_tahun'));
+            safeSetText('pr_sumberDana', safeGetVal('in_sumberDana'));
+
+            const tbody = document.getElementById('pr_tableBody');
+            tbody.innerHTML = '';
+            
+            belanjaItems.forEach((item, idx) => {
+                totalSekarang += item.jumlah;
+                tbody.innerHTML += `<tr>
+                    <td class="border border-black p-2 text-center">${idx + 1}</td>
+                    <td class="border border-black p-2 uppercase">${item.uraian}</td>
+                    <td class="border border-black p-2 text-right">-</td>
+                    <td class="border border-black p-2 text-right">-</td>
+                    <td class="border border-black p-2 text-right">${formatRp(item.jumlah)}</td>
+                    <td class="border border-black p-2 text-right">-</td>
+                    <td class="border border-black p-2 text-right">-</td>
+                </tr>`;
+            });
+
+            const pagu = parseFloat(safeGetVal('in_pagu')) || 0;
+            const lalu = parseFloat(safeGetVal('in_lalu')) || 0;
+            const total = lalu + totalSekarang;
+            const sisa = pagu - total;
+
+            safeSetText('ft_pagu', formatRp(pagu));
+            safeSetText('ft_lalu', formatRp(lalu));
+            safeSetText('ft_sekarang', formatRp(totalSekarang));
+            safeSetText('ft_total', formatRp(total));
+            safeSetText('ft_sisa', formatRp(sisa));
+
+            safeSetText('pr_namaSekdes', safeGetVal('in_namaSekdes'));
+            safeSetText('pr_namaPpkd', safeGetVal('in_namaPpkd'));
+            safeSetText('pr_jabatanPpkd', safeGetVal('in_jabatanPpkd'));
+            safeSetText('pr_namaKades', safeGetVal('in_namaKades'));
+            safeSetText('pr_namaKaurKeuangan', safeGetVal('in_namaKaurKeuangan'));
+            safeSetText('pr_tgl_cetak', tgl);
+
+            // 2. Populate Cover Document
+            safeSetText('cover_no_spp', document.getElementById('display_spp_no').innerText);
+            safeSetText('cover_kegiatan', kegiatanName);
+            safeSetText('cover_belanja', 'Rp ' + formatRp(totalSekarang));
+            safeSetText('cover_sumber', safeGetVal('in_sumberDana'));
+            safeSetText('cover_ppkd', safeGetVal('in_namaPpkd'));
+            safeSetText('cover_tahun', safeGetVal('in_tahun'));
+            const logoCover = document.getElementById('logo_cover'); if(logoCover) logoCover.src = LOGO_URL;
+            const logoSpp = document.getElementById('logo_spp'); if(logoSpp) logoSpp.src = LOGO_URL;
+
+            // 3. Populate SP2D Document
+            safeSetText('sp2d_spp_ref', document.getElementById('display_spp_no').innerText);
+            safeSetText('sp2d_spp_tgl', tgl);
+            safeSetText('sp2d_tahun', safeGetVal('in_tahun'));
+            safeSetText('sp2d_jumlah', 'Rp ' + formatRp(totalSekarang));
+            safeSetText('sp2d_terbilang', angkaTerbilang(totalSekarang) + ' Rupiah');
+            safeSetText('sp2d_ppkd', safeGetVal('in_namaPpkd'));
+            safeSetText('sp2d_keperluan', 'Pembayaran Kegiatan ' + kegiatanName);
+            safeSetText('sp2d_t_jumlah1', formatRp(totalSekarang));
+            safeSetText('sp2d_t_kegiatan', kegiatanName);
+            safeSetText('sp2d_t_jumlah2', formatRp(totalSekarang));
+            const logoSp2d = document.getElementById('logo_sp2d'); if(logoSp2d) logoSp2d.src = LOGO_URL;
+
+            // Hitung pajak untuk dimasukkan ke SP2D
+            let totPpn=0, totPph21=0, totPph22=0, totPph23=0, totRest=0, totGal=0;
+            belanjaItems.forEach(item => {
+                if(item.pajak) {
+                    totPpn += item.pajak.ppn||0; totPph21 += item.pajak.pph21||0; totPph22 += item.pajak.pph22||0;
+                    totPph23 += item.pajak.pph23||0; totRest += item.pajak.restoran||0; totGal += item.pajak.galian_c||0;
+                }
+            });
+            const totalPotongan = totPpn + totPph21 + totPph22 + totPph23 + totRest + totGal;
+            safeSetText('sp2d_v_ppn', fmtPjk(totPpn));
+            safeSetText('sp2d_v_pph21', fmtPjk(totPph21));
+            safeSetText('sp2d_v_pph22', fmtPjk(totPph22));
+            safeSetText('sp2d_v_pph23', fmtPjk(totPph23));
+            safeSetText('sp2d_v_restoran', fmtPjk(totRest));
+            safeSetText('sp2d_v_galian', fmtPjk(totGal));
+            safeSetText('sp2d_t_potongan', fmtPjk(totalPotongan));
+
+            safeSetText('sp2d_s_diminta', formatRp(totalSekarang));
+            safeSetText('sp2d_s_potongan_setor', formatRp(totalPotongan));
+            const dibayarkan = totalSekarang - totalPotongan;
+            safeSetText('sp2d_s_dibayarkan', formatRp(dibayarkan));
+            safeSetText('sp2d_s_terbilang', angkaTerbilang(dibayarkan) + ' Rupiah');
+            safeSetText('sp2d_tgl_cetak_sig', tgl);
+            safeSetText('sp2d_ttd_kades_bottom', safeGetVal('in_namaKades'));
+
+            // 4. Generate Kwitansi
+            populateKwitansi();
+
+            // Pindah Tampilan ke mode Preview
+            document.getElementById('sppView')?.classList.add('hidden');
+            document.getElementById('previewView')?.classList.remove('hidden');
+            switchDoc('spp'); // Otomatis aktif di tab SPP
+            window.scrollTo(0, 0);
+        }
+
+        // Fungsi untuk menutup mode preview kembali ke form pengisian
+        function hidePreview() { 
+            document.getElementById('previewView')?.classList.add('hidden'); 
+            document.getElementById('sppView')?.classList.remove('hidden'); 
+            window.scrollTo(0, 0);
+        }
+
+        // Fungsi mencetak untuk buku kas
+        function cetakBukuKas() {
+            window.print();
+        }
 
         function cetakDokumen() {
             const record = currentEditId ? savedRecords.find(x => x.id === currentEditId) : null;
