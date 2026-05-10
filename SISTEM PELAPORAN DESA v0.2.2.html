@@ -1,0 +1,2010 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pelaporan Desa (Cloud Only)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, Helvetica, sans-serif; background-color: #f1f5f9; }
+        @media print {
+            .no-print { display: none !important; }
+            @page { size: A4 portrait; margin: 1.5cm; }
+            body { background-color: white; margin: 0; padding: 0; }
+            .print-container { box-shadow: none !important; margin: 0 !important; padding: 0 !important; width: 100% !important; max-width: none !important; }
+            table { width: 100% !important; table-layout: fixed; border-collapse: collapse; }
+            .text-sm { font-size: 10pt !important; }
+            #mainAppContainer, #mainContent { display: block !important; height: auto !important; overflow: visible !important; width: 100% !important; background: white !important; }
+            .page-break { page-break-after: always; }
+            .page-break:last-child { page-break-after: auto; }
+            .doc-page.hidden { display: none !important; }
+            .doc-page.block { display: block !important; }
+            body.print-landscape { @page { size: A4 landscape; margin: 1.5cm; } }
+            body.print-a5 { @page { size: A5 portrait; margin: 1cm; } }
+        }
+        .form-input { width: 100%; border: 1px solid #d1d5db; padding: 0.5rem; border-radius: 0.375rem; font-size: 0.875rem; outline: none; background-color: white; }
+        .form-input:focus { border-color: #1e4b6e; ring: 1px solid #1e4b6e; }
+        optgroup { font-weight: bold; color: #1e4b6e; background: #f8fafc; padding: 5px; }
+        option { font-weight: normal; color: #334155; background: white; }
+        .tab-btn { transition: all 0.2s; }
+        .tab-btn.active-tab { background-color: white; color: #1e4b6e; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div id="loginView" class="min-h-screen flex items-center justify-center bg-slate-100 absolute inset-0 z-[100]">
+        <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-sm border-t-4 border-[#1e4b6e]">
+            <div class="text-center mb-6">
+                <h1 class="text-2xl font-black text-[#1e4b6e] uppercase tracking-wider mb-2">Sistem Pelaporan</h1>
+                <p class="text-sm text-slate-500">v0.1.3 - Cloud Edition</p>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1 uppercase">Kata Sandi</label>
+                    <input type="password" id="login_password" class="form-input text-center text-lg tracking-widest" placeholder="••••••">
+                </div>
+                <button onclick="handleLogin()" class="w-full bg-[#1e4b6e] text-white py-3 rounded-lg font-bold shadow-md hover:bg-blue-800 transition">Masuk</button>
+            </div>
+            <div class="mt-6 text-center text-xs text-slate-400">
+                <p>Login Pengunjung (Tanpa Sandi): Biarkan kosong dan klik Masuk.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainAppContainer" class="hidden flex flex-col md:flex-row h-screen overflow-hidden bg-slate-100">
+        
+        <nav class="no-print w-full md:w-64 bg-[#1e4b6e] flex-shrink-0 flex flex-col h-auto md:h-screen sticky top-0 z-50 shadow-xl transition-all">
+            <div class="p-4 md:p-5 border-b border-blue-800 flex justify-between items-center shrink-0">
+                <div class="text-white font-black text-lg leading-tight tracking-wide">PELAPORAN DESA <span class="text-[10px] font-normal opacity-70 block md:inline mt-1 md:mt-0">v0.1.6</span></div>
+                <div id="mobileUserRole" class="md:hidden text-[10px] bg-blue-800 text-white px-2 py-1 rounded font-bold uppercase">ROLE</div>
+            </div>
+            
+            <div class="flex flex-row md:flex-col gap-1 p-2 md:p-3 flex-1 overflow-x-auto md:overflow-y-auto no-scrollbar items-center md:items-stretch">
+                <div class="hidden md:block text-[10px] font-bold text-blue-400 px-4 uppercase tracking-widest border-b border-blue-800/50 pb-1 mb-1">Master & Transaksi</div>
+                
+                <button onclick="switchMainPage('spp')" id="nav_main_spp" class="text-left px-4 py-2 rounded-md md:rounded-r-lg border-b-4 md:border-b-0 md:border-l-4 border-transparent text-blue-200 hover:text-white hover:bg-[#153650] transition whitespace-nowrap text-sm font-bold flex-shrink-0">📝 Form SPP</button>
+                <button onclick="switchMainPage('pagu')" id="nav_main_pagu" class="non-ppkd-menu text-left px-4 py-2 rounded-md md:rounded-r-lg border-b-4 md:border-b-0 md:border-l-4 border-transparent text-blue-200 hover:text-white hover:bg-[#153650] transition whitespace-nowrap text-sm font-bold flex-shrink-0 hidden">💰 Pagu Anggaran</button>
+                <button onclick="switchMainPage('pendapatan')" id="nav_main_pendapatan" class="non-ppkd-menu text-left px-4 py-2 rounded-md md:rounded-r-lg border-b-4 md:border-b-0 md:border-l-4 border-transparent text-emerald-300 hover:text-white hover:bg-[#153650] transition whitespace-nowrap text-sm font-bold flex-shrink-0 hidden">💵 Penerimaan Kas</button>
+                <button onclick="switchMainPage('penarikan')" id="nav_main_penarikan" class="non-ppkd-menu text-left px-4 py-2 rounded-md md:rounded-r-lg border-b-4 md:border-b-0 md:border-l-4 border-transparent text-purple-300 hover:text-white hover:bg-[#153650] transition whitespace-nowrap text-sm font-bold flex-shrink-0 hidden">🏧 Penarikan Bank</button>
+                <button onclick="switchMainPage('pembiayaan')" id="nav_main_pembiayaan" class="non-ppkd-menu text-left px-4 py-2 rounded-md md:rounded-r-lg border-b-4 md:border-b-0 md:border-l-4 border-transparent text-teal-300 hover:text-white hover:bg-[#153650] transition whitespace-nowrap text-sm font-bold flex-shrink-0 hidden">🏛️ Pembiayaan</button>
+                <button onclick="switchMainPage('spj')" id="nav_main_spj" class="text-left px-4 py-2 rounded-md md:rounded-r-lg border-b-4 md:border-b-0 md:border-l-4 border-transparent text-yellow-300 hover:text-white hover:bg-[#153650] transition whitespace-nowrap text-sm font-bold flex-shrink-0">📄 Laporan SPJ</button>
+                
+                <div class="non-ppkd-menu hidden md:block text-[10px] font-bold text-blue-400 mt-2 px-4 uppercase tracking-widest border-b border-blue-800/50 pb-1 mb-1">Analitik</div>
+                <button onclick="switchMainPage('laporan')" id="nav_main_laporan" class="non-ppkd-menu text-left px-4 py-2 rounded-md md:rounded-r-lg border-b-4 md:border-b-0 md:border-l-4 border-transparent text-pink-300 hover:text-white hover:bg-[#153650] transition whitespace-nowrap text-sm font-bold flex-shrink-0 hidden">📈 Grafik Laporan</button>
+                
+                <button onclick="logout()" class="md:hidden text-left px-4 py-2 rounded-md text-red-300 hover:text-white hover:bg-red-900 transition whitespace-nowrap text-sm font-bold flex-shrink-0 ml-auto">🚪 Keluar</button>
+            </div>
+
+            <div class="hidden md:block p-4 border-t border-blue-800 shrink-0">
+                <div id="userRoleDisplay" class="text-xs bg-blue-800 text-blue-100 px-3 py-2 mb-3 rounded-lg font-bold uppercase text-center border border-blue-700 hidden shadow-inner">Role</div>
+                <button onclick="logout()" class="w-full flex items-center justify-center gap-2 bg-red-500/10 text-red-300 hover:bg-red-500 hover:text-white px-4 py-2.5 rounded-lg transition font-bold text-sm border border-red-500/20">Keluar Aplikasi</button>
+            </div>
+        </nav>
+
+        <div id="mainContent" class="flex-1 overflow-y-auto relative w-full h-full bg-slate-100 no-print print:bg-white print:overflow-visible print:h-auto">
+            
+            <!-- TOPBAR AREA BUKU KAS -->
+            <div id="topbarMenu" class="non-ppkd-menu no-print bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm flex items-center px-4 md:px-6 lg:px-10 py-3 overflow-x-auto no-scrollbar gap-2 transition-all hidden">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-widest mr-2 flex-shrink-0">Area Buku Kas:</span>
+                <button onclick="switchMainPage('bku')" id="nav_top_bku" class="px-4 py-2 rounded-lg text-sm font-bold bg-white text-slate-600 hover:bg-slate-50 border border-slate-200 transition flex-shrink-0 whitespace-nowrap">📓 Buku Kas Umum</button>
+                <button onclick="switchMainPage('bkt')" id="nav_top_bkt" class="px-4 py-2 rounded-lg text-sm font-bold bg-white text-slate-600 hover:bg-slate-50 border border-slate-200 transition flex-shrink-0 whitespace-nowrap">🪙 Kas Tunai</button>
+                <button onclick="switchMainPage('bksd')" id="nav_top_bksd" class="px-4 py-2 rounded-lg text-sm font-bold bg-white text-slate-600 hover:bg-slate-50 border border-slate-200 transition flex-shrink-0 whitespace-nowrap">📊 Kas Sumber Dana</button>
+                <button onclick="switchMainPage('bkp')" id="nav_top_bkp" class="px-4 py-2 rounded-lg text-sm font-bold bg-white text-slate-600 hover:bg-slate-50 border border-slate-200 transition flex-shrink-0 whitespace-nowrap">🧾 Buku Pajak</button>
+            </div>
+
+            <!-- VIEW FORM INPUT SPP -->
+            <div id="sppView" class="hidden block max-w-7xl mx-auto px-4 md:px-6 lg:px-10 py-6 mt-2 no-print">
+                <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+                    <div class="xl:col-span-3 bg-white shadow-xl rounded-lg overflow-hidden border border-slate-200">
+                        <div class="bg-[#1e4b6e] text-white p-4 sticky top-0 z-10 shadow-md flex justify-between items-center">
+                            <div>
+                                <h1 class="text-xl font-bold uppercase tracking-tight">Buat / Edit SPP (Pengeluaran)</h1>
+                                <p class="text-xs text-blue-200 opacity-80">Sistem Informasi Surat Permintaan Pembayaran</p>
+                            </div>
+                            <div id="display_spp_no" class="text-right font-mono bg-[#153650] px-3 py-1 rounded border border-blue-400">
+                                001/SPP/2011/2026
+                            </div>
+                        </div>
+
+                        <div class="p-6 space-y-8">
+                            <section>
+                                <h2 class="text-[#1e4b6e] font-bold text-xs uppercase tracking-wider mb-4 border-b pb-1">1. Informasi Waktu & Nomor</h2>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-600 mb-1">Bulan</label>
+                                        <select id="in_bulan" class="form-input">
+                                            <option value="Januari S.D Desember">Januari S.D Desember</option><option value="Februari">Februari</option>
+                                            <option value="Maret">Maret</option><option value="April">April</option>
+                                            <option value="Mei">Mei</option><option value="Juni">Juni</option>
+                                            <option value="Juli">Juli</option><option value="Agustus">Agustus</option>
+                                            <option value="September">September</option><option value="Oktober">Oktober</option>
+                                            <option value="November">November</option><option value="Desember">Desember</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-600 mb-1">Tahun Anggaran</label>
+                                        <select id="in_tahun" class="form-input">
+                                            <option value="2026">2026</option><option value="2027">2027</option>
+                                            <option value="2028">2028</option><option value="2029">2029</option><option value="2030">2030</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-600 mb-1">Tanggal SPP (Opsional)</label>
+                                        <input type="date" id="in_tanggal" class="form-input">
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section>
+                                <h2 class="text-[#1e4b6e] font-bold text-xs uppercase tracking-wider mb-4 border-b pb-1">2. Informasi Bidang & Kegiatan</h2>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-600 mb-1">Pilih Kegiatan (Pagu otomatis ditarik dari Master)</label>
+                                        <select id="in_kegiatan_select" class="form-input border-blue-300" onchange="updateInfoAuto(false)"></select>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-xs font-semibold text-gray-600 mb-1">Bidang (Otomatis)</label>
+                                            <input type="text" id="in_bidang" class="form-input bg-gray-50 font-medium" readonly placeholder="Terisi otomatis">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-gray-600 mb-1">Sub Bidang (Otomatis)</label>
+                                            <input type="text" id="in_subBidang" class="form-input bg-gray-50 font-medium" readonly placeholder="Terisi otomatis">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-600 mb-1">Sumber Dana</label>
+                                        <select id="in_sumberDana" class="form-input"></select>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section>
+                                <h2 class="text-[#1e4b6e] font-bold text-xs uppercase tracking-wider mb-4 border-b pb-1">3. Rincian Dana & Belanja</h2>
+                                <div class="grid grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-600 mb-1">Pagu Anggaran (Rp)</label>
+                                        <input type="number" id="in_pagu" class="form-input bg-blue-50 font-bold text-blue-800" value="0" oninput="calculate()" readonly title="Pagu hanya bisa diubah melalui menu Master Pagu">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-600 mb-1">Pencairan s.d Lalu (Rp)</label>
+                                        <input type="number" id="in_lalu" class="form-input bg-gray-50" value="0" oninput="calculate()" readonly>
+                                    </div>
+                                </div>
+                                <div id="belanjaList" class="space-y-4"></div>
+                                <button id="btnAddBelanja" onclick="addBelanjaItem()" class="action-btn w-full mt-3 py-3 border border-dashed border-[#1e4b6e] text-[#1e4b6e] rounded-lg bg-blue-50 hover:bg-blue-100 font-bold text-sm transition">
+                                    + Tambah Item Belanja (Kwitansi Otomatis)
+                                </button>
+                            </section>
+
+                            <section>
+                                <h2 class="text-[#1e4b6e] font-bold text-xs uppercase tracking-wider mb-4 border-b pb-1">4. Penandatangan Dokumen</h2>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs mb-4">
+                                    <div class="space-y-2">
+                                        <label class="font-bold text-gray-500 block uppercase">Kepala Desa</label>
+                                        <input type="text" id="in_namaKades" value="Sarmin A.Ma.Pd" class="form-input">
+                                    </div>
+                                    <div class="space-y-2">
+                                        <label class="font-bold text-gray-500 block uppercase">Sekretaris Desa (Verifikator)</label>
+                                        <input type="text" id="in_namaSekdes" value="Kusmita Pandatika S.M" class="form-input">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                                    <div class="space-y-2">
+                                        <label class="font-bold text-gray-500 block uppercase">Pelaksana Kegiatan (PPKD)</label>
+                                        <select id="in_jabatanPpkd" class="form-input mb-1" onchange="updateNamaPPKD()">
+                                            <option value="">-- Pilih Jabatan --</option>
+                                            <option value="Kaur TU dan Umum">Kaur TU dan Umum</option>
+                                            <option value="Kaur Perencanaan">Kaur Perencanaan</option>
+                                            <option value="Kasi Pemerintahan">Kasi Pemerintahan</option>
+                                            <option value="Kasi Kesejahteraan">Kasi Kesejahteraan</option>
+                                            <option value="Kasi Pelayanan">Kasi Pelayanan</option>
+                                            <option value="Kaur Keuangan">Kaur Keuangan</option>
+                                        </select>
+                                        <input type="text" id="in_namaPpkd" placeholder="Nama Lengkap PPKD" class="form-input">
+                                    </div>
+                                    <div class="space-y-2">
+                                        <label class="font-bold text-gray-500 block uppercase">Bendahara Desa</label>
+                                        <input type="text" id="in_namaKaurKeuangan" value="Jefri Pratama S.E" class="form-input">
+                                    </div>
+                                </div>
+                            </section>
+
+                            <div class="flex gap-4 pt-4 border-t">
+                                <button id="btnSave" onclick="saveData()" class="action-btn flex-1 bg-green-600 text-white py-4 rounded-lg font-bold shadow hover:bg-green-700 transition">Simpan ke Database (Cloud)</button>
+                                <button id="btnCetakPreview" onclick="showPreview()" class="flex-1 bg-[#1e4b6e] text-white py-4 rounded-lg font-bold shadow-lg hover:bg-[#153650] transition">Preview & Cetak Dokumen</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="bg-[#1e4b6e] text-white p-5 rounded-lg shadow-xl">
+                            <h3 class="text-xs font-bold uppercase mb-3 text-blue-200 tracking-widest">Status Anggaran</h3>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between opacity-80"><span>S.D Lalu</span><span id="sum_lalu">Rp 0,00</span></div>
+                                <div class="flex justify-between font-medium"><span>Sekarang</span><span id="sum_sekarang">Rp 0,00</span></div>
+                                <div class="flex justify-between font-bold text-emerald-400 text-lg border-t border-blue-400 pt-2 mt-2"><span>Sisa Pagu</span><span id="sum_sisa">Rp 0,00</span></div>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg border shadow-sm flex flex-col h-[600px]">
+                            <div class="flex flex-col gap-2 mb-3 border-b pb-3">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="text-xs font-bold text-slate-500 uppercase">Riwayat SPP</h3>
+                                    <button id="btnAddSpp" onclick="resetForm()" class="action-btn bg-[#1e4b6e] text-white px-3 py-1.5 rounded text-[10px] font-bold hover:bg-[#153650] transition shadow hover:shadow-md flex items-center gap-1"><span>➕</span> Tambah Baru</button>
+                                </div>
+                                <div class="mt-1">
+                                    <input type="text" id="searchSpp" oninput="renderSavedData()" placeholder="🔍 Cari No SPP, Kegiatan..." class="form-input text-xs py-1.5 px-2 w-full border-slate-300 bg-slate-50">
+                                </div>
+                            </div>
+                            <div id="savedDataList" class="flex-1 space-y-2 overflow-y-auto text-[11px] pr-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW MASTER PAGU ANGGARAN -->
+            <div id="paguView" class="hidden max-w-7xl mx-auto px-4 md:px-6 lg:px-10 py-6 mt-2 no-print">
+                <div class="bg-white shadow-xl rounded-lg overflow-hidden border border-slate-200">
+                    <div class="bg-blue-800 text-white p-4 flex justify-between items-center">
+                        <div>
+                            <h1 class="text-lg font-bold uppercase tracking-tight">Data Master Pagu Anggaran</h1>
+                            <p class="text-xs text-blue-200 opacity-80">Atur pagu dana per kegiatan untuk ditarik otomatis ke Form SPP</p>
+                        </div>
+                    </div>
+                    <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-1 space-y-4">
+                            <h3 class="font-bold text-slate-700 uppercase border-b pb-2 text-sm">Input Pagu Baru / Edit</h3>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Pilih Kegiatan</label>
+                                <select id="pagu_kegiatan_select" class="form-input" onchange="updateInfoPagu()"></select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Bidang</label>
+                                <input type="text" id="pagu_bidang" class="form-input bg-gray-50 text-xs" readonly placeholder="Otomatis">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Sub Bidang</label>
+                                <input type="text" id="pagu_subBidang" class="form-input bg-gray-50 text-xs" readonly placeholder="Otomatis">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-blue-600 mb-1">Total Pagu Anggaran (Rp)</label>
+                                <input type="number" id="pagu_jumlah" class="form-input font-bold text-lg" value="0">
+                            </div>
+                            <div class="pt-4 border-t">
+                                <button id="btnSavePagu" onclick="savePaguData()" class="action-btn w-full bg-blue-600 text-white py-3 rounded-lg font-bold shadow hover:bg-blue-700 transition">Simpan / Update Pagu</button>
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-2">
+                            <h3 class="font-bold text-slate-700 uppercase border-b pb-2 text-sm mb-4">Daftar Pagu Tersimpan</h3>
+                            <div class="bg-slate-50 border rounded-lg p-2 h-[500px] overflow-y-auto">
+                                <table class="w-full text-left text-sm border-collapse">
+                                    <thead class="sticky top-0 bg-slate-100 shadow-sm text-xs text-slate-500 uppercase">
+                                        <tr>
+                                            <th class="p-3 border-b">Kode / Kegiatan</th>
+                                            <th class="p-3 border-b text-right">Pagu (Rp)</th>
+                                            <th class="p-3 border-b text-center w-20">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="paguDataList" class="text-xs"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW FORM PENDAPATAN -->
+            <div id="pendapatanView" class="hidden max-w-7xl mx-auto px-4 md:px-6 lg:px-10 py-6 mt-2 no-print">
+                <div class="bg-white shadow-xl rounded-lg overflow-hidden border border-slate-200">
+                    <div class="bg-emerald-600 text-white p-4 flex justify-between items-center">
+                        <div>
+                            <h1 class="text-lg font-bold uppercase tracking-tight">Penerimaan Kas (Pendapatan)</h1>
+                            <p class="text-xs text-emerald-100 opacity-90">Catat uang masuk ke rekening desa agar tercatat di Buku Kas</p>
+                        </div>
+                    </div>
+                    <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-1 space-y-4">
+                            <h3 class="font-bold text-slate-700 uppercase border-b pb-2 text-sm">Input Penerimaan Baru</h3>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Tanggal Terima</label>
+                                <input type="date" id="in_pendapatan_tgl" class="form-input">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Sumber Dana Masuk</label>
+                                <select id="in_pendapatan_sumber" class="form-input"></select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Uraian / Keterangan Masuk</label>
+                                <textarea id="in_pendapatan_uraian" class="form-input text-xs" rows="3" placeholder="Contoh: Pencairan Dana Desa Tahap I..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-emerald-600 mb-1">Nominal Diterima (Rp)</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-2.5 text-xs text-gray-400 font-bold">Rp</span>
+                                    <input type="number" id="in_pendapatan_nominal" class="form-input pl-8 font-bold text-lg text-emerald-700" value="0">
+                                </div>
+                            </div>
+                            <div class="pt-4 border-t">
+                                <button id="btnSavePendapatan" onclick="savePendapatanData()" class="action-btn w-full bg-emerald-600 text-white py-3 rounded-lg font-bold shadow hover:bg-emerald-700 transition">Simpan Pendapatan</button>
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-2">
+                            <h3 class="font-bold text-slate-700 uppercase border-b pb-2 text-sm mb-4">Riwayat Penerimaan</h3>
+                            <div class="bg-slate-50 border rounded-lg p-2 h-[500px] overflow-y-auto">
+                                <table class="w-full text-left text-sm border-collapse">
+                                    <thead class="sticky top-0 bg-slate-100 shadow-sm text-xs text-slate-500 uppercase">
+                                        <tr>
+                                            <th class="p-3 border-b w-24">Tanggal</th>
+                                            <th class="p-3 border-b">Uraian Transaksi</th>
+                                            <th class="p-3 border-b w-24 text-center">Sumber Dana</th>
+                                            <th class="p-3 border-b text-right">Nominal (Rp)</th>
+                                            <th class="p-3 border-b text-center w-20">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="pendapatanDataList" class="text-xs"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW FORM PENARIKAN BANK -->
+            <div id="penarikanView" class="hidden max-w-7xl mx-auto px-4 md:px-6 lg:px-10 py-6 mt-2 no-print">
+                <div class="bg-white shadow-xl rounded-lg overflow-hidden border border-slate-200">
+                    <div class="bg-purple-700 text-white p-4 flex justify-between items-center">
+                        <div>
+                            <h1 class="text-lg font-bold uppercase tracking-tight">Penarikan Dana Dari Bank</h1>
+                            <p class="text-xs text-purple-200 opacity-90">Catat penarikan dana dari rekening bank desa ke Kas Tunai Bendahara</p>
+                        </div>
+                    </div>
+                    <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-1 space-y-4">
+                            <h3 class="font-bold text-slate-700 uppercase border-b pb-2 text-sm">Input Penarikan Baru</h3>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Tanggal Penarikan</label>
+                                <input type="date" id="in_penarikan_tgl" class="form-input">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Sumber Dana yang Ditarik</label>
+                                <select id="in_penarikan_sumber" class="form-input"></select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Uraian Penarikan</label>
+                                <textarea id="in_penarikan_uraian" class="form-input text-xs" rows="3" placeholder="Contoh: Penarikan tunai untuk bayar Siltap..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-purple-700 mb-1">Nominal Ditarik (Rp)</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-2.5 text-xs text-gray-400 font-bold">Rp</span>
+                                    <input type="number" id="in_penarikan_nominal" class="form-input pl-8 font-bold text-lg text-purple-800" value="0">
+                                </div>
+                            </div>
+                            <div class="pt-4 border-t">
+                                <button id="btnSavePenarikan" onclick="savePenarikanData()" class="action-btn w-full bg-purple-700 text-white py-3 rounded-lg font-bold shadow hover:bg-purple-800 transition">Simpan Penarikan</button>
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-2">
+                            <h3 class="font-bold text-slate-700 uppercase border-b pb-2 text-sm mb-4">Riwayat Penarikan Bank</h3>
+                            <div class="bg-slate-50 border rounded-lg p-2 h-[500px] overflow-y-auto">
+                                <table class="w-full text-left text-sm border-collapse">
+                                    <thead class="sticky top-0 bg-slate-100 shadow-sm text-xs text-slate-500 uppercase">
+                                        <tr>
+                                            <th class="p-3 border-b w-24">Tanggal</th>
+                                            <th class="p-3 border-b">Uraian Transaksi</th>
+                                            <th class="p-3 border-b w-24 text-center">Sumber Dana</th>
+                                            <th class="p-3 border-b text-right">Nominal (Rp)</th>
+                                            <th class="p-3 border-b text-center w-20">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="penarikanDataList" class="text-xs"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW FORM PEMBIAYAAN -->
+            <div id="pembiayaanView" class="hidden max-w-7xl mx-auto px-4 md:px-6 lg:px-10 py-6 mt-2 no-print">
+                <div class="bg-white shadow-xl rounded-lg overflow-hidden border border-slate-200">
+                    <div class="bg-teal-600 text-white p-4 flex justify-between items-center">
+                        <div>
+                            <h1 class="text-lg font-bold uppercase tracking-tight">Data Pembiayaan Desa</h1>
+                            <p class="text-xs text-teal-100 opacity-90">Penerimaan (SILPA) dan Pengeluaran (Penyertaan Modal BUMDes)</p>
+                        </div>
+                    </div>
+                    <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-1 space-y-4">
+                            <h3 class="font-bold text-slate-700 uppercase border-b pb-2 text-sm">Input Pembiayaan Baru</h3>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Tanggal Transaksi</label>
+                                <input type="date" id="in_pembiayaan_tgl" class="form-input">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-teal-600 mb-1">Jenis Pembiayaan</label>
+                                <select id="in_pembiayaan_jenis" class="form-input bg-teal-50 border-teal-200 font-bold text-teal-800">
+                                    <option value="Penerimaan">1. Penerimaan (Input SILPA Tahun Sebelumnya)</option>
+                                    <option value="Pengeluaran">2. Pengeluaran (Transfer Dana ke BUMDes)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Sumber Dana Terkait</label>
+                                <select id="in_pembiayaan_sumber" class="form-input"></select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Uraian Transaksi</label>
+                                <textarea id="in_pembiayaan_uraian" class="form-input text-xs" rows="3" placeholder="Contoh: Saldo Sisa Lebih Perhitungan Anggaran Tahun Lalu..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Nominal (Rp)</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-2.5 text-xs text-gray-400 font-bold">Rp</span>
+                                    <input type="number" id="in_pembiayaan_nominal" class="form-input pl-8 font-bold text-lg text-slate-800" value="0">
+                                </div>
+                            </div>
+                            <div class="pt-4 border-t">
+                                <button id="btnSavePembiayaan" onclick="savePembiayaanData()" class="action-btn w-full bg-teal-600 text-white py-3 rounded-lg font-bold shadow hover:bg-teal-700 transition">Simpan Transaksi Pembiayaan</button>
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-2">
+                            <h3 class="font-bold text-slate-700 uppercase border-b pb-2 text-sm mb-4">Riwayat Pembiayaan Desa</h3>
+                            <div class="bg-slate-50 border rounded-lg p-2 h-[500px] overflow-y-auto">
+                                <table class="w-full text-left text-sm border-collapse">
+                                    <thead class="sticky top-0 bg-slate-100 shadow-sm text-xs text-slate-500 uppercase">
+                                        <tr>
+                                            <th class="p-3 border-b w-24">Tanggal</th>
+                                            <th class="p-3 border-b">Uraian Transaksi</th>
+                                            <th class="p-3 border-b w-24 text-center">Jenis</th>
+                                            <th class="p-3 border-b text-right">Nominal (Rp)</th>
+                                            <th class="p-3 border-b text-center w-20">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="pembiayaanDataList" class="text-xs"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW MANAJEMEN SPJ -->
+            <div id="spjView" class="hidden max-w-7xl mx-auto px-4 md:px-6 lg:px-10 py-6 mt-2 no-print">
+                <div class="bg-white shadow-xl rounded-lg overflow-hidden border border-slate-200">
+                    <div class="bg-yellow-600 text-white p-4 flex justify-between items-center">
+                        <div>
+                            <h1 class="text-lg font-bold uppercase tracking-tight">Manajemen Laporan SPJ</h1>
+                            <p class="text-xs text-yellow-100 opacity-90">Pelaporan Surat Pertanggungjawaban (SPJ) oleh PPKD & Verifikasi Bendahara</p>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-r shadow-sm">
+                            <h3 class="text-sm font-bold text-blue-800">Petunjuk Penggunaan:</h3>
+                            <ul class="text-xs text-blue-700 list-disc pl-5 mt-1 space-y-1">
+                                <li><strong>PPKD:</strong> Wajib meng-upload link Google Drive yang berisi scan PDF SPJ (lengkap dengan nota/faktur/dokumentasi) untuk SPP yang telah di-ACC.</li>
+                                <li><strong>Bendahara:</strong> Memeriksa link dokumen SPJ, lalu melakukan "ACC SPJ" agar dapat mencetak Surat Rekomendasi/Pengantar ke Kecamatan.</li>
+                            </ul>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm border-collapse border border-slate-300">
+                                <thead class="bg-slate-100 text-xs uppercase text-slate-600">
+                                    <tr>
+                                        <th class="p-3 border border-slate-300">No SPP / Kegiatan</th>
+                                        <th class="p-3 border border-slate-300 text-center w-32">PPKD</th>
+                                        <th class="p-3 border border-slate-300 text-center w-48">Link SPJ (PDF)</th>
+                                        <th class="p-3 border border-slate-300 text-center w-36">Status SPJ</th>
+                                        <th class="p-3 border border-slate-300 text-center w-64">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="spjDataList"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW LAPORAN GRAFIK -->
+            <div id="laporanView" class="hidden max-w-7xl mx-auto px-4 md:px-6 lg:px-10 py-6 mt-2 no-print">
+                <div class="bg-white shadow-xl rounded-lg overflow-hidden border border-slate-200">
+                    <div class="bg-[#1e4b6e] text-white p-4 flex justify-between items-center">
+                        <div>
+                            <h1 class="text-lg font-bold uppercase tracking-tight">Dashboard Laporan & Analitik Kas</h1>
+                            <p class="text-xs text-blue-200 opacity-80">Ringkasan keuangan, mutasi kas, dan pajak desa berdasarkan data terinput</p>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6 bg-slate-50">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div class="bg-white border-l-4 border-emerald-500 p-5 rounded-lg shadow-sm">
+                                <div class="text-emerald-800 text-xs font-bold uppercase tracking-wider mb-1">Total Pemasukan Kas</div>
+                                <div class="text-2xl font-black text-emerald-600" id="lap_total_masuk">Rp 0</div>
+                            </div>
+                            <div class="bg-white border-l-4 border-red-500 p-5 rounded-lg shadow-sm">
+                                <div class="text-red-800 text-xs font-bold uppercase tracking-wider mb-1">Total Pengeluaran Kas</div>
+                                <div class="text-2xl font-black text-red-600" id="lap_total_keluar">Rp 0</div>
+                            </div>
+                            <div class="bg-white border-l-4 border-blue-500 p-5 rounded-lg shadow-sm">
+                                <div class="text-blue-800 text-xs font-bold uppercase tracking-wider mb-1">Saldo BKU Global</div>
+                                <div class="text-2xl font-black text-blue-600" id="lap_saldo">Rp 0</div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                            <div class="bg-indigo-50 border border-indigo-200 p-4 rounded-lg shadow-sm">
+                                <div class="text-[10px] font-bold text-indigo-500 uppercase">🏦 Saldo Rekening Bank</div>
+                                <div class="text-lg font-black text-indigo-700 mt-1 truncate" id="lap_saldo_bank">Rp 0</div>
+                            </div>
+                            <div class="bg-purple-50 border border-purple-200 p-4 rounded-lg shadow-sm">
+                                <div class="text-[10px] font-bold text-purple-500 uppercase">🪙 Saldo Kas Tunai (Brankas)</div>
+                                <div class="text-lg font-black text-purple-700 mt-1 truncate" id="lap_saldo_tunai">Rp 0</div>
+                            </div>
+                            <div class="bg-orange-50 border border-orange-200 p-4 rounded-lg shadow-sm">
+                                <div class="text-[10px] font-bold text-orange-500 uppercase">✂️ Pajak Dipotong (Tertahan)</div>
+                                <div class="text-lg font-black text-orange-700 mt-1 truncate" id="lap_pajak_potong">Rp 0</div>
+                            </div>
+                            <div class="bg-teal-50 border border-teal-200 p-4 rounded-lg shadow-sm">
+                                <div class="text-[10px] font-bold text-teal-500 uppercase">✅ Pajak Lunas Disetor</div>
+                                <div class="text-lg font-black text-teal-700 mt-1 truncate" id="lap_pajak_setor">Rp 0</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white border border-slate-200 rounded-lg p-5 shadow-sm mb-8">
+                            <h3 class="font-bold text-slate-700 text-sm mb-4 border-b pb-2 flex items-center gap-2">
+                                <span>📦 Rincian Sisa Saldo Kas Tunai Per Sumber Dana</span>
+                            </h3>
+                            <div id="lap_saldo_sumber_dana" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3"></div>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div class="bg-white border border-slate-200 rounded-lg p-4 shadow-sm">
+                                <h3 class="font-bold text-slate-700 text-sm mb-4 text-center">Komposisi Pengeluaran Kas per Sumber Dana</h3>
+                                <div class="relative h-64 w-full flex justify-center">
+                                    <canvas id="chartSumberDana"></canvas>
+                                </div>
+                            </div>
+                            <div class="bg-white border border-slate-200 rounded-lg p-4 shadow-sm">
+                                <h3 class="font-bold text-slate-700 text-sm mb-4 text-center">Tren Pengeluaran Belanja per Bulan</h3>
+                                <div class="relative h-64 w-full">
+                                    <canvas id="chartTrendBulan"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW BKU -->
+            <div id="bkuView" class="hidden max-w-7xl mx-auto px-4 md:px-6 lg:px-10 py-6 mt-2 print:p-0 print:m-0 print:min-h-0 print-landscape">
+                <div class="bg-white shadow-xl rounded-lg overflow-hidden border border-slate-200 print:shadow-none print:border-none">
+                    <div class="bg-blue-800 text-white p-4 flex justify-between items-center no-print"><div><h1 class="text-lg font-bold uppercase">Buku Kas Umum (BKU)</h1><p class="text-xs text-blue-200 opacity-80">Rekapitulasi seluruh pemasukan & pengeluaran</p></div><button onclick="cetakBukuKas()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold shadow-md transition flex items-center gap-2 border border-blue-500">🖨️ Cetak BKU</button></div>
+                    <div class="hidden print:block text-center mt-6 mb-6 text-black"><h1 class="font-bold text-xl uppercase tracking-wide">Buku Kas Umum</h1><h2 class="font-bold text-lg uppercase tracking-wide">Pemerintah Desa Pangek</h2></div>
+                    <div class="p-6 print:p-0 overflow-x-auto print:overflow-visible text-black">
+                        <table class="w-full text-left text-sm border-collapse border border-slate-300 print:border-black"><thead class="bg-slate-100 print:bg-transparent text-xs uppercase text-slate-600 print:text-black"><tr><th class="p-2 border border-slate-300 print:border-black text-center w-10">No.</th><th class="p-2 border border-slate-300 print:border-black w-24">Tanggal</th><th class="p-2 border border-slate-300 print:border-black w-32">No. Bukti/Ref</th><th class="p-2 border border-slate-300 print:border-black">Uraian / Kegiatan</th><th class="p-2 border border-slate-300 print:border-black w-24 text-center">Sumber Dana</th><th class="p-2 border border-slate-300 print:border-black text-right w-28">Penerimaan (Rp)</th><th class="p-2 border border-slate-300 print:border-black text-right w-28">Pengeluaran (Rp)</th><th class="p-2 border border-slate-300 print:border-black text-right w-28">Saldo (Rp)</th></tr></thead><tbody id="bkuDataList"></tbody><tfoot class="bg-slate-50 print:bg-transparent font-bold" id="bkuFooter"></tfoot></table>
+                        <div id="bkuPrintFooter" class="hidden print:block mt-8 text-black"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW BKT -->
+            <div id="bktView" class="hidden max-w-7xl mx-auto px-4 md:px-6 lg:px-10 py-6 mt-2 print:p-0 print:m-0 print:min-h-0 print-landscape">
+                <div class="bg-white shadow-xl rounded-lg overflow-hidden border border-slate-200 print:shadow-none print:border-none">
+                    <div class="bg-blue-800 text-white p-4 flex justify-between items-center no-print"><div><h1 class="text-lg font-bold uppercase">Buku Kas Tunai (BKT)</h1><p class="text-xs text-blue-200 opacity-80">Rekapitulasi Mutasi Penarikan Tunai & Belanja Tunai</p></div><button onclick="cetakBukuKas()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold shadow-md transition flex items-center gap-2 border border-blue-500">🖨️ Cetak BKT</button></div>
+                    <div class="hidden print:block text-center mt-6 mb-6 text-black"><h1 class="font-bold text-xl uppercase tracking-wide">Buku Kas Tunai</h1><h2 class="font-bold text-lg uppercase tracking-wide">Pemerintah Desa Pangek</h2></div>
+                    <div class="p-6 print:p-0 overflow-x-auto print:overflow-visible text-black">
+                        <table class="w-full text-left text-sm border-collapse border border-slate-300 print:border-black"><thead class="bg-slate-100 print:bg-transparent text-xs uppercase text-slate-600 print:text-black"><tr><th class="p-2 border border-slate-300 print:border-black text-center w-10">No.</th><th class="p-2 border border-slate-300 print:border-black w-24">Tanggal</th><th class="p-2 border border-slate-300 print:border-black w-32">No. Bukti/Ref</th><th class="p-2 border border-slate-300 print:border-black">Uraian / Kegiatan</th><th class="p-2 border border-slate-300 print:border-black w-24 text-center">Sumber Dana</th><th class="p-2 border border-slate-300 print:border-black text-right w-28">Penerimaan (Rp)</th><th class="p-2 border border-slate-300 print:border-black text-right w-28">Pengeluaran (Rp)</th><th class="p-2 border border-slate-300 print:border-black text-right w-28">Saldo Kas (Rp)</th></tr></thead><tbody id="bktDataList"></tbody><tfoot class="bg-slate-50 print:bg-transparent font-bold" id="bktFooter"></tfoot></table>
+                        <div id="bktPrintFooter" class="hidden print:block mt-8 text-black"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW BKSD -->
+            <div id="bksdView" class="hidden max-w-7xl mx-auto px-4 md:px-6 lg:px-10 py-6 mt-2 print:p-0 print:m-0 print:min-h-0 print-landscape">
+                <div class="bg-white shadow-xl rounded-lg overflow-hidden border border-slate-200 print:shadow-none print:border-none">
+                    <div class="bg-blue-800 text-white p-4 flex flex-col sm:flex-row justify-between items-center gap-4 no-print"><div><h1 class="text-lg font-bold uppercase">Buku Kas Sumber Dana</h1><p class="text-xs text-blue-200 opacity-80">Rekapitulasi keuangan per sumber dana spesifik</p></div><div class="flex gap-2 items-center"><select id="filter_sumber_dana" class="form-input text-black py-1 w-auto shadow-sm" onchange="renderBKSD()"></select><button onclick="cetakBukuKas()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold shadow-md transition flex items-center gap-2 border border-blue-500">🖨️ Cetak BKSD</button></div></div>
+                    <div class="hidden print:block text-center mt-6 mb-6 text-black"><h1 class="font-bold text-xl uppercase tracking-wide">Buku Kas Sumber Dana</h1><h2 class="font-bold text-lg uppercase tracking-wide">Pemerintah Desa Pangek</h2><p class="text-sm font-bold mt-1" id="print_bksd_filter_info">Semua Sumber Dana</p></div>
+                    <div class="p-6 print:p-0 overflow-x-auto print:overflow-visible text-black">
+                        <table class="w-full text-left text-sm border-collapse border border-slate-300 print:border-black"><thead class="bg-slate-100 print:bg-transparent text-xs uppercase text-slate-600 print:text-black"><tr><th class="p-2 border border-slate-300 print:border-black text-center w-10">No.</th><th class="p-2 border border-slate-300 print:border-black w-24">Tanggal</th><th class="p-2 border border-slate-300 print:border-black w-32">No. Bukti/Ref</th><th class="p-2 border border-slate-300 print:border-black">Uraian / Kegiatan</th><th class="p-2 border border-slate-300 print:border-black w-24 text-center">Sumber Dana</th><th class="p-2 border border-slate-300 print:border-black text-right w-28">Penerimaan (Rp)</th><th class="p-2 border border-slate-300 print:border-black text-right w-28">Pengeluaran (Rp)</th><th class="p-2 border border-slate-300 print:border-black text-right w-28">Saldo (Rp)</th></tr></thead><tbody id="bksdDataList"></tbody><tfoot class="bg-slate-50 print:bg-transparent font-bold" id="bksdFooter"></tfoot></table>
+                        <div id="bksdPrintFooter" class="hidden print:block mt-8 text-black"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW BKP -->
+            <div id="bkpView" class="hidden max-w-7xl mx-auto px-4 md:px-6 lg:px-10 py-6 mt-2 print:p-0 print:m-0 print:min-h-0 print-landscape">
+                <div class="bg-white shadow-xl rounded-lg overflow-hidden border border-slate-200 print:shadow-none print:border-none">
+                    <div class="bg-blue-800 text-white p-4 flex justify-between items-center no-print">
+                        <div>
+                            <h1 class="text-lg font-bold uppercase">Buku Pembantu Pajak</h1>
+                            <p class="text-xs text-blue-200 opacity-80">Pencatatan rincian potongan dan penyetoran pajak</p>
+                        </div>
+                        <button onclick="cetakBukuKas()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold shadow-md transition flex items-center gap-2 border border-blue-500">🖨️ Cetak BKP</button>
+                    </div>
+                    <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-8 print:block print:p-0">
+                        <div class="lg:col-span-1 space-y-4 no-print">
+                            <h3 class="font-bold text-slate-700 uppercase border-b pb-2 text-sm">Input Penyetoran Pajak Baru</h3>
+                            <div class="p-3 bg-blue-50 text-blue-800 border border-blue-200 rounded text-xs mb-4">
+                                💡 Saldo pemotongan pajak dari SPP otomatis masuk ke tabel. Gunakan form ini untuk mencatat <b>Penyetoran/Pembayaran Pajak</b>.
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Tanggal Setor</label>
+                                <input type="date" id="in_pajak_tgl" class="form-input">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Jenis Pajak</label>
+                                <select id="in_pajak_jenis" class="form-input">
+                                    <option value="PPN">PPN</option>
+                                    <option value="PPh 21">PPh 21</option>
+                                    <option value="PPh 22">PPh 22</option>
+                                    <option value="PPh 23">PPh 23</option>
+                                    <option value="Pajak Restoran">Pajak Restoran</option>
+                                    <option value="Pajak Galian C">Pajak Galian C</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Uraian / NTPN (Tanda Terima)</label>
+                                <textarea id="in_pajak_uraian" class="form-input text-xs" rows="2" placeholder="Contoh: NTPN 1234567890 / Setoran PPN..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-blue-800 mb-1">Nominal Disetor (Rp)</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-2.5 text-xs text-gray-400 font-bold">Rp</span>
+                                    <input type="number" id="in_pajak_nominal" class="form-input pl-8 font-bold text-lg text-blue-800" value="0">
+                                </div>
+                            </div>
+                            <div class="pt-4 border-t">
+                                <button id="btnSavePajak" onclick="saveSetoranPajakData()" class="action-btn w-full bg-blue-800 text-white py-3 rounded-lg font-bold shadow hover:bg-blue-900 transition">Simpan Penyetoran</button>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-2 print:col-span-full">
+                            <div class="hidden print:block text-center mt-6 mb-6 text-black">
+                                <h1 class="font-bold text-xl uppercase tracking-wide">Buku Pembantu Pajak</h1>
+                                <h2 class="font-bold text-lg uppercase tracking-wide">Pemerintah Desa Pangek</h2>
+                            </div>
+                            <div class="overflow-x-auto print:overflow-visible text-black bg-slate-50 border rounded-lg p-2 print:p-0 print:border-none">
+                                <table class="w-full text-left text-sm border-collapse border border-slate-300 print:border-black">
+                                    <thead class="bg-slate-100 print:bg-transparent text-xs uppercase text-slate-600 print:text-black sticky top-0">
+                                        <tr>
+                                            <th class="p-2 border border-slate-300 print:border-black text-center w-10">No.</th>
+                                            <th class="p-2 border border-slate-300 print:border-black w-24">Tanggal</th>
+                                            <th class="p-2 border border-slate-300 print:border-black">No. Bukti / Uraian</th>
+                                            <th class="p-2 border border-slate-300 print:border-black text-right w-24">Potongan (Rp)</th>
+                                            <th class="p-2 border border-slate-300 print:border-black text-right w-24">Setoran (Rp)</th>
+                                            <th class="p-2 border border-slate-300 print:border-black text-right w-28 print:bg-transparent bg-blue-50">Saldo (Rp)</th>
+                                            <th class="p-2 border border-slate-300 text-center w-16 no-print">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="bkpDataList" class="text-xs"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW PREVIEW DOCUMENT -->
+            <div id="previewView" class="hidden absolute inset-0 min-h-screen bg-slate-200 py-10 print:py-0 print:m-0 z-50 overflow-y-auto print:relative print:z-0 print:bg-white print:overflow-visible">
+                <div class="max-w-[210mm] mx-auto print-container">
+                    
+                    <div class="no-print bg-white p-4 mb-6 rounded-lg shadow-lg flex flex-col sm:flex-row gap-4 items-center justify-between border-b-4 border-[#1e4b6e]">
+                        <div class="flex bg-slate-100 p-1 rounded-md border text-sm font-semibold overflow-x-auto no-scrollbar">
+                            <button onclick="switchDoc('cover')" id="tab_cover" class="tab-btn text-slate-500 px-6 py-2 rounded hover:text-slate-800 whitespace-nowrap">Cover SPP</button>
+                            <button onclick="switchDoc('spp')" id="tab_spp" class="tab-btn active-tab px-6 py-2 rounded whitespace-nowrap">SPP</button>
+                            <button onclick="switchDoc('sp2d')" id="tab_sp2d" class="tab-btn text-slate-500 px-6 py-2 rounded hover:text-slate-800 whitespace-nowrap">SP2D</button>
+                            <button onclick="switchDoc('kwitansi')" id="tab_kwitansi" class="tab-btn text-slate-500 px-6 py-2 rounded hover:text-slate-800 whitespace-nowrap">Kwitansi</button>
+                            <button onclick="switchDoc('rekomendasi')" id="tab_rekomendasi" class="tab-btn text-slate-500 px-6 py-2 rounded hover:text-slate-800 whitespace-nowrap hidden">Surat Pengantar SPJ</button>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="hidePreview()" class="bg-slate-700 text-white px-5 py-2 rounded-md font-bold hover:bg-slate-800 transition shadow">Kembali</button>
+                            <button id="btn_cetak_preview" onclick="cetakDokumen()" class="bg-blue-600 text-white px-5 py-2 rounded-md font-bold hover:bg-blue-700 transition shadow">🖨️ Cetak / PDF</button>
+                        </div>
+                    </div>
+
+                    <div id="doc_cover" class="doc-page hidden bg-white p-[1.5cm] shadow-xl print:shadow-none border border-black mx-auto" style="max-width: 148mm; min-height: 210mm; font-family: 'Times New Roman', Times, serif;">
+                        <div class="text-center mb-6"><img src="" class="h-16 mx-auto mb-2" id="logo_cover" onerror="this.style.display='none'" alt="Logo"><h1 class="font-bold text-sm uppercase">Pemerintahan Kabupaten Bangka Barat</h1><h2 class="font-bold text-sm uppercase">Kecamatan Simpang Teritip</h2><h3 class="font-bold text-lg uppercase">Desa Pangek</h3></div>
+                        <div class="border-b-[3px] border-black mt-2 mb-1"></div><div class="border-b-[1px] border-black mb-10"></div>
+                        <div class="text-center mb-10 mt-12"><h2 class="text-2xl font-black uppercase tracking-widest border-2 border-black inline-block px-6 py-2">DOKUMEN SPP</h2></div>
+                        <div class="text-[13px] leading-loose"><table class="w-full"><tr><td class="w-28 font-bold">Nomor SPP</td><td class="w-4">:</td><td id="cover_no_spp" class="font-bold"></td></tr><tr><td class="align-top font-bold">Kegiatan</td><td class="align-top">:</td><td id="cover_kegiatan" class="font-bold uppercase text-justify"></td></tr><tr><td class="font-bold">Total Belanja</td><td>:</td><td id="cover_belanja" class="font-bold text-lg"></td></tr><tr><td class="font-bold">Sumber Dana</td><td>:</td><td id="cover_sumber" class="font-bold uppercase"></td></tr><tr><td class="font-bold">PPKD</td><td>:</td><td id="cover_ppkd" class="font-bold uppercase"></td></tr></table></div>
+                        <div class="mt-32 text-center"><p class="font-bold text-sm uppercase">TAHUN ANGGARAN <span id="cover_tahun"></span></p></div>
+                    </div>
+
+                    <div id="doc_spp" class="doc-page block bg-white p-[2cm] shadow-xl print:shadow-none">
+                        <div class="text-black leading-tight" style="font-family: 'Times New Roman', Times, serif;">
+                            <div class="text-center mb-1 relative min-h-[75px]">
+                                <div class="absolute left-2 top-0 w-16 h-16 flex items-center justify-center"><img id="logo_spp" src="" alt="Logo" class="max-w-full max-h-full object-contain" onerror="this.style.display='none'"></div>
+                                <div class="w-full"><h1 class="font-bold text-lg uppercase">Pemerintahan Kabupaten Bangka Barat</h1><h2 class="font-bold text-lg uppercase">Kecamatan Simpang Teritip</h2><h3 class="font-bold text-xl uppercase">Desa Pangek</h3><p class="text-[10px] italic mt-1">Alamat: Jl. Lintas Desa Pangek Kecamatan Simpang Teritip Kabupaten Bangka Barat</p></div>
+                            </div>
+                            <div class="border-b-[4px] border-black mt-2 mb-1"></div><div class="border-b-[1px] border-black mb-6"></div>
+                            <div class="text-center mb-8 uppercase"><h4 class="font-bold border-b border-black inline-block px-4 mb-1">SURAT PERMINTAAN PEMBAYARAN (SPP)</h4><p id="pr_no_spp" class="text-xs font-bold"></p></div>
+                            <table class="w-full mb-6 text-[12px]"><tr><td class="w-44">1. Bidang</td><td class="w-4 text-center">:</td><td id="pr_bidang" class="font-medium uppercase"></td></tr><tr><td>2. Sub Bidang</td><td class="text-center">:</td><td id="pr_subBidang" class="font-medium uppercase"></td></tr><tr><td>3. Kegiatan</td><td class="text-center">:</td><td id="pr_kegiatan" class="font-medium uppercase"></td></tr><tr><td>4. Waktu Pelaksanaan</td><td class="text-center">:</td><td id="pr_waktu" class="font-medium"></td></tr><tr><td>5. Sumber Dana</td><td class="text-center">:</td><td id="pr_sumberDana" class="font-medium uppercase"></td></tr></table>
+                            <table class="w-full border-collapse border border-black text-[10px]">
+                                <thead><tr class="bg-gray-100 font-bold text-center"><th class="border border-black p-2 w-8">NO</th><th class="border border-black p-2 w-40">URAIAN</th><th class="border border-black p-2 w-20">PAGU ANGGARAN(Rp)</th><th class="border border-black p-2 w-20">PENCAIRAN S.D LALU (Rp)</th><th class="border border-black p-2 w-20">PENCAIRAN SEKARANG (Rp)</th><th class="border border-black p-2 w-20">JUMLAH SAMPAI SAAT INI (Rp)</th><th class="border border-black p-2 w-20">SISA DANA (Rp)</th></tr></thead>
+                                <tbody id="pr_tableBody"></tbody>
+                                <tr class="font-bold bg-gray-50"><td colspan="2" class="border border-black p-2 text-center uppercase">Jumlah Total</td><td id="ft_pagu" class="border border-black p-2 text-right"></td><td id="ft_lalu" class="border border-black p-2 text-right"></td><td id="ft_sekarang" class="border border-black p-2 text-right"></td><td id="ft_total" class="border border-black p-2 text-right"></td><td id="ft_sisa" class="border border-black p-2 text-right"></td></tr>
+                            </table>
+                            <div class="mt-12 text-[12px]"><div class="grid grid-cols-2 gap-y-16"><div class="text-center"><p>Telah dilakukan verifikasi</p><p class="font-medium">Sekretaris Desa</p><div class="h-16"></div><p id="pr_namaSekdes" class="font-bold underline uppercase"></p><p class="text-[9px]">NIPD. ....................................</p></div><div class="text-center"><p>Pangek, <span id="pr_tgl_cetak"></span></p><p id="pr_jabatanPpkd" class="font-medium"></p><div class="h-16"></div><p id="pr_namaPpkd" class="font-bold underline uppercase"></p><p class="text-[9px]">NIPD. ....................................</p></div><div class="text-center"><p>Setuju untuk dibayarkan</p><p class="font-medium">Kepala Desa</p><div class="h-16"></div><p id="pr_namaKades" class="font-bold underline uppercase"></p><p class="text-[9px]">NIPD. ....................................</p></div><div class="text-center"><p>Telah dibayar lunas</p><p class="font-medium">Bendahara Desa</p><div class="h-16"></div><p id="pr_namaKaurKeuangan" class="font-bold underline uppercase"></p><p class="text-[9px]">NIPD. ....................................</p></div></div></div>
+                        </div>
+                    </div>
+
+                    <div id="doc_sp2d" class="doc-page hidden bg-white p-[1cm] shadow-xl print:shadow-none text-black">
+                        <div class="max-w-full" style="font-family: 'Times New Roman', Times, serif;">
+                            <table class="w-full border-collapse border-[3px] border-black text-[12px] leading-tight">
+                                <tr><td colspan="2" class="border-b-[3px] border-black p-3"><div class="flex items-center justify-center relative min-h-[75px]"><div class="absolute left-2 top-1 w-16 h-16 flex items-center justify-center"><img id="logo_sp2d" src="" alt="Logo" class="max-w-full max-h-full object-contain" onerror="this.style.display='none'"></div><div class="text-center w-full"><div class="font-bold text-[15px] uppercase tracking-wide">Pemerintah Kabupaten Bangka Barat</div><div class="font-bold text-[15px] uppercase tracking-wide">Kecamatan Simpang Teritip</div><div class="font-bold text-[16px] uppercase tracking-wide">Desa Pangek</div><div class="text-[9px] mt-1">Alamat : Jl. Gang Kantor Kepala Desa Samping Lapangan Sepak Bola Desa Pangek Kode Pos 33366</div></div></div></td></tr>
+                                <tr><td class="w-[50%] border-r-[3px] border-b-[3px] border-black p-2 align-top"><div class="font-bold">DESA PANGEK</div><div class="font-bold">KECAMATAN SIMPANG TERITIP</div><table class="w-full mt-2"><tr><td class="w-20">Nomor SPP</td><td class="w-2">:</td><td id="sp2d_spp_ref"></td></tr><tr><td>Tanggal</td><td>:</td><td id="sp2d_spp_tgl"></td></tr></table></td><td class="w-[50%] border-b-[3px] border-black p-2 align-top"><div class="font-bold text-center mb-2">SURAT PERINTAH PENCAIRAN DANA</div><table class="w-full"><tr><td class="w-28">Nomor</td><td class="w-2">:</td><td class="font-bold" id="sp2d_no_dok"></td></tr><tr><td>Dari</td><td>:</td><td>Kepala Desa Pangek/PKPKD</td></tr><tr><td>Tahun Anggaran</td><td>:</td><td id="sp2d_tahun"></td></tr></table></td></tr>
+                                <tr><td colspan="2" class="border-b-[3px] border-black p-3 pb-2"><p class="mb-1">Bendahara Desa Pangek</p><p class="mb-1">Hendaklah mencairkan/memindahbukukan dari Rekening Kas Desa pada Bank SUMSELBABEL</p><p class="mb-4">MUNTOK Nomor 949673</p><table class="w-full"><tr><td class="w-24">Uang Sebesar</td><td class="w-2">:</td><td class="w-28 font-bold" id="sp2d_jumlah"></td><td class="italic font-bold" id="sp2d_terbilang"></td></tr></table></td></tr>
+                                <tr><td colspan="2" class="border-b-[3px] border-black p-3"><table class="w-full"><tr><td class="w-32">Kepada</td><td class="w-2">:</td><td id="sp2d_ppkd"></td></tr><tr><td>NPWP</td><td>:</td><td>-</td></tr><tr><td>Pada Bank</td><td>:</td><td>-</td></tr><tr><td>No. Rekening Bank</td><td>:</td><td>-</td></tr><tr><td class="align-top">Keperluan Untuk</td><td class="align-top">:</td><td id="sp2d_keperluan" class="align-top"></td></tr></table></td></tr>
+                                <tr><td colspan="2" class="p-0 border-b-[3px] border-black"><table class="w-full border-collapse text-center"><tr class="font-bold border-b-[2px] border-black"><td class="w-12 border-r-[2px] border-black py-1">No.</td><td class="w-48 border-r-[2px] border-black py-1">Kode Rekening</td><td class="border-r-[2px] border-black py-1">Uraian</td><td class="w-40 py-1">Jumlah (Rp)</td></tr><tr class="font-bold border-b-[2px] border-black bg-gray-50 print:bg-transparent"><td class="border-r-[2px] border-black py-0.5">1</td><td class="border-r-[2px] border-black py-0.5">2</td><td class="border-r-[2px] border-black py-0.5">3</td><td class="py-0.5">4</td></tr><tr class="font-bold"><td class="border-r-[2px] border-black py-1"></td><td class="border-r-[2px] border-black py-1"></td><td class="border-r-[2px] border-black py-1 text-center">Belanja Barang dan Jasa</td><td class="py-1" id="sp2d_t_jumlah1"></td></tr><tr class="border-b-[2px] border-black font-bold"><td class="border-r-[2px] border-black py-1">1</td><td class="border-r-[2px] border-black py-1" id="sp2d_t_kode"></td><td class="border-r-[2px] border-black py-1 text-left px-2 font-normal" id="sp2d_t_kegiatan"></td><td class="py-1 font-normal" id="sp2d_t_jumlah2"></td></tr></table></td></tr>
+                                <tr><td colspan="2" class="p-0 border-b-[3px] border-black"><div class="px-2 py-1 text-[11px]">Potongan-potongan :</div><table class="w-full border-collapse text-center"><tr class="font-bold border-y-[2px] border-black"><td class="w-12 border-r-[2px] border-black py-1">No.</td><td class="border-r-[2px] border-black py-1">Uraian</td><td class="w-48 border-r-[2px] border-black py-1">Jumlah (Rp)</td><td class="w-40 py-1">Keterangan</td></tr><tr class="border-b border-black"><td class="border-r-[2px] border-black py-0.5">1.</td><td class="border-r-[2px] border-black text-left px-2 py-0.5">PPN</td><td class="border-r-[2px] border-black py-0.5" id="sp2d_v_ppn">-</td><td class="py-0.5 text-blue-600">[1]</td></tr><tr class="border-b border-black"><td class="border-r-[2px] border-black py-0.5">2.</td><td class="border-r-[2px] border-black text-left px-2 py-0.5">PPh21</td><td class="border-r-[2px] border-black py-0.5" id="sp2d_v_pph21">-</td><td class="py-0.5"></td></tr><tr class="border-b border-black"><td class="border-r-[2px] border-black py-0.5">3.</td><td class="border-r-[2px] border-black text-left px-2 py-0.5">PPh22</td><td class="border-r-[2px] border-black py-0.5" id="sp2d_v_pph22">-</td><td class="py-0.5"></td></tr><tr class="border-b border-black"><td class="border-r-[2px] border-black py-0.5">4.</td><td class="border-r-[2px] border-black text-left px-2 py-0.5">PPh23</td><td class="border-r-[2px] border-black py-0.5" id="sp2d_v_pph23">-</td><td class="py-0.5"></td></tr><tr class="border-b border-black"><td class="border-r-[2px] border-black py-0.5">5.</td><td class="border-r-[2px] border-black text-left px-2 py-0.5">Pajak Restoran</td><td class="border-r-[2px] border-black py-0.5" id="sp2d_v_restoran">-</td><td class="py-0.5"></td></tr><tr class="border-b-[2px] border-black"><td class="border-r-[2px] border-black py-0.5">6.</td><td class="border-r-[2px] border-black text-left px-2 py-0.5">Pajak Galian C</td><td class="border-r-[2px] border-black py-0.5" id="sp2d_v_galian">-</td><td class="py-0.5"></td></tr><tr><td colspan="2" class="border-r-[2px] border-black py-1 text-center font-bold">Jumlah</td><td class="border-r-[2px] border-black py-1 font-bold" id="sp2d_t_potongan">-</td><td class="py-1"></td></tr></table></td></tr>
+                                <tr><td colspan="2" class="p-0 border-b-[3px] border-black"><div class="px-2 py-1 font-bold border-b-[2px] border-black">SPPD yang Dicairkan/Dipindahbukukan</div><table class="w-full border-collapse"><tr class="border-b border-black"><td class="border-r-[2px] border-black px-2 py-1">Jumlah yang Diminta</td><td class="w-40 px-2 py-1 text-center font-bold" id="sp2d_s_diminta"></td></tr><tr class="border-b border-black"><td class="border-r-[2px] border-black px-2 py-1">Jumlah potongan (yang harus Disetor)</td><td class="w-40 px-2 py-1 text-center font-bold" id="sp2d_s_potongan_setor"></td></tr><tr><td class="border-r-[2px] border-black px-2 py-1">Jumlah yang dibayarkan</td><td class="w-40 px-2 py-1 text-center font-bold" id="sp2d_s_dibayarkan"></td></tr></table></td></tr>
+                                <tr><td colspan="2" class="p-0"><div class="p-3 pb-2 border-b-[3px] border-black text-center font-bold">Terbilang : <span id="sp2d_s_terbilang"></span></div><div class="flex justify-end p-4 pt-4"><div class="text-center w-64"><p>PANGEK, <span id="sp2d_tgl_cetak_sig"></span></p><p>Kepala Desa Pangek/PKPK-Desa</p><div class="h-16"></div><p class="font-bold underline uppercase" id="sp2d_ttd_kades_bottom"></p></div></div></td></tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="doc_kwitansi" class="doc-page hidden bg-transparent">
+                        <div id="kwitansi_wrapper" class="text-black"></div>
+                    </div>
+
+                    <div id="doc_rekomendasi" class="doc-page hidden bg-white p-[2cm] shadow-xl print:shadow-none">
+                        <div class="text-black leading-tight" style="font-family: 'Times New Roman', Times, serif;">
+                            <div class="text-center mb-1 relative min-h-[75px]"><div class="absolute left-2 top-0 w-16 h-16 flex items-center justify-center"><img id="logo_rekomendasi" src="" alt="Logo Desa" class="max-w-full max-h-full object-contain" onerror="this.style.display='none'"></div><div class="w-full"><h1 class="font-bold text-lg uppercase">Pemerintahan Kabupaten Bangka Barat</h1><h2 class="font-bold text-lg uppercase">Kecamatan Simpang Teritip</h2><h3 class="font-bold text-xl uppercase">Desa Pangek</h3><p class="text-[10px] italic mt-1">Alamat: Jl. Lintas Desa Pangek Kecamatan Simpang Teritip Kabupaten Bangka Barat</p></div></div>
+                            <div class="border-b-[4px] border-black mt-2 mb-1"></div><div class="border-b-[1px] border-black mb-6"></div>
+                            <div class="text-center mb-8 uppercase"><h4 class="font-bold border-b border-black inline-block px-4 mb-1">SURAT PENGANTAR PENYAMPAIAN SPJ</h4><p id="rek_no_surat" class="text-xs font-bold">Nomor: 140/    /SPJ/Pangek/2026</p></div>
+                            <div class="mb-4 text-justify"><p>Berdasarkan hasil verifikasi yang dilakukan oleh Sekretaris Desa dan persetujuan Kepala Desa Pangek, dengan ini kami sampaikan laporan Surat Pertanggungjawaban (SPJ) atas pelaksanaan kegiatan:</p></div>
+                            <table class="w-full mb-6 text-[12px] ml-4"><tr><td class="w-44">1. Bidang</td><td class="w-4 text-center">:</td><td id="rek_bidang" class="font-medium uppercase"></td></tr><tr><td>2. Kegiatan</td><td class="text-center">:</td><td id="rek_kegiatan" class="font-medium uppercase"></td></tr><tr><td>3. No. SPP Terkait</td><td class="text-center">:</td><td id="rek_no_spp" class="font-medium"></td></tr><tr><td>4. Pelaksana Kegiatan (PPKD)</td><td class="text-center">:</td><td id="rek_ppkd" class="font-medium uppercase"></td></tr><tr><td>5. Total Belanja (Realisasi)</td><td class="text-center">:</td><td id="rek_total_belanja" class="font-bold text-lg"></td></tr></table>
+                            <div class="mb-8 text-justify"><p>Demikian surat pengantar laporan SPJ ini dibuat dengan sebenarnya beserta lampiran dokumen pendukung secara lengkap, untuk dapat dipergunakan dan dievaluasi sebagaimana mestinya.</p></div>
+                            <div class="flex justify-between mt-12 text-[12px] text-center"><div class="w-1/2"><p>Menerima & Memverifikasi,<br>Sekretaris Desa Pangek</p><div class="h-20"></div><p class="font-bold underline uppercase" id="rek_namaSekdes"></p></div><div class="w-1/2"><p>Pangek, <span id="rek_tgl_cetak"></span><br>Mengetahui,<br>Kepala Desa Pangek</p><div class="h-16"></div><p class="font-bold underline uppercase" id="rek_namaKades"></p></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div> <!-- End of mainContent -->
+    </div> <!-- End of mainAppContainer -->
+
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxmxE234SAdXc_IfzpWpTHYtY-h02ZRBnFxA9oFtk3RVdvJvJEi3RSyj7C5WsFWCnCqXw/exec'; 
+        const LOGO_URL = 'https://drive.google.com/uc?id=1udqyICVQgZildQdBCepEvUwnWQrJ7OAp';
+
+        function getBukuKasHelperHTML(totalIn, totalOut, saldo, isTunai) {
+            const tgl = safeGetVal('in_tanggal') ? new Date(safeGetVal('in_tanggal')).toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'}) : '.......... ' + (safeGetVal('in_tahun') || new Date().getFullYear());
+            let detail = isTunai ? `<div class="font-bold">Keterangan Buku Kas Tunai :</div><table class="ml-4 w-auto border-none border-collapse mt-2"><tr><td class="pr-4 py-1">1. Total Penarikan Tunai</td><td>: Rp.</td><td class="text-right pl-2 font-mono font-bold">${formatRp(totalIn).replace('Rp ', '')}</td></tr><tr><td class="pr-4 py-1">2. Total Belanja Tunai</td><td>: Rp.</td><td class="text-right pl-2 font-mono font-bold">${formatRp(totalOut).replace('Rp ', '')}</td></tr><tr><td class="pr-4 py-1">3. Saldo Tunai Brankas</td><td>: Rp.</td><td class="text-right pl-2 font-mono font-bold border-t border-black pt-1">${formatRp(saldo).replace('Rp ', '')}</td></tr></table>` : `<div class="font-bold">Keterangan :</div><div class="ml-4 mt-1">1. Menurut Buku</div><table class="ml-8 w-auto border-none border-collapse mt-1 mb-3"><tr><td class="pr-4">a. Jumlah Penerimaan Bulan lalu s.d Bulan ini</td><td>: Rp.</td><td class="text-right pl-2">${formatRp(totalIn).replace('Rp ', '')}</td></tr><tr><td class="pr-4">b. Jumlah Pengeluaran Bulan lalu s.d Bulan ini</td><td>: Rp.</td><td class="text-right pl-2">${formatRp(totalOut).replace('Rp ', '')}</td></tr><tr><td class="pr-4">c. Saldo menurut buku (1.a - 1.b)</td><td>: Rp.</td><td class="text-right pl-2 border-t border-black">${formatRp(saldo).replace('Rp ', '')}</td></tr></table><div class="ml-4 mt-4">2. Menurut Kas</div><table class="ml-8 w-auto border-none border-collapse mt-1"><tr><td class="pr-4">a. Uang tunai</td><td>: Rp.</td><td class="text-right pl-2">-</td></tr><tr><td class="pr-4">b. Saldo di Bank</td><td>: Rp.</td><td class="text-right pl-2">${formatRp(saldo).replace('Rp ', '')}</td></tr><tr><td class="pr-4">c. Saldo menurut Kas</td><td>: Rp.</td><td class="text-right pl-2 border-t border-black">${formatRp(saldo).replace('Rp ', '')}</td></tr></table>`;
+            return `<div class="text-[12px] leading-relaxed font-sans mt-4"><div class="mb-8">${detail}</div><div class="flex justify-between mt-16 text-[12px] text-center"><div class="w-1/3"><p>Diverifikasi oleh :<br>Sekretaris Desa,</p><div class="h-20"></div><p class="font-bold">${safeGetVal('in_namaSekdes') || 'Kusmita Pandatika, S.M'}</p></div><div class="w-1/3"><p>Disetujui Oleh<br>Kepala Desa Pangek</p><div class="h-20"></div><p class="font-bold">${safeGetVal('in_namaKades') || 'Sarmin A.Ma.Pd'}</p></div><div class="w-1/3"><p>Pangek, ${tgl}<br>Kaur Keuangan</p><div class="h-20"></div><p class="font-bold">(${safeGetVal('in_namaKaurKeuangan') || 'Jefri Pratama, S.E'})</p></div></div></div>`;
+        }
+
+        function processBukuKasTransactions(transactions, tbody, tfoot) {
+            if (transactions.length === 0) { tbody.innerHTML = '<tr><td colspan="8" class="text-center p-4 text-gray-500">Belum ada transaksi di-ACC.</td></tr>'; tfoot.innerHTML = ''; return { totalIn: 0, totalOut: 0, saldo: 0 }; }
+            transactions.sort((a, b) => {
+                const timeA = a.date.getTime() || 0;
+                const timeB = b.date.getTime() || 0;
+                if (timeA !== timeB) return timeA - timeB;
+                if (a.masuk > 0 && b.masuk === 0) return -1;
+                if (a.masuk === 0 && b.masuk > 0) return 1;
+                return (a.ref || '').localeCompare(b.ref || '', 'id', { numeric: true });
+            });
+            let saldo = 0, totalIn = 0, totalOut = 0, html = '';
+            transactions.forEach((t, idx) => {
+                saldo += t.masuk; saldo -= t.keluar; totalIn += t.masuk; totalOut += t.keluar;
+                const tgl = !isNaN(t.date.getTime()) ? t.date.toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) : '-';
+                html += `<tr class="hover:bg-slate-50 transition border-b border-slate-200 print:border-black"><td class="p-2 border-r border-slate-300 print:border-black text-center text-xs whitespace-nowrap">${idx + 1}</td><td class="p-2 border-r border-slate-300 print:border-black whitespace-nowrap text-xs">${tgl}</td><td class="p-2 border-r border-slate-300 print:border-black font-mono text-[11px] break-all">${t.ref}</td><td class="p-2 border-r border-slate-300 print:border-black text-xs"><span class="${t.masuk > 0 ? 'text-emerald-700' : 'text-slate-700'} block print:text-black">${t.uraian}</span></td><td class="p-2 border-r border-slate-300 print:border-black text-xs text-center"><span class="bg-blue-100 print:bg-transparent text-blue-800 print:text-black px-2 py-0.5 rounded font-bold">${t.sumber || ''}</span></td><td class="p-2 border-r border-slate-300 print:border-black text-right text-emerald-600 print:text-black whitespace-nowrap">${t.masuk > 0 ? formatRp(t.masuk) : '-'}</td><td class="p-2 border-r border-slate-300 print:border-black text-right text-red-600 print:text-black whitespace-nowrap">${t.keluar > 0 ? formatRp(t.keluar) : '-'}</td><td class="p-2 text-right text-blue-700 font-bold print:text-black whitespace-nowrap">${formatRp(saldo)}</td></tr>`;
+            });
+            tbody.innerHTML = html;
+            tfoot.innerHTML = `<tr><td colspan="5" class="p-3 border border-slate-300 print:border-black text-right uppercase text-slate-700 print:text-black">Jumlah Total S.D Saat Ini</td><td class="p-3 border border-slate-300 print:border-black text-right text-emerald-600 print:text-black">${formatRp(totalIn)}</td><td class="p-3 border border-slate-300 print:border-black text-right text-red-600 print:text-black">${formatRp(totalOut)}</td><td class="p-3 border border-slate-300 print:border-black text-right text-blue-700 print:text-black text-base">${formatRp(saldo)}</td></tr>`;
+            return { totalIn, totalOut, saldo };
+        }
+
+        const SUMBER_DANA_OPTIONS = ["ADD", "SILPA ADD", "APBN", "SILPA APBN", "PARET", "SILPA PARET", "BANKAB", "BANGUB", "PAD", "SILPA PAD", "DLL", "BUNGA BANK", "SILPA BUNGA BANK"];
+        const KEGIATAN_OPTIONS = [
+            { label: "1. BIDANG PENYELENGGARAAN PEMERINTAHAN DESA", options: [{val: "1.1.01 Penyediaan Penghasilan Tetap dan Tunjangan Kepala Desa", text: "1.1.01 Penyediaan Siltap & Tunjangan Kades", bid: "Penyelenggaraan Pemerintahan Desa", sub: "Siltap, Tunjangan dan Operasional"}, {val: "1.1.02 Penyediaan Penghasilan Tetap dan Tunjangan Perangkat Desa", text: "1.1.02 Penyediaan Siltap & Tunjangan Perangkat Desa", bid: "Penyelenggaraan Pemerintahan Desa", sub: "Siltap, Tunjangan dan Operasional"}, {val: "1.1.03 Penyediaan Jaminan Sosial bagi Kepala Desa dan Perangkat Desa", text: "1.1.03 Penyediaan Jaminan Sosial Kades & Perangkat", bid: "Penyelenggaraan Pemerintahan Desa", sub: "Siltap, Tunjangan dan Operasional"}, {val: "1.1.04 Penyediaan Operasional Pemerintah Desa", text: "1.1.04 Penyediaan Operasional Pemerintah Desa (ATK, Honor, dll)", bid: "Penyelenggaraan Pemerintahan Desa", sub: "Siltap, Tunjangan dan Operasional"}, {val: "1.1.05 Penyediaan Tunjangan BPD", text: "1.1.05 Penyediaan Tunjangan BPD", bid: "Penyelenggaraan Pemerintahan Desa", sub: "Siltap, Tunjangan dan Operasional"}, {val: "1.1.06 Penyediaan Operasional BPD", text: "1.1.06 Penyediaan Operasional BPD", bid: "Penyelenggaraan Pemerintahan Desa", sub: "Siltap, Tunjangan dan Operasional"}, {val: "1.1.07 Penyediaan Insentif/Operasional RT/RW", text: "1.1.07 Penyediaan Insentif/Operasional RT/RW", bid: "Penyelenggaraan Pemerintahan Desa", sub: "Siltap, Tunjangan dan Operasional"}, {val: "1.1.08 Operasional Desa yang bersumber dari dana desa", text: "1.1.08 Operasional Desa yang bersumber dari dana desa", bid: "Penyelenggaraan Pemerintahan Desa", sub: "Siltap, Tunjangan dan Operasional"}, {val: "1.2.01 Penyediaan sarana (aset tetap) perkantoran/pemerintahan", text: "1.2.01 Penyediaan sarana perkantoran", bid: "Penyelenggaraan Pemerintahan Desa", sub: "Sarana dan Prasarana Pemerintahan Desa"}, {val: "1.2.02 Pemeliharaan Gedung/Prasarana Kantor Desa", text: "1.2.02 Pemeliharaan Gedung Kantor Desa", bid: "Penyelenggaraan Pemerintahan Desa", sub: "Sarana dan Prasarana Pemerintahan Desa"}, {val: "1.2.03 Pembangunan/Rehabilitasi Gedung Kantor Desa", text: "1.2.03 Pembangunan/Rehab Gedung Kantor Desa", bid: "Penyelenggaraan Pemerintahan Desa", sub: "Sarana dan Prasarana Pemerintahan Desa"}, {val: "1.3.01 Pelayanan administrasi umum dan kependudukan", text: "1.3.01 Pelayanan administrasi umum & kependudukan", bid: "Penyelenggaraan Pemerintahan Desa", sub: "Adminduk, Capil, Statistik & Kearsipan"}, {val: "1.3.02 Penyusunan/Pendataan/Pemutakhiran Profil Desa", text: "1.3.02 Penyusunan Profil Desa", bid: "Penyelenggaraan Pemerintahan Desa", sub: "Adminduk, Capil, Statistik & Kearsipan"}, {val: "1.3.03 Pengelolaan administrasi dan kearsipan pemerintahan desa", text: "1.3.03 Pengelolaan administrasi & kearsipan desa", bid: "Penyelenggaraan Pemerintahan Desa", sub: "Adminduk, Capil, Statistik & Kearsipan"}, {val: "1.4.01 Penyelenggaraan Musyawarah Perencanaan Desa/Pembahasan APBDes", text: "1.4.01 Musdes Perencanaan (Reguler)", bid: "Penyelenggaraan Pemerintahan Desa", sub: "Tata Praja, Perencanaan, Keuangan & Pelaporan"}, {val: "1.4.03 Penyusunan Dokumen Perencanaan Desa (RPJMDes/RKPDes,dll)", text: "1.4.03 Penyusunan RPJMDes/RKPDes", bid: "Penyelenggaraan Pemerintahan Desa", sub: "Tata Praja, Perencanaan, Keuangan & Pelaporan"}, {val: "1.4.04 Penyusunan Dokumen Keuangan Desa", text: "1.4.04 Penyusunan APBDes/LPJ", bid: "Penyelenggaraan Pemerintahan Desa", sub: "Tata Praja, Perencanaan, Keuangan & Pelaporan"}, {val: "1.5.01 Sertifikasi Tanah Kas Desa", text: "1.5.01 Sertifikasi Tanah Kas Desa", bid: "Penyelenggaraan Pemerintahan Desa", sub: "Pertanahan"}, {val: "1.5.06 Administrasi Pajak Bumi dan Bangunan (PBB)", text: "1.5.06 Administrasi PBB", bid: "Penyelenggaraan Pemerintahan Desa", sub: "Pertanahan"} ]},
+            { label: "2. BIDANG PELAKSANAAN PEMBANGUNAN DESA", options: [{val: "2.1.01 Penyelenggaraan PAUD/TK/TPA/TKA/TPQ/Madrasah", text: "2.1.01 Honor Pengajar/Operasional PAUD/TK/TPA", bid: "Pelaksanaan Pembangunan Desa", sub: "Pendidikan"}, {val: "2.1.06 Pembangunan/Rehab Sarana PAUD/TK/TPA", text: "2.1.06 Pembangunan/Rehab Sarana PAUD", bid: "Pelaksanaan Pembangunan Desa", sub: "Pendidikan"}, {val: "2.2.02 Penyelenggaraan Posyandu", text: "2.2.02 Posyandu (PMT, Insentif Kader, dll)", bid: "Pelaksanaan Pembangunan Desa", sub: "Kesehatan"}, {val: "2.2.09 Pembangunan/Rehab Sarana Posyandu/Polindes", text: "2.2.09 Pembangunan/Rehab Posyandu/Polindes", bid: "Pelaksanaan Pembangunan Desa", sub: "Kesehatan"}, {val: "2.3.01 Pemeliharaan Jalan Desa", text: "2.3.01 Pemeliharaan Jalan Desa", bid: "Pelaksanaan Pembangunan Desa", sub: "Pekerjaan Umum dan Penataan Ruang"}, {val: "2.3.10 Pembangunan/Rehabilitasi/Peningkatan Jalan Desa", text: "2.3.10 Pembangunan/Pengerasan Jalan Desa", bid: "Pelaksanaan Pembangunan Desa", sub: "Pekerjaan Umum dan Penataan Ruang"}, {val: "2.3.14 Pembangunan/Rehabilitasi Drainase/Gorong-gorong", text: "2.3.14 Pembangunan Drainase/Gorong-gorong", bid: "Pelaksanaan Pembangunan Desa", sub: "Pekerjaan Umum dan Penataan Ruang"}, {val: "2.4.11 Pembangunan/Rehabilitasi Sumur Bor/Air Bersih", text: "2.4.11 Pembangunan Sumur Bor/Air Bersih", bid: "Pelaksanaan Pembangunan Desa", sub: "Kawasan Permukiman"} ]},
+            { label: "3. BIDANG PEMBINAAN KEMASYARAKATAN", options: [{val: "3.1.02 Penguatan Kapasitas Satlinmas", text: "3.1.02 Kapasitas Satlinmas Desa", bid: "Pembinaan Kemasyarakatan", sub: "Ketenteraman dan Ketertiban"}, {val: "3.2.03 Penyelenggaraan Festival Kesenian/HUT RI/Hari Besar", text: "3.2.03 HUT RI / Perayaan Hari Besar", bid: "Pembinaan Kemasyarakatan", sub: "Kebudayaan dan Keagamaan"}, {val: "3.3.06 Pembinaan Karang Taruna/Klub Olah raga", text: "3.3.06 Pembinaan Karang Taruna/Klub Olahraga", bid: "Pembinaan Kemasyarakatan", sub: "Kepemudaan dan Olah Raga"}, {val: "3.4.03 Pembinaan PKK", text: "3.4.03 Pembinaan PKK", bid: "Pembinaan Kemasyarakatan", sub: "Kelembagaan Masyarakat"} ]},
+            { label: "4. BIDANG PEMBERDAYAAN MASYARAKAT", options: [{val: "4.2.01 Peningkatan Produksi Tanaman Pangan", text: "4.2.01 Peningkatan Produksi Tanaman Pangan", bid: "Pemberdayaan Masyarakat", sub: "Pertanian dan Peternakan"}, {val: "4.3.02 Peningkatan kapasitas perangkat Desa", text: "4.3.02 Pelatihan/Bimtek Perangkat Desa", bid: "Pemberdayaan Masyarakat", sub: "Peningkatan Kapasitas Aparatur"}, {val: "4.6.01 Pembentukan/Penyertaan Modal BUM Desa", text: "4.6.01 Penyertaan Modal BUM Desa", bid: "Pemberdayaan Masyarakat", sub: "Dukungan Penanaman Modal"} ]},
+            { label: "5. BIDANG PENANGGULANGAN BENCANA, DARURAT & MENDESAK", options: [{val: "5.3.00 Keadaan Mendesak (BLT DD)", text: "5.3.00 Keadaan Mendesak (BLT Dana Desa)", bid: "Penanggulangan Bencana, Darurat dan Mendesak", sub: "Keadaan Mendesak"} ]}
+        ];
+
+        function initDropdowns() {
+            let kegHtml = '<option value="">-- Cari Kode/Nama Kegiatan --</option>';
+            KEGIATAN_OPTIONS.forEach(g => { kegHtml += `<optgroup label="${g.label}">`; g.options.forEach(o => { kegHtml += `<option data-bidang="${o.bid}" data-sub="${o.sub}" value="${o.val}">${o.text}</option>`; }); kegHtml += `</optgroup>`; });
+            ['pagu_kegiatan_select', 'in_kegiatan_select'].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = kegHtml; });
+            let sumHtml = ''; SUMBER_DANA_OPTIONS.forEach(o => { sumHtml += `<option value="${o}">${o}</option>`; });
+            ['in_sumberDana', 'in_pendapatan_sumber', 'in_penarikan_sumber', 'in_pembiayaan_sumber'].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = sumHtml; });
+            const filterSumber = document.getElementById('filter_sumber_dana'); if (filterSumber) filterSumber.innerHTML = '<option value="">-- Semua Sumber Dana --</option>' + sumHtml;
+        }
+
+        let belanjaItems = [{ id: Date.now(), uraian: '', jumlah: 0, pajak: {ppn:0, pph21:0, pph22:0, pph23:0, restoran:0, galian_c:0} }];
+        let savedRecords = [], paguRecords = [], pendapatanRecords = [], penarikanRecords = [], pembiayaanRecords = [], setoranPajakRecords = [];
+        let currentEditId = null, currentIsAcc = false, currentUserRole = '';
+
+        function handleLogin() {
+            const password = document.getElementById('login_password').value;
+            currentUserRole = (password === '4') ? 'bendahara' : (password === '123456') ? 'ppkd' : 'pengunjung';
+            initDropdowns(); applyRolePermissions();
+            document.getElementById('loginView').classList.add('hidden'); document.getElementById('mainAppContainer').classList.remove('hidden');
+            switchMainPage('spp'); 
+            loadDataFromCloud(); loadPaguFromCloud(); loadPendapatanFromCloud(); loadPenarikanFromCloud(); loadPembiayaanFromCloud(); loadSetoranPajakFromCloud();
+        }
+
+        function logout() {
+            currentUserRole = ''; document.getElementById('login_password').value = '';
+            document.getElementById('loginView').classList.remove('hidden'); document.getElementById('mainAppContainer').classList.add('hidden');
+            const mobileRoleDisplay = document.getElementById('mobileUserRole'); if (mobileRoleDisplay) mobileRoleDisplay.classList.add('hidden');
+            document.getElementById('userRoleDisplay').classList.add('hidden'); resetForm(); 
+        }
+
+        function applyRolePermissions() {
+            const roleDisplay = document.getElementById('userRoleDisplay'), mobileRoleDisplay = document.getElementById('mobileUserRole');
+            const nonPpkdMenus = document.querySelectorAll('.non-ppkd-menu'), actionBtns = document.querySelectorAll('.action-btn'); 
+            roleDisplay.classList.remove('hidden'); if (mobileRoleDisplay) mobileRoleDisplay.classList.remove('hidden');
+            
+            if (currentUserRole === 'bendahara') {
+                roleDisplay.innerText = 'Mode: BENDAHARA'; roleDisplay.className = 'text-xs bg-emerald-800 text-emerald-100 px-3 py-2 mb-3 rounded-lg font-bold uppercase hidden md:block border border-emerald-700 shadow-inner';
+                if (mobileRoleDisplay) { mobileRoleDisplay.innerText = 'BENDAHARA'; mobileRoleDisplay.className = 'md:hidden text-[10px] bg-emerald-600 text-white px-2 py-1 rounded font-bold uppercase'; }
+                nonPpkdMenus.forEach(el => el.classList.remove('hidden')); actionBtns.forEach(el => el.classList.remove('hidden'));
+            } else if (currentUserRole === 'ppkd') {
+                roleDisplay.innerText = 'Mode: PPKD'; roleDisplay.className = 'text-xs bg-orange-800 text-orange-100 px-3 py-2 mb-3 rounded-lg font-bold uppercase hidden md:block border border-orange-700 shadow-inner';
+                if (mobileRoleDisplay) { mobileRoleDisplay.innerText = 'PPKD'; mobileRoleDisplay.className = 'md:hidden text-[10px] bg-orange-600 text-white px-2 py-1 rounded font-bold uppercase'; }
+                nonPpkdMenus.forEach(el => el.classList.add('hidden')); actionBtns.forEach(el => el.classList.remove('hidden'));
+            } else { 
+                roleDisplay.innerText = 'Mode: PENGUNJUNG (Hanya Baca)'; roleDisplay.className = 'text-xs bg-slate-700 text-slate-200 px-3 py-2 mb-3 rounded-lg font-bold uppercase hidden md:block border border-slate-600 shadow-inner';
+                if (mobileRoleDisplay) { mobileRoleDisplay.innerText = 'PENGUNJUNG'; mobileRoleDisplay.className = 'md:hidden text-[10px] bg-slate-600 text-white px-2 py-1 rounded font-bold uppercase'; }
+                nonPpkdMenus.forEach(el => el.classList.remove('hidden')); actionBtns.forEach(el => el.classList.add('hidden'));
+            }
+        }
+
+        function switchMainPage(page) {
+            const sidebarPages = ['spp', 'pagu', 'pendapatan', 'penarikan', 'pembiayaan', 'spj', 'laporan'], topbarPages = ['bku', 'bkt', 'bksd', 'bkp'];
+            sidebarPages.forEach(p => {
+                const btn = document.getElementById('nav_main_' + p);
+                if(btn) { btn.classList.remove('bg-[#153650]', 'text-white', 'border-blue-400', 'border-emerald-400', 'border-purple-400', 'border-teal-400', 'border-pink-400', 'border-yellow-400'); btn.classList.add('border-transparent');
+                    if (p === 'pendapatan') btn.classList.add('text-emerald-300'); else if (p === 'penarikan') btn.classList.add('text-purple-300'); else if (p === 'pembiayaan') btn.classList.add('text-teal-300'); else if (p === 'spj') btn.classList.add('text-yellow-300'); else if (p === 'laporan') btn.classList.add('text-pink-300'); else btn.classList.add('text-blue-200');
+                }
+            });
+            topbarPages.forEach(p => { const btn = document.getElementById('nav_top_' + p); if(btn) { btn.classList.remove('bg-blue-600', 'text-white', 'border-blue-600'); btn.classList.add('bg-white', 'text-slate-600', 'border-slate-200'); } });
+            if (sidebarPages.includes(page)) {
+                const activeBtn = document.getElementById('nav_main_' + page);
+                if(activeBtn) { activeBtn.classList.remove('text-blue-200', 'text-emerald-300', 'text-purple-300', 'text-teal-300', 'text-pink-300', 'text-yellow-300', 'border-transparent');
+                    let borderClass = 'border-blue-400'; if(page === 'pendapatan') borderClass = 'border-emerald-400'; else if(page === 'penarikan') borderClass = 'border-purple-400'; else if(page === 'pembiayaan') borderClass = 'border-teal-400'; else if(page === 'spj') borderClass = 'border-yellow-400'; else if(page === 'laporan') borderClass = 'border-pink-400';
+                    activeBtn.classList.add('bg-[#153650]', 'text-white', borderClass);
+                }
+            } else if (topbarPages.includes(page)) {
+                const activeBtn = document.getElementById('nav_top_' + page);
+                if(activeBtn) { activeBtn.classList.remove('bg-white', 'text-slate-600', 'border-slate-200'); activeBtn.classList.add('bg-blue-600', 'text-white', 'border-blue-600'); }
+            }
+            
+            ['spp', 'pagu', 'pendapatan', 'penarikan', 'pembiayaan', 'spj', 'laporan', 'bku', 'bkt', 'bksd', 'bkp', 'preview'].forEach(v => { 
+                const el = document.getElementById(v + 'View'); 
+                if(el) { el.classList.add('hidden'); el.classList.remove('block'); }
+            });
+            
+            const selectedView = document.getElementById(page + 'View');
+            if(selectedView) {
+                selectedView.classList.remove('hidden');
+                if (page === 'spp') selectedView.classList.add('block');
+            }
+
+            if(page === 'spj') renderSPJ(); 
+            else if(page === 'bku') renderBKU(); 
+            else if(page === 'bkt') renderBKT(); 
+            else if(page === 'bksd') renderBKSD(); 
+            else if(page === 'bkp') renderBKP(); 
+            else if(page === 'laporan') renderLaporan();
+        }
+
+        function angkaTerbilang(angka) {
+            if (!angka || angka === 0) return '';
+            var huruf = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
+            var bagi = 0, sisa = 0, hasil = "";
+            if (angka < 12) hasil = huruf[angka]; else if (angka < 20) hasil = huruf[angka - 10] + " Belas"; else if (angka < 100) { bagi = Math.floor(angka / 10); sisa = angka % 10; hasil = huruf[bagi] + " Puluh " + angkaTerbilang(sisa); } else if (angka < 200) hasil = "Seratus " + angkaTerbilang(angka - 100); else if (angka < 1000) { bagi = Math.floor(angka / 100); sisa = angka % 100; hasil = huruf[bagi] + " Ratus " + angkaTerbilang(sisa); } else if (angka < 2000) hasil = "Seribu " + angkaTerbilang(angka - 1000); else if (angka < 1000000) { bagi = Math.floor(angka / 1000); sisa = angka % 1000; hasil = angkaTerbilang(bagi) + " Ribu " + angkaTerbilang(sisa); } else if (angka < 1000000000) { bagi = Math.floor(angka / 1000000); sisa = angka % 1000000; hasil = angkaTerbilang(bagi) + " Juta " + angkaTerbilang(sisa); } else if (angka < 1000000000000) { bagi = Math.floor(angka / 1000000000); sisa = angka % 1000000000; hasil = angkaTerbilang(bagi) + " Miliar " + angkaTerbilang(sisa); }
+            return hasil.trim().replace(/\s+/g, ' ');
+        }
+
+        const safeSetText = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
+        const safeGetVal = (id) => document.getElementById(id)?.value || '';
+        function formatRp(n) { return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2 }).format(n || 0); }
+        function fmtPjk(n) { return (n && n > 0) ? formatRp(n) : '-'; }
+
+        function refreshSemuaLaporan() {
+            if (!document.getElementById('bkuView').classList.contains('hidden')) renderBKU();
+            if (!document.getElementById('bktView').classList.contains('hidden')) renderBKT();
+            if (!document.getElementById('bksdView').classList.contains('hidden')) renderBKSD();
+            if (!document.getElementById('bkpView').classList.contains('hidden')) renderBKP();
+            if (!document.getElementById('laporanView').classList.contains('hidden')) renderLaporan();
+        }
+
+        async function loadSetoranPajakFromCloud() {
+            if(!SCRIPT_URL) return;
+            try { 
+                const res = await fetch(SCRIPT_URL + '?action=get_setoran_pajak'); 
+                if(!res.ok) throw new Error("Fetch error"); 
+                const data = await res.json(); 
+                if (data && data.status === 'error') throw new Error(data.message);
+                setoranPajakRecords = Array.isArray(data) ? data : []; 
+                renderBKP(); 
+                refreshSemuaLaporan();
+            } catch(e) { 
+                setoranPajakRecords = []; 
+                renderBKP(); 
+                refreshSemuaLaporan();
+            }
+        }
+
+        async function saveSetoranPajakData() {
+            const tgl = safeGetVal('in_pajak_tgl'), jenis = safeGetVal('in_pajak_jenis'), uraian = safeGetVal('in_pajak_uraian'), nominal = parseFloat(safeGetVal('in_pajak_nominal')) || 0;
+            if(!tgl || !uraian || nominal <= 0) return alert('Data tidak valid! Lengkapi semua kolom.');
+            const btnSave = document.getElementById('btnSavePajak'); const origText = btnSave.innerHTML; btnSave.innerHTML = '⏳ Menyimpan ke Cloud...'; btnSave.disabled = true;
+            const rec = { id: Date.now(), tanggal: tgl, jenis: jenis, uraian: uraian, nominal: nominal };
+            
+            if(SCRIPT_URL) { 
+                try { 
+                    let res = await fetch(SCRIPT_URL + '?action=save_setoran_pajak', { method: 'POST', body: JSON.stringify(rec), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); 
+                    if(!res.ok) throw new Error("Gagal"); 
+                    setoranPajakRecords.unshift(rec); 
+                    renderBKP();
+                    refreshSemuaLaporan();
+                    alert('Berhasil disimpan ke Database Google Sheet!'); 
+                } catch(e) { 
+                    alert('⚠️ PERINGATAN: Gagal tersambung ke Google Sheet! (Data akan hilang saat halaman di-refresh jika SCRIPT_URL belum dikonfigurasi).');
+                    setoranPajakRecords.unshift(rec); renderBKP(); refreshSemuaLaporan();
+                } 
+            }
+            btnSave.innerHTML = origText; btnSave.disabled = false; document.getElementById('in_pajak_uraian').value = ''; document.getElementById('in_pajak_nominal').value = '0';
+        }
+
+        async function deleteSetoranPajakRec(id) {
+            if(confirm('Yakin hapus data penyetoran pajak ini dari Cloud?')) {
+                if (SCRIPT_URL) { 
+                    try { 
+                        let res = await fetch(SCRIPT_URL + '?action=delete_setoran_pajak', { method: 'POST', body: JSON.stringify({ id: id }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); 
+                        if(!res.ok) throw new Error("gagal"); 
+                        setoranPajakRecords = setoranPajakRecords.filter(x => x.id.toString() !== id.toString()); 
+                        renderBKP();
+                        refreshSemuaLaporan();
+                        alert("Berhasil dihapus dari Database.");
+                    } catch(e) { 
+                        alert('⚠️ PERINGATAN: Gagal menghapus dari Database Google Sheet! Proses dibatalkan.'); 
+                    } 
+                }
+            }
+        }
+
+        async function loadDataFromCloud() {
+            const listContainer = document.getElementById('savedDataList');
+            if(!SCRIPT_URL) return;
+            if(listContainer) listContainer.innerHTML = '<div class="text-center p-4 text-blue-500 font-bold animate-pulse">Memuat Data SPP dari Cloud...</div>';
+            try {
+                const res = await fetch(SCRIPT_URL); 
+                if (!res.ok) throw new Error("Gagal mengambil data dari server Google");
+                const data = await res.json();
+                if (data && data.status === 'error') throw new Error(data.message);
+                
+                savedRecords = (Array.isArray(data) ? data : []).map(r => { if (r.statusAcc === undefined && r.items && r.items.length > 0 && r.items[0]._statusAcc !== undefined) { r.statusAcc = r.items[0]._statusAcc; } r.statusAcc = (r.statusAcc === true || r.statusAcc === "true"); return r; });
+                renderSavedData(); 
+                refreshSemuaLaporan();
+            } catch(e) { 
+                console.warn("Fetch failed", e); 
+                if(listContainer) listContainer.innerHTML = `<div class="text-center p-4 text-red-500 font-bold">⚠️ Gagal memuat data dari Cloud.<br><span class="text-xs font-normal">${e.message}</span></div>`;
+                savedRecords = []; 
+                renderSavedData(); 
+                refreshSemuaLaporan();
+            }
+            calculate();
+        }
+
+        async function loadPaguFromCloud() {
+            if(!SCRIPT_URL) return;
+            try { 
+                const res = await fetch(SCRIPT_URL + '?action=get_pagu'); 
+                if(!res.ok) throw new Error("Fetch error"); 
+                const data = await res.json(); 
+                if (data && data.status === 'error') throw new Error(data.message);
+                if(data.length > 0 && data[0].noSpp !== undefined) return; 
+                paguRecords = Array.isArray(data) ? data : []; 
+                renderPaguData(); 
+                autoCalculateLalu();
+            } catch(e) { 
+                paguRecords = []; 
+                renderPaguData(); 
+                autoCalculateLalu();
+            }
+        }
+
+        async function loadPendapatanFromCloud() {
+            if(!SCRIPT_URL) return;
+            try { 
+                const res = await fetch(SCRIPT_URL + '?action=get_pendapatan'); 
+                if(!res.ok) throw new Error("Fetch error"); 
+                const data = await res.json(); 
+                if (data && data.status === 'error') throw new Error(data.message);
+                pendapatanRecords = Array.isArray(data) ? data : []; 
+                renderPendapatanData(); 
+                refreshSemuaLaporan();
+            } catch(e) { 
+                pendapatanRecords = []; 
+                renderPendapatanData(); 
+                refreshSemuaLaporan();
+            }
+        }
+
+        async function loadPenarikanFromCloud() {
+            if(!SCRIPT_URL) return;
+            try { 
+                const res = await fetch(SCRIPT_URL + '?action=get_penarikan'); 
+                if(!res.ok) throw new Error("Fetch error"); 
+                const data = await res.json(); 
+                if (data && data.status === 'error') throw new Error(data.message);
+                penarikanRecords = Array.isArray(data) ? data : []; 
+                renderPenarikanData(); 
+                refreshSemuaLaporan();
+            } catch(e) { 
+                penarikanRecords = []; 
+                renderPenarikanData(); 
+                refreshSemuaLaporan();
+            }
+        }
+
+        async function loadPembiayaanFromCloud() {
+            if(!SCRIPT_URL) return;
+            try { 
+                const res = await fetch(SCRIPT_URL + '?action=get_pembiayaan'); 
+                if(!res.ok) throw new Error("Fetch error"); 
+                const data = await res.json(); 
+                if (data && data.status === 'error') throw new Error(data.message);
+                pembiayaanRecords = Array.isArray(data) ? data : []; 
+                renderPembiayaanData(); 
+                refreshSemuaLaporan();
+            } catch(e) { 
+                pembiayaanRecords = []; 
+                renderPembiayaanData(); 
+                refreshSemuaLaporan();
+            }
+        }
+
+        async function savePembiayaanData() {
+            const tgl = safeGetVal('in_pembiayaan_tgl'), jenis = safeGetVal('in_pembiayaan_jenis'), sumber = safeGetVal('in_pembiayaan_sumber'), uraian = safeGetVal('in_pembiayaan_uraian'), nominal = parseFloat(safeGetVal('in_pembiayaan_nominal')) || 0;
+            if(!tgl || !uraian || nominal <= 0) return alert('Data tidak valid!');
+            const btnSave = document.getElementById('btnSavePembiayaan'); const origText = btnSave.innerHTML; btnSave.innerHTML = '⏳ Menyimpan ke Cloud...'; btnSave.disabled = true;
+            const rec = { id: Date.now(), tanggal: tgl, jenis: jenis, sumberDana: sumber, uraian: uraian, nominal: nominal };
+            
+            if(SCRIPT_URL) { 
+                try { 
+                    let res = await fetch(SCRIPT_URL + '?action=save_pembiayaan', { method: 'POST', body: JSON.stringify(rec), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); 
+                    if(!res.ok) throw new Error("Gagal");
+                    pembiayaanRecords.unshift(rec);
+                    renderPembiayaanData();
+                    refreshSemuaLaporan();
+                    alert('Berhasil disimpan ke Database Google Sheet!');
+                } catch(e) { 
+                    alert('⚠️ PERINGATAN: Gagal terhubung ke Database Google Sheet! Data TIDAK TERSIMPAN.');
+                } 
+            }
+            btnSave.innerHTML = origText; btnSave.disabled = false; document.getElementById('in_pembiayaan_uraian').value = ''; document.getElementById('in_pembiayaan_nominal').value = '0';
+        }
+
+        function renderPembiayaanData() {
+            const list = document.getElementById('pembiayaanDataList'); if(!list) return; list.innerHTML = '';
+            if(pembiayaanRecords.length === 0) { list.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-gray-400">Belum ada transaksi pembiayaan dari Cloud.</td></tr>`; return; }
+            pembiayaanRecords.sort((a,b) => b.id - a.id).forEach(r => {
+                const tr = document.createElement('tr'); tr.className = 'border-b hover:bg-slate-100 transition';
+                const isPenerimaan = r.jenis === 'Penerimaan', jenisColor = isPenerimaan ? 'text-teal-600 bg-teal-100' : 'text-orange-600 bg-orange-100', nominalColor = isPenerimaan ? 'text-teal-600' : 'text-orange-600', prefix = isPenerimaan ? '+' : '-';
+                const hapusBtn = (currentUserRole !== 'pengunjung') ? `<button onclick="deletePembiayaanRec('${r.id}')" class="text-red-500 hover:text-red-700 font-bold p-1 border rounded bg-white shadow-sm">Hapus</button>` : '';
+                tr.innerHTML = `<td class="p-3 whitespace-nowrap">${r.tanggal ? new Date(r.tanggal).toLocaleDateString('id-ID', {day: '2-digit', month: 'short', year: 'numeric'}) : '-'}</td><td class="p-3"><div class="font-bold text-slate-700 leading-tight">${r.uraian}</div><div class="text-[10px] bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded inline-block mt-1">${r.sumberDana}</div></td><td class="p-3 text-center"><span class="text-[10px] px-2 py-1 rounded font-bold uppercase ${jenisColor}">${r.jenis}</span></td><td class="p-3 text-right font-mono font-bold ${nominalColor}">${prefix} Rp ${formatRp(r.nominal)}</td><td class="p-3 text-center">${hapusBtn}</td>`;
+                list.appendChild(tr);
+            });
+        }
+
+        async function deletePembiayaanRec(id) {
+            if(confirm('Yakin hapus data pembiayaan ini secara permanen dari Cloud?')) {
+                if (SCRIPT_URL) { 
+                    try { 
+                        let res = await fetch(SCRIPT_URL + '?action=delete_pembiayaan', { method: 'POST', body: JSON.stringify({ id: id }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); 
+                        if(!res.ok) throw new Error("gagal"); 
+                        pembiayaanRecords = pembiayaanRecords.filter(x => x.id.toString() !== id.toString());
+                        renderPembiayaanData();
+                        refreshSemuaLaporan();
+                        alert("Berhasil dihapus dari Database.");
+                    } catch(e) { 
+                        alert('⚠️ PERINGATAN: Gagal menghapus dari Database Google Sheet! Proses dibatalkan.'); 
+                    } 
+                }
+            }
+        }
+
+        async function savePenarikanData() {
+            const tgl = safeGetVal('in_penarikan_tgl'), sumber = safeGetVal('in_penarikan_sumber'), uraian = safeGetVal('in_penarikan_uraian'), nominal = parseFloat(safeGetVal('in_penarikan_nominal')) || 0;
+            if(!tgl || !uraian || nominal <= 0) return alert('Data tidak valid!');
+            const btnSave = document.getElementById('btnSavePenarikan'); const origText = btnSave.innerHTML; btnSave.innerHTML = '⏳ Menyimpan ke Cloud...'; btnSave.disabled = true;
+            const rec = { id: Date.now(), tanggal: tgl, sumberDana: sumber, uraian: uraian, nominal: nominal };
+            
+            if(SCRIPT_URL) { 
+                try { 
+                    let res = await fetch(SCRIPT_URL + '?action=save_penarikan', { method: 'POST', body: JSON.stringify(rec), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); 
+                    if(!res.ok) throw new Error("Gagal"); 
+                    penarikanRecords.unshift(rec); 
+                    renderPenarikanData();
+                    refreshSemuaLaporan();
+                    alert('Berhasil disimpan ke Database Google Sheet!'); 
+                } catch(e) { 
+                    alert('⚠️ PERINGATAN: Gagal terhubung ke Database Google Sheet! Data TIDAK TERSIMPAN.'); 
+                } 
+            }
+            btnSave.innerHTML = origText; btnSave.disabled = false; document.getElementById('in_penarikan_uraian').value = ''; document.getElementById('in_penarikan_nominal').value = '0';
+        }
+
+        function renderPenarikanData() {
+            const list = document.getElementById('penarikanDataList'); if(!list) return; list.innerHTML = '';
+            if(penarikanRecords.length === 0) { list.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-gray-400">Belum ada penarikan kas dari Cloud.</td></tr>`; return; }
+            penarikanRecords.sort((a,b) => b.id - a.id).forEach(r => {
+                const tr = document.createElement('tr'); tr.className = 'border-b hover:bg-slate-100 transition';
+                const hapusBtn = (currentUserRole !== 'pengunjung') ? `<button onclick="deletePenarikanRec('${r.id}')" class="text-red-500 hover:text-red-700 font-bold p-1 border rounded bg-white shadow-sm">Hapus</button>` : '';
+                tr.innerHTML = `<td class="p-3 whitespace-nowrap">${r.tanggal ? new Date(r.tanggal).toLocaleDateString('id-ID', {day: '2-digit', month: 'short', year: 'numeric'}) : '-'}</td><td class="p-3"><div class="font-bold text-slate-700 leading-tight">${r.uraian}</div><div class="text-[10px] bg-purple-100 text-purple-800 px-1.5 py-0.5 rounded inline-block mt-1">${r.sumberDana}</div></td><td class="p-3 text-right font-mono font-bold text-purple-600">Rp ${formatRp(r.nominal)}</td><td class="p-3 text-center">${hapusBtn}</td>`;
+                list.appendChild(tr);
+            });
+        }
+
+        async function deletePenarikanRec(id) {
+            if(confirm('Yakin hapus data penarikan ini dari Cloud?')) {
+                if (SCRIPT_URL) { 
+                    try { 
+                        let res = await fetch(SCRIPT_URL + '?action=delete_penarikan', { method: 'POST', body: JSON.stringify({ id: id }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); 
+                        if(!res.ok) throw new Error("gagal"); 
+                        penarikanRecords = penarikanRecords.filter(x => x.id.toString() !== id.toString()); 
+                        renderPenarikanData();
+                        refreshSemuaLaporan();
+                        alert("Berhasil dihapus dari Database.");
+                    } catch(e) { 
+                        alert('⚠️ PERINGATAN: Gagal menghapus dari Database Google Sheet! Proses dibatalkan.'); 
+                    } 
+                }
+            }
+        }
+
+        async function savePendapatanData() {
+            const tgl = safeGetVal('in_pendapatan_tgl'), sumber = safeGetVal('in_pendapatan_sumber'), uraian = safeGetVal('in_pendapatan_uraian'), nominal = parseFloat(safeGetVal('in_pendapatan_nominal')) || 0;
+            if(!tgl || !uraian || nominal <= 0) return alert('Data tidak valid!');
+            const btnSave = document.getElementById('btnSavePendapatan'); const origText = btnSave.innerHTML; btnSave.innerHTML = '⏳ Menyimpan ke Cloud...'; btnSave.disabled = true;
+            const rec = { id: Date.now(), tanggal: tgl, sumberDana: sumber, uraian: uraian, nominal: nominal };
+            
+            if(SCRIPT_URL) { 
+                try { 
+                    let res = await fetch(SCRIPT_URL + '?action=save_pendapatan', { method: 'POST', body: JSON.stringify(rec), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); 
+                    if(!res.ok) throw new Error("Gagal"); 
+                    pendapatanRecords.unshift(rec); 
+                    renderPendapatanData();
+                    refreshSemuaLaporan();
+                    alert('Berhasil disimpan ke Database Google Sheet!'); 
+                } catch(e) { 
+                    alert('⚠️ PERINGATAN: Gagal terhubung ke Database Google Sheet! Data TIDAK TERSIMPAN.'); 
+                } 
+            }
+            btnSave.innerHTML = origText; btnSave.disabled = false; document.getElementById('in_pendapatan_uraian').value = ''; document.getElementById('in_pendapatan_nominal').value = '0';
+        }
+
+        function renderPendapatanData() {
+            const list = document.getElementById('pendapatanDataList'); if(!list) return; list.innerHTML = '';
+            if(pendapatanRecords.length === 0) { list.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-gray-400">Belum ada pendapatan dari Cloud.</td></tr>`; return; }
+            pendapatanRecords.sort((a,b) => b.id - a.id).forEach(r => {
+                const tr = document.createElement('tr'); tr.className = 'border-b hover:bg-slate-100 transition';
+                const hapusBtn = (currentUserRole !== 'pengunjung') ? `<button onclick="deletePendapatanRec('${r.id}')" class="text-red-500 hover:text-red-700 font-bold p-1 border rounded bg-white shadow-sm">Hapus</button>` : '';
+                tr.innerHTML = `<td class="p-3 whitespace-nowrap">${r.tanggal ? new Date(r.tanggal).toLocaleDateString('id-ID', {day: '2-digit', month: 'short', year: 'numeric'}) : '-'}</td><td class="p-3 font-bold text-slate-700 leading-tight">${r.uraian}</td><td class="p-3 text-center"><span class="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold">${r.sumberDana}</span></td><td class="p-3 text-right font-mono font-bold text-emerald-600">Rp ${formatRp(r.nominal)}</td><td class="p-3 text-center">${hapusBtn}</td>`;
+                list.appendChild(tr);
+            });
+        }
+
+        async function deletePendapatanRec(id) {
+            if(confirm('Yakin hapus data pendapatan ini dari Cloud?')) {
+                if (SCRIPT_URL) { 
+                    try { 
+                        let res = await fetch(SCRIPT_URL + '?action=delete_pendapatan', { method: 'POST', body: JSON.stringify({ id: id }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); 
+                        if(!res.ok) throw new Error("gagal"); 
+                        pendapatanRecords = pendapatanRecords.filter(x => x.id.toString() !== id.toString()); 
+                        renderPendapatanData();
+                        refreshSemuaLaporan();
+                        alert("Berhasil dihapus dari Database.");
+                    } catch(e) { 
+                        alert('⚠️ PERINGATAN: Gagal menghapus dari Database Google Sheet! Proses dibatalkan.'); 
+                    } 
+                }
+            }
+        }
+
+        function updateInfoPagu() {
+            const sel = document.getElementById('pagu_kegiatan_select'); if(!sel) return;
+            const opt = sel.options[sel.selectedIndex]; 
+            const bidEl = document.getElementById('pagu_bidang'), subEl = document.getElementById('pagu_subBidang');
+            if(bidEl) bidEl.value = opt.getAttribute('data-bidang') || ''; 
+            if(subEl) subEl.value = opt.getAttribute('data-sub') || '';
+            const existingPagu = paguRecords.find(p => p.kegiatan === sel.value); const paguInput = document.getElementById('pagu_jumlah'); if(paguInput) paguInput.value = existingPagu ? existingPagu.pagu : 0;
+        }
+
+        async function savePaguData() {
+            const keg = safeGetVal('pagu_kegiatan_select'), jumlah = safeGetVal('pagu_jumlah');
+            if(!keg || !jumlah || jumlah <= 0) return alert('Data tidak valid!');
+            const btnSave = document.getElementById('btnSavePagu'); const origText = btnSave.innerHTML; btnSave.innerHTML = '⏳ Menyimpan ke Cloud...'; btnSave.disabled = true;
+            const rec = { id: Date.now(), kegiatan: keg, bidang: safeGetVal('pagu_bidang'), subBidang: safeGetVal('pagu_subBidang'), pagu: jumlah };
+            
+            if(SCRIPT_URL) { 
+                try { 
+                    let res = await fetch(SCRIPT_URL + '?action=save_pagu', { method: 'POST', body: JSON.stringify(rec), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); 
+                    if(!res.ok) throw new Error("Gagal"); 
+                    const existIndex = paguRecords.findIndex(p => p.kegiatan === keg); 
+                    if (existIndex > -1) { rec.id = paguRecords[existIndex].id; paguRecords[existIndex] = rec; } else { paguRecords.unshift(rec); }
+                    renderPaguData();
+                    autoCalculateLalu(); 
+                    alert('Pagu Anggaran Berhasil Disimpan ke Database Google Sheet!'); 
+                } catch(e) { 
+                    alert('⚠️ PERINGATAN: Gagal menyimpan Pagu ke Google Sheet. Data TIDAK TERSIMPAN.'); 
+                } 
+            }
+            btnSave.innerHTML = origText; btnSave.disabled = false; 
+        }
+
+        function renderPaguData() {
+            const list = document.getElementById('paguDataList'); if(!list) return; list.innerHTML = '';
+            if(paguRecords.length === 0) { list.innerHTML = `<tr><td colspan="3" class="text-center p-4 text-gray-400">Belum ada pagu dari Cloud.</td></tr>`; return; }
+            paguRecords.forEach(r => {
+                const tr = document.createElement('tr'); tr.className = 'border-b hover:bg-slate-100 transition';
+                const hapusBtn = (currentUserRole !== 'pengunjung') ? `<button onclick="deletePaguRec('${r.id}', '${r.kegiatan}')" class="text-red-500 hover:text-red-700 font-bold p-1 border rounded bg-white shadow-sm">Hapus</button>` : '';
+                tr.innerHTML = `<td class="p-3"><div class="font-bold text-[#1e4b6e] leading-tight">${r.kegiatan}</div></td><td class="p-3 text-right font-mono font-bold text-slate-700">Rp ${formatRp(r.pagu)}</td><td class="p-3 text-center">${hapusBtn}</td>`; list.appendChild(tr);
+            });
+        }
+
+        async function deletePaguRec(id, namaKeg) {
+            if(confirm(`Yakin hapus pagu untuk:\n${namaKeg} dari Cloud?`)) {
+                if (SCRIPT_URL) { 
+                    try { 
+                        let res = await fetch(SCRIPT_URL + '?action=delete_pagu', { method: 'POST', body: JSON.stringify({ id: id }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); 
+                        if(!res.ok) throw new Error("gagal"); 
+                        paguRecords = paguRecords.filter(x => x.id.toString() !== id.toString()); 
+                        renderPaguData();
+                        autoCalculateLalu();
+                        alert("Berhasil dihapus dari Database.");
+                    } catch(e) { 
+                        alert('⚠️ PERINGATAN: Gagal menghapus Pagu dari Database Google Sheet! Proses dibatalkan.'); 
+                    } 
+                }
+            }
+        }
+
+        function updateInfoAuto(isEdit = false) {
+            const sel = document.getElementById('in_kegiatan_select');
+            if (sel && sel.selectedIndex >= 0) {
+                const opt = sel.options[sel.selectedIndex]; 
+                const bidEl = document.getElementById('in_bidang'), subEl = document.getElementById('in_subBidang');
+                if(bidEl) bidEl.value = opt.getAttribute('data-bidang') || ''; 
+                if(subEl) subEl.value = opt.getAttribute('data-sub') || '';
+            }
+            if (!isEdit) autoCalculateLalu();
+        }
+
+        function updateNamaPPKD() {
+            const jabatan = safeGetVal('in_jabatanPpkd');
+            const dataPPKD = {
+                "Kaur TU dan Umum": "ANGGUN DEWI KINANTI",
+                "Kasi Pemerintahan": "NURLENI PERMATA SARI, S.I.P M.A.P",
+                "Kasi Pelayanan": "AMINGGU",
+                "Kaur Perencanaan": "FAIZAL NURHADI",
+                "Kasi Kesejahteraan": "SUSILAWATI",
+                "Kaur Keuangan": "JEFRI PRATAMA, S.E"
+            };
+            const namaInput = document.getElementById('in_namaPpkd');
+            if (namaInput) {
+                namaInput.value = dataPPKD[jabatan] || "";
+            }
+        }
+
+        function autoCalculateLalu() {
+            const selectedKegiatan = safeGetVal('in_kegiatan_select');
+            if(!selectedKegiatan) {
+                const elLalu = document.getElementById('in_lalu'), elPagu = document.getElementById('in_pagu'); if(elLalu) elLalu.value = 0; if(elPagu) elPagu.value = 0; calculate(); return;
+            }
+            let totalLalu = 0, currentPagu = 0;
+            const paguMasterObj = paguRecords.find(p => p.kegiatan === selectedKegiatan); if (paguMasterObj) currentPagu = parseFloat(paguMasterObj.pagu);
+            savedRecords.forEach(record => { if (record.kegiatan === selectedKegiatan && !(currentEditId && record.id === currentEditId)) totalLalu += (record.items || []).reduce((sum, item) => sum + (parseFloat(item.jumlah) || 0), 0); });
+            const inLalu = document.getElementById('in_lalu'), inPagu = document.getElementById('in_pagu'); if(inLalu) inLalu.value = totalLalu; if(inPagu) inPagu.value = currentPagu;
+            calculate();
+        }
+
+        function addBelanjaItem() { belanjaItems.push({ id: Date.now(), uraian: '', jumlah: 0, pajak: {ppn:0, pph21:0, pph22:0, pph23:0, restoran:0, galian_c:0} }); renderBelanjaList(); }
+        function removeBelanjaItem(id) { if (belanjaItems.length > 1) { belanjaItems = belanjaItems.filter(i => i.id !== id); renderBelanjaList(); calculate(); } }
+        window.updatePajak = function(idx, jenis, val) { if(!belanjaItems[idx].pajak) belanjaItems[idx].pajak = {ppn:0, pph21:0, pph22:0, pph23:0, restoran:0, galian_c:0}; belanjaItems[idx].pajak[jenis] = parseFloat(val) || 0; calculate(); };
+        window.autoCalculatePajak = function(idx) {
+            const item = belanjaItems[idx], uraian = item.uraian || "", nominal = item.jumlah || 0; let p = {ppn:0, pph21:0, pph22:0, pph23:0, restoran:0, galian_c:0};
+            if (nominal > 0) {
+                if (uraian.startsWith("5.1.4")) p.pph21 = nominal * 0.05; 
+                else if (uraian.startsWith("5.2.3")) { const dpp = nominal / 1.10; p.restoran = dpp * 0.10; p.pph23 = dpp * 0.02; }
+                else if (uraian.startsWith("5.2.5") || uraian.startsWith("5.2.9")) p.pph23 = nominal * 0.02; 
+                else if (uraian.startsWith("5.2.1") || uraian.startsWith("5.2.2") || uraian.startsWith("5.2.7") || uraian.startsWith("5.2.8") || uraian.startsWith("5.2.10") || uraian.startsWith("5.2.11") || uraian.startsWith("5.2.12") || uraian.startsWith("5.3.")) {
+                    if (nominal > 2000000) { const dpp = nominal / 1.11; p.ppn = dpp * 0.11; p.pph22 = dpp * 0.015; }
+                }
+            }
+            for (let key in p) p[key] = Math.round(p[key]); item.pajak = p;
+            const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+            setVal(`pajak_ppn_${idx}`, p.ppn); setVal(`pajak_pph21_${idx}`, p.pph21); setVal(`pajak_pph22_${idx}`, p.pph22); setVal(`pajak_pph23_${idx}`, p.pph23); setVal(`pajak_restoran_${idx}`, p.restoran); setVal(`pajak_galian_c_${idx}`, p.galian_c);
+        };
+
+        function getBelanjaOptionsHTML(selectedValue) {
+            let html = '<option value="">-- Pilih Kode & Uraian Belanja --</option>', found = false;
+            const belanjaGroups = [
+                {label: "5.1 BELANJA PEGAWAI", opts: ["5.1.1 Penghasilan Tetap", "5.1.2 Tunjangan", "5.1.3 Insentif", "5.1.4 Honorarium"]},
+                {label: "5.2 BELANJA BARANG DAN JASA", opts: ["5.2.1 Belanja ATK", "5.2.2 Belanja Cetak dan Penggandaan", "5.2.3 Belanja Konsumsi", "5.2.4 Belanja Perjalanan Dinas", "5.2.5 Belanja Jasa", "5.2.6 Belanja Listrik, Air dan Internet", "5.2.7 Belanja BBM dan Pelumas", "5.2.8 Belanja Pemeliharaan", "5.2.9 Belanja Sewa", "5.2.10 Belanja Pakaian", "5.2.11 Belanja Obat dan Kesehatan", "5.2.12 Belanja Bahan Material"]},
+                {label: "5.3 BELANJA MODAL", opts: ["5.3.1 Belanja Tanah", "5.3.2 Belanja Peralatan dan Mesin", "5.3.3 Belanja Kendaraan", "5.3.4 Belanja Gedung dan Bangunan", "5.3.5 Belanja Jalan, Irigasi dan Jaringan", "5.3.6 Belanja Aset Tetap Lainnya"]},
+                {label: "5.4 BELANJA TAK TERDUGA", opts: ["5.4.1 Penanggulangan Bencana", "5.4.2 Keadaan Darurat", "5.4.3 Keadaan Mendesak"]}
+            ];
+            belanjaGroups.forEach(g => { html += `<optgroup label="${g.label}">`; g.opts.forEach(opt => { const isSelected = (selectedValue === opt) ? 'selected' : ''; if (isSelected) found = true; html += `<option value="${opt}" ${isSelected}>${opt}</option>`; }); html += `</optgroup>`; });
+            if (selectedValue && !found) html += `<optgroup label="Lainnya (Input Manual Lama)"><option value="${selectedValue}" selected>${selectedValue}</option></optgroup>`;
+            return html;
+        }
+
+        function getStartingKwitansiNo(targetSppId) {
+            let count = 0; for (const r of [...savedRecords].sort((a, b) => a.id - b.id)) { if (r.id === targetSppId) break; count += (r.items ? r.items.length : 0); } return count + 1;
+        }
+
+        function renderBelanjaList() {
+            const cont = document.getElementById('belanjaList'); if (!cont) return; cont.innerHTML = '';
+            const thn = safeGetVal('in_tahun'), startNo = getStartingKwitansiNo(currentEditId || Date.now());
+            const isLocked = currentUserRole === 'pengunjung' || (currentUserRole === 'ppkd' && currentIsAcc), isReadonly = isLocked ? 'readonly disabled' : '', isHiddenBtn = isLocked ? 'hidden' : '';
+
+            belanjaItems.forEach((item, idx) => {
+                const kwt = (startNo + idx).toString().padStart(4, '0'), p = item.pajak || {ppn:0, pph21:0, pph22:0, pph23:0, restoran:0, galian_c:0};
+                const div = document.createElement('div'); div.className = 'bg-white border-2 p-4 rounded-lg shadow-sm border-slate-300 relative';
+                div.innerHTML = `<div class="flex justify-between items-center text-[10px] mb-3 font-mono border-b pb-2"><span class="text-blue-700 font-bold px-2 py-1 bg-blue-50 rounded">KWITANSI: ${kwt}/KWT/02.2011/${thn}</span><button onclick="removeBelanjaItem(${item.id})" class="${isHiddenBtn} text-red-500 hover:text-white hover:bg-red-500 border border-red-500 px-2 py-1 rounded transition">Hapus Item</button></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label class="block text-xs font-bold text-slate-500 mb-1">Uraian Pembayaran (Kode Belanja)</label><select class="form-input text-xs" onchange="belanjaItems[${idx}].uraian=this.value; autoCalculatePajak(${idx}); calculate()" ${isReadonly}>${getBelanjaOptionsHTML(item.uraian)}</select></div><div><label class="block text-xs font-bold text-slate-500 mb-1">Jumlah Nilai (Rp)</label><div class="relative"><span class="absolute left-3 top-2.5 text-xs text-gray-400 font-bold">Rp</span><input type="number" class="form-input pl-8 font-bold" placeholder="0" value="${item.jumlah||''}" oninput="belanjaItems[${idx}].jumlah=parseFloat(this.value)||0; autoCalculatePajak(${idx}); calculate()" ${isReadonly}></div></div></div><div class="mt-4 bg-slate-50 p-3 rounded border border-slate-200"><div class="text-[10px] font-bold text-slate-600 mb-2 uppercase tracking-wide">⬇️ Rincian Potongan Pajak (Isi jika ada pemotongan)</div><div class="grid grid-cols-2 md:grid-cols-6 gap-3 text-xs"><div><label class="block mb-1 text-slate-500">PPN</label><input type="number" id="pajak_ppn_${idx}" class="form-input px-2 py-1 text-xs" value="${p.ppn||''}" oninput="updatePajak(${idx}, 'ppn', this.value)" ${isReadonly}></div><div><label class="block mb-1 text-slate-500">PPh 21</label><input type="number" id="pajak_pph21_${idx}" class="form-input px-2 py-1 text-xs" value="${p.pph21||''}" oninput="updatePajak(${idx}, 'pph21', this.value)" ${isReadonly}></div><div><label class="block mb-1 text-slate-500">PPh 22</label><input type="number" id="pajak_pph22_${idx}" class="form-input px-2 py-1 text-xs" value="${p.pph22||''}" oninput="updatePajak(${idx}, 'pph22', this.value)" ${isReadonly}></div><div><label class="block mb-1 text-slate-500">PPh 23</label><input type="number" id="pajak_pph23_${idx}" class="form-input px-2 py-1 text-xs" value="${p.pph23||''}" oninput="updatePajak(${idx}, 'pph23', this.value)" ${isReadonly}></div><div><label class="block mb-1 text-slate-500">Pajak Restoran</label><input type="number" id="pajak_restoran_${idx}" class="form-input px-2 py-1 text-xs" value="${p.restoran||''}" oninput="updatePajak(${idx}, 'restoran', this.value)" ${isReadonly}></div><div><label class="block mb-1 text-slate-500">Pajak Galian C</label><input type="number" id="pajak_galian_c_${idx}" class="form-input px-2 py-1 text-xs" value="${p.galian_c||''}" oninput="updatePajak(${idx}, 'galian_c', this.value)" ${isReadonly}></div></div></div>`;
+                cont.appendChild(div);
+            });
+        }
+
+        function calculate() {
+            const pagu = parseFloat(safeGetVal('in_pagu')) || 0, lalu = parseFloat(safeGetVal('in_lalu')) || 0, skrg = belanjaItems.reduce((a, b) => a + (b.jumlah || 0), 0), total = lalu + skrg, sisa = pagu - total;
+            safeSetText('sum_lalu', 'Rp ' + formatRp(lalu)); safeSetText('sum_sekarang', 'Rp ' + formatRp(skrg)); safeSetText('sum_sisa', 'Rp ' + formatRp(sisa));
+            const count = currentEditId ? savedRecords.find(x=>x.id===currentEditId)?.noSpp : (savedRecords.length + 1).toString().padStart(3, '0');
+            safeSetText('display_spp_no', `${count || '001'}/SPP/2011/${safeGetVal('in_tahun')}`);
+            return { pagu, lalu, skrg, total, sisa };
+        }
+
+        function resetForm() {
+            currentEditId = null; currentIsAcc = false;
+            const setVal = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
+            setVal('in_tanggal', ''); setVal('in_kegiatan_select', ''); setVal('in_bidang', ''); setVal('in_subBidang', ''); setVal('in_pagu', '0'); setVal('in_lalu', '0');
+            belanjaItems = [{ id: Date.now(), uraian: '', jumlah: 0, pajak: {ppn:0, pph21:0, pph22:0, pph23:0, restoran:0, galian_c:0} }];
+            const searchInput = document.getElementById('searchSpp'); if (searchInput) searchInput.value = '';
+            
+            renderBelanjaList(); calculate(); renderSavedData(); 
+            const btnSave = document.getElementById('btnSave'), btnCetak = document.getElementById('btnCetakPreview'), btnAddBelanja = document.getElementById('btnAddBelanja');
+            if (currentUserRole === 'pengunjung') { if(btnSave) btnSave.classList.add('hidden'); if(btnCetak) btnCetak.classList.add('hidden'); if(btnAddBelanja) btnAddBelanja.classList.add('hidden'); } else if (currentUserRole === 'ppkd') { if(btnSave) { btnSave.classList.remove('hidden'); btnSave.innerHTML = 'Simpan Draft (Tunggu ACC)'; } if(btnAddBelanja) btnAddBelanja.classList.remove('hidden'); if(btnCetak) btnCetak.classList.add('hidden'); } else { if(btnSave) { btnSave.classList.remove('hidden'); btnSave.innerHTML = 'Simpan ke Database (Cloud)'; } if(btnAddBelanja) btnAddBelanja.classList.remove('hidden'); if(btnCetak) btnCetak.classList.remove('hidden'); }
+            window.scrollTo(0, 0);
+        }
+
+        async function saveData() {
+            const keg = safeGetVal('in_kegiatan_select');
+            if(!keg) return alert('Pilih kegiatan terlebih dahulu!');
+            if(parseFloat(safeGetVal('in_pagu')) <= 0) return alert('Pagu Anggaran untuk kegiatan ini masih 0. Silakan atur terlebih dahulu di menu MASTER PAGU ANGGARAN.');
+            
+            const btnSave = document.getElementById('btnSave'); const originalText = btnSave.innerHTML; btnSave.innerHTML = '⏳ Menyimpan ke Cloud...'; btnSave.disabled = true; btnSave.classList.add('opacity-75', 'cursor-not-allowed');
+            let itemsToSave = JSON.parse(JSON.stringify(belanjaItems)); let isAcc = currentUserRole === 'bendahara' ? currentIsAcc : false; if (itemsToSave.length > 0) itemsToSave[0]._statusAcc = isAcc; 
+
+            const rec = { id: currentEditId || Date.now(), noSpp: currentEditId ? savedRecords.find(x=>x.id===currentEditId).noSpp : (savedRecords.length + 1).toString().padStart(3, '0'), bulan: safeGetVal('in_bulan'), tahun: safeGetVal('in_tahun'), tanggal: safeGetVal('in_tanggal'), bidang: safeGetVal('in_bidang'), subBidang: safeGetVal('in_subBidang'), kegiatan: keg, sumberDana: safeGetVal('in_sumberDana'), pagu: safeGetVal('in_pagu'), lalu: safeGetVal('in_lalu'), pejabat: { kades: safeGetVal('in_namaKades'), sekdes: safeGetVal('in_namaSekdes'), ppkd: safeGetVal('in_namaPpkd'), jabatanPpkd: safeGetVal('in_jabatanPpkd'), bendahara: safeGetVal('in_namaKaurKeuangan') }, items: itemsToSave, statusAcc: isAcc };
+            
+            if(SCRIPT_URL) { 
+                try { 
+                    let res = await fetch(SCRIPT_URL + '?action=save', { method: 'POST', body: JSON.stringify(rec), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); 
+                    if(!res.ok) throw new Error("Gagal terhubung");
+                    
+                    const existingIdx = savedRecords.findIndex(x => x.id === rec.id);
+                    if (existingIdx > -1) savedRecords[existingIdx] = rec;
+                    else savedRecords.unshift(rec);
+                    renderSavedData();
+                    refreshSemuaLaporan();
+                    
+                    alert('Data Berhasil Disimpan ke Database Google Sheet!');
+                    resetForm(); 
+                } catch(e) { 
+                    alert('⚠️ PERINGATAN: Gagal terhubung ke Database Google Sheet! Data TIDAK TERSIMPAN.'); 
+                } 
+            }
+            btnSave.innerHTML = originalText; btnSave.disabled = false; btnSave.classList.remove('opacity-75', 'cursor-not-allowed');
+        }
+
+        async function toggleAccSpp(id, isAcc) {
+            if(currentUserRole !== 'bendahara') return;
+            const r = savedRecords.find(x => x.id === id);
+            if(r) { 
+                r.statusAcc = isAcc; if (r.items && r.items.length > 0) r.items[0]._statusAcc = isAcc; 
+                if(SCRIPT_URL) { 
+                    try { 
+                        let res = await fetch(SCRIPT_URL + '?action=save', { method: 'POST', body: JSON.stringify(r), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); 
+                        if(!res.ok) throw new Error("gagal"); 
+                        renderSavedData();
+                        refreshSemuaLaporan();
+                        alert('Status ACC berhasil diperbarui di Cloud!');
+                    } catch(e) { 
+                        r.statusAcc = !isAcc; if (r.items && r.items.length > 0) r.items[0]._statusAcc = !isAcc; // Revert
+                        alert('⚠️ PERINGATAN: Gagal update status ke Database Google Sheet! Proses dibatalkan.'); 
+                    } 
+                } 
+            }
+        }
+
+        function renderSavedData() {
+            const list = document.getElementById('savedDataList'); if(!list) return;
+            const searchInput = document.getElementById('searchSpp'); const query = searchInput ? searchInput.value.toLowerCase() : '';
+            if(!list.innerHTML.includes('Peringatan') && !list.innerHTML.includes('gagal') && !list.innerHTML.includes('Memuat')) list.innerHTML = ''; else Array.from(list.children).forEach(child => { if(child.innerHTML.includes('Memuat')) list.removeChild(child); });
+            let recordsToRender = savedRecords;
+            if (query) recordsToRender = savedRecords.filter(r => String(r.noSpp || '').toLowerCase().includes(query) || String(r.kegiatan || '').toLowerCase().includes(query) || String(r.bulan || '').toLowerCase().includes(query) || String(r.sumberDana || '').toLowerCase().includes(query));
+            if(recordsToRender.length === 0) { list.innerHTML = `<div class="text-center text-gray-400 p-4">${query ? 'Data tidak ditemukan.' : 'Belum ada data dari Cloud.'}</div>`; return; }
+            list.innerHTML = ''; 
+            recordsToRender.forEach(r => {
+                const d = document.createElement('div'); d.className = 'bg-slate-50 p-3 border rounded-md hover:bg-slate-100 transition shadow-sm';
+                const isAcc = r.statusAcc === true || r.statusAcc === "true"; const statusBadge = isAcc ? `<span class="bg-emerald-100 text-emerald-800 border border-emerald-300 px-1.5 py-0.5 rounded text-[9px] font-bold ml-2">✅ ACC</span>` : `<span class="bg-orange-100 text-orange-800 border border-orange-300 px-1.5 py-0.5 rounded text-[9px] font-bold ml-2">⏳ Menunggu ACC</span>`;
+                let actionButtons = '';
+                if (currentUserRole === 'bendahara') { const btnAcc = isAcc ? `<button onclick="toggleAccSpp(${r.id}, false)" class="text-orange-600 font-semibold hover:underline border px-2 py-0.5 rounded bg-white">Batal ACC</button>` : `<button onclick="toggleAccSpp(${r.id}, true)" class="text-emerald-600 font-semibold hover:underline border px-2 py-0.5 rounded bg-white">✅ ACC SPP</button>`; actionButtons = `<div class="flex gap-2 border-t pt-2 mt-2 items-center flex-wrap">${btnAcc}<button onclick="editRec(${r.id})" class="text-blue-600 font-semibold hover:underline border px-2 py-0.5 rounded bg-white">✏️ Edit</button><button onclick="deleteRec(${r.id})" class="text-red-500 font-semibold hover:underline border px-2 py-0.5 rounded bg-white">🗑️ Hapus</button></div>`; } else if (currentUserRole === 'ppkd') { if (isAcc) actionButtons = `<div class="flex gap-2 border-t pt-2 mt-2 items-center flex-wrap"><button onclick="editRec(${r.id})" class="text-blue-600 font-semibold hover:underline border px-2 py-0.5 rounded bg-white">🖨️ Buka & Cetak</button></div>`; else actionButtons = `<div class="flex gap-2 border-t pt-2 mt-2 items-center flex-wrap"><button onclick="editRec(${r.id})" class="text-blue-600 font-semibold hover:underline border px-2 py-0.5 rounded bg-white">✏️ Edit</button></div>`; } else { actionButtons = `<div class="flex gap-2 border-t pt-2 mt-2 items-center flex-wrap"><button onclick="editRec(${r.id})" class="text-blue-600 font-semibold hover:underline border px-2 py-0.5 rounded bg-white">👁️ Lihat Dokumen</button></div>`; }
+                d.innerHTML = `<div class="flex justify-between items-start mb-1"><div class="font-bold text-[#1e4b6e] flex items-center flex-wrap">#${r.noSpp} | ${r.bulan} ${r.tahun} ${statusBadge}</div><div class="text-[9px] bg-blue-200 font-bold px-1.5 py-0.5 rounded text-blue-800">${r.sumberDana}</div></div><div class="text-slate-600 text-xs mb-1 leading-tight">${r.kegiatan}</div>${actionButtons}`;
+                list.appendChild(d);
+            });
+        }
+
+        function editRec(id) {
+            const r = savedRecords.find(x => x.id === id); if(!r) return; currentEditId = r.id; currentIsAcc = r.statusAcc === true || r.statusAcc === "true"; 
+            const setVal = (elmId, val) => { const el = document.getElementById(elmId); if(el) el.value = val || ''; };
+            setVal('in_bulan', r.bulan); setVal('in_tahun', r.tahun); setVal('in_tanggal', r.tanggal); setVal('in_kegiatan_select', r.kegiatan); setVal('in_sumberDana', r.sumberDana); setVal('in_pagu', r.pagu); setVal('in_lalu', r.lalu); setVal('in_namaKades', r.pejabat?.kades); setVal('in_namaSekdes', r.pejabat?.sekdes); setVal('in_namaPpkd', r.pejabat?.ppkd); setVal('in_jabatanPpkd', r.pejabat?.jabatanPpkd); setVal('in_namaKaurKeuangan', r.pejabat?.bendahara);
+            belanjaItems = (Array.isArray(r.items) ? r.items : []).map(item => ({ ...item, pajak: item.pajak || {ppn:0, pph21:0, pph22:0, pph23:0, restoran:0, galian_c:0} }));
+            updateInfoAuto(true); renderBelanjaList(); calculate();
+            const btnSave = document.getElementById('btnSave'), btnCetak = document.getElementById('btnCetakPreview'), btnAddBelanja = document.getElementById('btnAddBelanja');
+            if (currentUserRole === 'pengunjung') { if(btnSave) btnSave.classList.add('hidden'); if(btnAddBelanja) btnAddBelanja.classList.add('hidden'); if(btnCetak) btnCetak.classList.remove('hidden'); } else if (currentUserRole === 'ppkd') { if (currentIsAcc) { if(btnSave) btnSave.classList.add('hidden'); if(btnAddBelanja) btnAddBelanja.classList.add('hidden'); if(btnCetak) btnCetak.classList.remove('hidden'); } else { if(btnSave) { btnSave.classList.remove('hidden'); btnSave.innerHTML = 'Simpan Draft (Tunggu ACC)'; } if(btnAddBelanja) btnAddBelanja.classList.remove('hidden'); if(btnCetak) btnCetak.classList.add('hidden'); } } else { if(btnSave) { btnSave.classList.remove('hidden'); btnSave.innerHTML = 'Simpan ke Database (Cloud)'; } if(btnAddBelanja) btnAddBelanja.classList.remove('hidden'); if(btnCetak) btnCetak.classList.remove('hidden'); }
+            switchMainPage('spp'); window.scrollTo(0,0);
+        }
+
+        async function deleteRec(id) {
+            if(currentUserRole === 'pengunjung' || currentUserRole === 'ppkd') return alert("Akses ditolak: Hanya Bendahara yang dapat menghapus dokumen SPP.");
+            if(confirm('Apakah Anda yakin ingin menghapus data ini dari Spreadsheet secara permanen?')) {
+                if (SCRIPT_URL) {
+                    const listContainer = document.getElementById('savedDataList'); if(listContainer) listContainer.innerHTML = '<div id="delIndicator" class="text-center p-2 bg-red-100 text-red-600 text-xs font-bold mb-2 rounded">🗑️ Menghapus data dari Spreadsheet...</div>' + listContainer.innerHTML;
+                    try { 
+                        let res = await fetch(SCRIPT_URL + '?action=delete', { method: 'POST', body: JSON.stringify({ id: id }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); 
+                        if(!res.ok) throw new Error("gagal"); 
+                        savedRecords = savedRecords.filter(x => x.id !== id); 
+                        renderSavedData();
+                        refreshSemuaLaporan();
+                        alert("Data berhasil dihapus dari Cloud.");
+                    } catch(e) { 
+                        alert('⚠️ PERINGATAN: Gagal menghapus dari Database Google Sheet! Proses dibatalkan.'); 
+                    } finally { 
+                        const delInd = document.getElementById('delIndicator'); if(delInd) delInd.remove(); 
+                    }
+                }
+            }
+        }
+
+        function renderSPJ() {
+            const list = document.getElementById('spjDataList'); if (!list) return; list.innerHTML = '';
+            const accRecords = savedRecords.filter(r => r.statusAcc === true || r.statusAcc === "true");
+            if (accRecords.length === 0) { list.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-gray-500">Belum ada SPP yang di-ACC.</td></tr>`; return; }
+
+            accRecords.forEach(r => {
+                const isSpjAcc = r.spjAcc === true || r.spjAcc === "true", spjLink = r.spjLink || '';
+                let statusBadge = isSpjAcc ? `<span class="bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-1 rounded text-[10px] font-bold">✅ SPJ ACC</span>` : (spjLink ? `<span class="bg-blue-100 text-blue-800 border border-blue-300 px-2 py-1 rounded text-[10px] font-bold">📄 SPJ Terkirim</span>` : `<span class="bg-orange-100 text-orange-800 border border-orange-300 px-2 py-1 rounded text-[10px] font-bold">⏳ Menunggu SPJ</span>`);
+                let linkContent = spjLink ? `<a href="${spjLink}" target="_blank" class="text-blue-600 underline text-xs">Buka Berkas PDF</a>` : `<span class="text-slate-400 italic text-xs">Belum ada</span>`, actionBtns = '';
+
+                if (currentUserRole === 'bendahara') {
+                    if (spjLink) { if (isSpjAcc) actionBtns = `<button onclick="batalAccSPJ(${r.id})" class="text-orange-600 font-semibold hover:underline border px-2 py-0.5 rounded bg-white text-xs mr-2">Batal ACC</button><button onclick="previewRekomendasi(${r.id})" class="bg-[#1e4b6e] text-white font-bold hover:bg-blue-900 border px-2 py-1 rounded text-xs">🖨️ Cetak Pengantar</button>`; else actionBtns = `<button onclick="accSPJ(${r.id})" class="text-emerald-600 font-semibold hover:underline border px-2 py-0.5 rounded bg-white text-xs">✅ ACC SPJ</button>`; } else { actionBtns = `<span class="text-slate-400 text-xs italic">Menunggu PPKD</span>`; }
+                } else if (currentUserRole === 'ppkd') {
+                    if (isSpjAcc) actionBtns = `<span class="text-emerald-600 font-bold text-xs block mb-1">Selesai</span><button onclick="previewRekomendasi(${r.id})" class="bg-[#1e4b6e] text-white font-bold hover:bg-blue-900 border px-2 py-1 rounded text-xs w-full">🖨️ Cetak Pengantar</button>`; else actionBtns = `<input type="text" id="link_spj_${r.id}" placeholder="Paste Link GDrive PDF..." class="form-input text-xs p-1 mb-1" value="${spjLink}"><button onclick="kirimSPJ(${r.id})" class="bg-blue-600 text-white font-bold hover:bg-blue-700 border px-2 py-1 rounded text-xs w-full">⬆️ Upload/Kirim Link</button>`;
+                } else { actionBtns = `<span class="text-slate-400 text-xs italic">Read Only</span>`; }
+
+                const tr = document.createElement('tr'); tr.className = 'border-b hover:bg-slate-50 transition';
+                tr.innerHTML = `<td class="p-3"><div class="font-bold text-[#1e4b6e]">#${r.noSpp}</div><div class="text-xs text-slate-600 mt-1">${r.kegiatan}</div></td><td class="p-3 text-center text-xs font-bold text-slate-700">${r.pejabat?.ppkd || '-'}</td><td class="p-3 text-center">${linkContent}</td><td class="p-3 text-center">${statusBadge}</td><td class="p-3 text-center align-middle">${actionBtns}</td>`;
+                list.appendChild(tr);
+            });
+        }
+
+        async function kirimSPJ(id) {
+            const linkInput = document.getElementById(`link_spj_${id}`).value; if (!linkInput) return alert('Masukkan link Google Drive SPJ (PDF) terlebih dahulu!');
+            const r = savedRecords.find(x => x.id === id);
+            if(r) { r.spjLink = linkInput; saveToCloud(r); }
+        }
+
+        async function accSPJ(id) { const r = savedRecords.find(x => x.id === id); if(r) { r.spjAcc = true; saveToCloud(r); } }
+        async function batalAccSPJ(id) { const r = savedRecords.find(x => x.id === id); if(r) { r.spjAcc = false; saveToCloud(r); } }
+
+        function saveToCloud(rec) {
+            if (SCRIPT_URL) {
+                fetch(SCRIPT_URL + '?action=save', { 
+                    method:'POST', 
+                    body:JSON.stringify(rec), 
+                    headers:{'Content-Type':'text/plain'} 
+                })
+                .then(res => { 
+                    if(!res.ok) throw new Error("Gagal terhubung");
+                    const existingIdx = savedRecords.findIndex(x => x.id === rec.id);
+                    if (existingIdx > -1) savedRecords[existingIdx] = rec;
+                    else savedRecords.unshift(rec);
+                    renderSPJ();
+                    alert("Berhasil Disimpan ke Database Google Sheet!"); 
+                })
+                .catch(e => { 
+                    console.warn("Sinkronisasi gagal:", e); 
+                    alert("⚠️ PERINGATAN: Gagal menyimpan ke Google Sheet! Data tidak tersimpan."); 
+                });
+            }
+        }
+
+        function previewRekomendasi(id) {
+            const r = savedRecords.find(x => x.id === id); if(!r) return;
+            let totalSpp = 0; (r.items || []).forEach(item => { totalSpp += parseFloat(item.jumlah) || 0; });
+            const namaKeg = (r.kegiatan || '').replace(/^[0-9.]+\s*/, '').trim();
+            safeSetText('rek_bidang', r.bidang); safeSetText('rek_kegiatan', namaKeg); safeSetText('rek_no_spp', `${r.noSpp}/SPP/2011/${r.tahun}`); safeSetText('rek_ppkd', r.pejabat?.ppkd); safeSetText('rek_total_belanja', 'Rp ' + formatRp(totalSpp)); safeSetText('rek_namaSekdes', r.pejabat?.sekdes || '....................................'); safeSetText('rek_namaKades', r.pejabat?.kades || '....................................'); safeSetText('rek_tgl_cetak', r.tanggal ? new Date(r.tanggal).toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'}) : `.......... ${r.tahun}`);
+            const logoRekomendasi = document.getElementById('logo_rekomendasi'); if(logoRekomendasi) logoRekomendasi.src = LOGO_URL;
+            ['form', 'masterPagu', 'pendapatan', 'penarikan', 'pembiayaan', 'spj', 'bku', 'bkt', 'bksd', 'bkp', 'laporan'].forEach(p => { const el = document.getElementById(p + 'View'); if(el) el.classList.add('hidden'); });
+            document.getElementById('previewView')?.classList.remove('hidden'); switchDoc('rekomendasi'); window.scrollTo(0, 0); currentEditId = id;
+        }
+
+        let chartSumberDanaInstance = null; let chartTrendBulanInstance = null;
+        function renderLaporan() {
+            let totalMasukGlobal = 0, totalKeluarGlobal = 0, saldoBank = 0, saldoTunai = 0, totalPajakPotong = 0, totalPajakSetor = 0; 
+            let saldoTunaiPerSumber = {}, keluarPerSumber = {}, keluarPerBulan = { 'Januari': 0, 'Februari': 0, 'Maret': 0, 'April': 0, 'Mei': 0, 'Juni': 0, 'Juli': 0, 'Agustus': 0, 'September': 0, 'Oktober': 0, 'November': 0, 'Desember': 0 };
+
+            pendapatanRecords.forEach(p => { let nom = parseFloat(p.nominal) || 0; totalMasukGlobal += nom; saldoBank += nom; });
+            pembiayaanRecords.forEach(p => { let nom = parseFloat(p.nominal) || 0; if (p.jenis === 'Penerimaan') { totalMasukGlobal += nom; saldoBank += nom; } else { totalKeluarGlobal += nom; saldoBank -= nom; const lbl = 'Pembiayaan (' + p.sumberDana + ')'; keluarPerSumber[lbl] = (keluarPerSumber[lbl] || 0) + nom; let blnStr = p.tanggal ? new Date(p.tanggal).toLocaleString('id-ID', {month: 'long'}) : 'Desember'; if (keluarPerBulan[blnStr] !== undefined) keluarPerBulan[blnStr] += nom; } });
+            penarikanRecords.forEach(p => { let nom = parseFloat(p.nominal) || 0; saldoBank -= nom; saldoTunai += nom; let sumber = p.sumberDana || 'Lainnya'; saldoTunaiPerSumber[sumber] = (saldoTunaiPerSumber[sumber] || 0) + nom; });
+            setoranPajakRecords.forEach(s => { let nom = parseFloat(s.nominal) || 0; totalPajakSetor += nom; saldoTunai -= nom; });
+            
+            savedRecords.forEach(s => { if (s.statusAcc === true || s.statusAcc === "true") { let sumSpp = 0, sumPajakSPP = 0; (s.items || []).forEach(item => { sumSpp += parseFloat(item.jumlah) || 0; const p = item.pajak || {}; sumPajakSPP += (parseFloat(p.ppn)||0) + (parseFloat(p.pph21)||0) + (parseFloat(p.pph22)||0) + (parseFloat(p.pph23)||0) + (parseFloat(p.restoran)||0) + (parseFloat(p.galian_c)||0); }); totalKeluarGlobal += sumSpp; saldoTunai -= sumSpp; totalPajakPotong += sumPajakSPP; let sumber = s.sumberDana || 'Lainnya'; saldoTunaiPerSumber[sumber] = (saldoTunaiPerSumber[sumber] || 0) - sumSpp; keluarPerSumber[sumber] = (keluarPerSumber[sumber] || 0) + sumSpp; let bln = s.bulan; if(bln && bln.includes(' S.D ')) bln = 'Desember'; if (keluarPerBulan[bln] !== undefined) keluarPerBulan[bln] += sumSpp; } });
+
+            saldoTunai += totalPajakPotong; // Karena uang pajak dipotong dari kuitansi tunai, uang fisiknya tertinggal di brankas sampai disetorkan
+
+            safeSetText('lap_total_masuk', 'Rp ' + formatRp(totalMasukGlobal)); safeSetText('lap_total_keluar', 'Rp ' + formatRp(totalKeluarGlobal)); safeSetText('lap_saldo', 'Rp ' + formatRp(totalMasukGlobal - totalKeluarGlobal)); safeSetText('lap_saldo_bank', 'Rp ' + formatRp(saldoBank)); safeSetText('lap_saldo_tunai', 'Rp ' + formatRp(saldoTunai)); safeSetText('lap_pajak_potong', 'Rp ' + formatRp(totalPajakPotong)); safeSetText('lap_pajak_setor', 'Rp ' + formatRp(totalPajakSetor));
+
+            const sisaSumberContainer = document.getElementById('lap_saldo_sumber_dana');
+            if (sisaSumberContainer) { sisaSumberContainer.innerHTML = ''; let adaSumber = false; for (let key in saldoTunaiPerSumber) { if (saldoTunaiPerSumber[key] !== 0) { adaSumber = true; let val = saldoTunaiPerSumber[key]; sisaSumberContainer.innerHTML += `<div class="bg-slate-50 border border-slate-200 p-3 rounded-md"><div class="text-[10px] font-bold text-slate-500 uppercase mb-1 truncate" title="${key}">${key}</div><div class="text-sm font-black ${val < 0 ? 'text-red-600' : 'text-slate-800'}">Rp ${formatRp(val)}</div></div>`; } } if (!adaSumber) sisaSumberContainer.innerHTML = `<div class="col-span-full text-xs text-slate-400">Belum ada rincian mutasi.</div>`; }
+
+            const ctxSumber = document.getElementById('chartSumberDana');
+            if (ctxSumber) { if (chartSumberDanaInstance) chartSumberDanaInstance.destroy(); chartSumberDanaInstance = new Chart(ctxSumber.getContext('2d'), { type: 'doughnut', data: { labels: Object.keys(keluarPerSumber).length ? Object.keys(keluarPerSumber) : ['Belum ada data'], datasets: [{ data: Object.values(keluarPerSumber).length ? Object.values(keluarPerSumber) : [1], backgroundColor: Object.values(keluarPerSumber).length ? ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'] : ['#e2e8f0'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } }); }
+            const ctxBulan = document.getElementById('chartTrendBulan');
+            if (ctxBulan) { if (chartTrendBulanInstance) chartTrendBulanInstance.destroy(); chartTrendBulanInstance = new Chart(ctxBulan.getContext('2d'), { type: 'bar', data: { labels: Object.keys(keluarPerBulan), datasets: [{ label: 'Pengeluaran', data: Object.values(keluarPerBulan), backgroundColor: '#1e4b6e', borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } } }); }
+        }
+
+        // ===============================================
+        // FUNGSI RENDER BUKU KAS & BUKU PAJAK
+        // ===============================================
+        function renderBKU() {
+            const tbody = document.getElementById('bkuDataList'), tfoot = document.getElementById('bkuFooter'); if(!tbody || !tfoot) return;
+            let transactions = [];
+            pendapatanRecords.forEach(p => { transactions.push({ id: p.id, date: new Date(p.tanggal), ref: 'BKM-' + String(p.id).slice(-4), uraian: p.uraian, sumber: p.sumberDana, masuk: parseFloat(p.nominal) || 0, keluar: 0 }); });
+            pembiayaanRecords.forEach(p => { let isPenerimaan = p.jenis === 'Penerimaan'; transactions.push({ id: 'PB-' + p.id, date: new Date(p.tanggal), ref: (isPenerimaan ? 'SILPA-' : 'BMDS-') + String(p.id).slice(-4), uraian: p.uraian, sumber: p.sumberDana, masuk: isPenerimaan ? (parseFloat(p.nominal) || 0) : 0, keluar: !isPenerimaan ? (parseFloat(p.nominal) || 0) : 0 }); });
+            const kwtStartMap = {}; let kwtCounter = 0; [...savedRecords].sort((a, b) => a.id - b.id).forEach(r => { kwtStartMap[r.id] = kwtCounter + 1; kwtCounter += (r.items ? r.items.length : 0); });
+            savedRecords.forEach(s => { 
+                if(s.statusAcc === true || s.statusAcc === "true") { 
+                    const startNo = kwtStartMap[s.id]; 
+                    const namaKeg = (s.kegiatan || '').replace(/^[0-9.]+\s*/, '').trim();
+                    (s.items || []).forEach((item, idx) => { 
+                        transactions.push({ 
+                            id: s.id + '-' + idx, 
+                            date: new Date(s.tanggal || s.bulan + " 1, " + s.tahun), 
+                            ref: `${(startNo + idx).toString().padStart(4, '0')}/KWT/02.2011/${s.tahun}`, 
+                            uraian: `${item.uraian} Kegiatan ${namaKeg}`, 
+                            sumber: s.sumberDana, 
+                            masuk: 0, 
+                            keluar: parseFloat(item.jumlah) || 0 
+                        }); 
+                    }); 
+                } 
+            });
+            
+            const res = processBukuKasTransactions(transactions, tbody, tfoot);
+            const bkuFooterContainer = document.getElementById('bkuPrintFooter'); if(bkuFooterContainer) bkuFooterContainer.innerHTML = getBukuKasHelperHTML(res.totalIn, res.totalOut, res.saldo, false);
+        }
+
+        function renderBKT() {
+            const tbody = document.getElementById('bktDataList'), tfoot = document.getElementById('bktFooter'); if(!tbody || !tfoot) return;
+            let transactions = [];
+            penarikanRecords.forEach(p => { transactions.push({ id: p.id, date: new Date(p.tanggal), ref: 'TARIK-' + String(p.id).slice(-4), uraian: p.uraian + ' (Dari Rek. Desa)', masuk: parseFloat(p.nominal) || 0, keluar: 0 }); });
+            const kwtStartMap = {}; let kwtCounter = 0; [...savedRecords].sort((a, b) => a.id - b.id).forEach(r => { kwtStartMap[r.id] = kwtCounter + 1; kwtCounter += (r.items ? r.items.length : 0); });
+            savedRecords.forEach(s => { 
+                if(s.statusAcc === true || s.statusAcc === "true") { 
+                    const startNo = kwtStartMap[s.id]; 
+                    const namaKeg = (s.kegiatan || '').replace(/^[0-9.]+\s*/, '').trim();
+                    (s.items || []).forEach((item, idx) => { 
+                        transactions.push({ 
+                            id: s.id + '-' + idx, 
+                            date: new Date(s.tanggal || s.bulan + " 1, " + s.tahun), 
+                            ref: `${(startNo + idx).toString().padStart(4, '0')}/KWT/02.2011/${s.tahun}`, 
+                            uraian: `${item.uraian} Kegiatan ${namaKeg}`, 
+                            masuk: 0, 
+                            keluar: parseFloat(item.jumlah) || 0 
+                        }); 
+                    }); 
+                } 
+            });
+            
+            const res = processBukuKasTransactions(transactions, tbody, tfoot);
+            const bktFooterContainer = document.getElementById('bktPrintFooter'); if(bktFooterContainer) bktFooterContainer.innerHTML = getBukuKasHelperHTML(res.totalIn, res.totalOut, res.saldo, true);
+        }
+
+        function renderBKSD() {
+            const tbody = document.getElementById('bksdDataList'), tfoot = document.getElementById('bksdFooter'), filterVal = safeGetVal('filter_sumber_dana');
+            if(!tbody || !tfoot) return; safeSetText('print_bksd_filter_info', filterVal ? 'Sumber Dana: ' + filterVal : 'Semua Sumber Dana');
+            let transactions = [];
+            pendapatanRecords.forEach(p => { if (filterVal === '' || p.sumberDana === filterVal) transactions.push({ id: p.id, date: new Date(p.tanggal), ref: 'BKM-' + String(p.id).slice(-4), sumber: p.sumberDana, uraian: p.uraian, masuk: parseFloat(p.nominal) || 0, keluar: 0 }); });
+            pembiayaanRecords.forEach(p => { if (filterVal === '' || p.sumberDana === filterVal) { let isPenerimaan = p.jenis === 'Penerimaan'; transactions.push({ id: 'PB-' + p.id, date: new Date(p.tanggal), ref: (isPenerimaan ? 'SILPA-' : 'BMDS-') + String(p.id).slice(-4), sumber: p.sumberDana, uraian: p.uraian, masuk: isPenerimaan ? (parseFloat(p.nominal) || 0) : 0, keluar: !isPenerimaan ? (parseFloat(p.nominal) || 0) : 0 }); } });
+            const kwtStartMap = {}; let kwtCounter = 0; [...savedRecords].sort((a, b) => a.id - b.id).forEach(r => { kwtStartMap[r.id] = kwtCounter + 1; kwtCounter += (r.items ? r.items.length : 0); });
+            savedRecords.forEach(s => { 
+                if ((filterVal === '' || s.sumberDana === filterVal) && (s.statusAcc === true || s.statusAcc === "true")) { 
+                    const startNo = kwtStartMap[s.id]; 
+                    const namaKeg = (s.kegiatan || '').replace(/^[0-9.]+\s*/, '').trim();
+                    (s.items || []).forEach((item, idx) => { 
+                        transactions.push({ 
+                            id: s.id + '-' + idx, 
+                            date: new Date(s.tanggal || s.bulan + " 1, " + s.tahun), 
+                            ref: `${(startNo + idx).toString().padStart(4, '0')}/KWT/02.2011/${s.tahun}`, 
+                            sumber: s.sumberDana, 
+                            uraian: `${item.uraian} Kegiatan ${namaKeg}`, 
+                            masuk: 0, 
+                            keluar: parseFloat(item.jumlah) || 0 
+                        }); 
+                    }); 
+                } 
+            });
+            
+            const res = processBukuKasTransactions(transactions, tbody, tfoot);
+            const bksdFooterContainer = document.getElementById('bksdPrintFooter'); if(bksdFooterContainer) bksdFooterContainer.innerHTML = getBukuKasHelperHTML(res.totalIn, res.totalOut, res.saldo, false);
+        }
+
+       function renderBKP() {
+            const tbody = document.getElementById('bkpDataList'); if(!tbody) return; tbody.innerHTML = '';
+            
+            const kwtStartMap = {}; let kwtCounter = 0; 
+            [...savedRecords].sort((a, b) => a.id - b.id).forEach(r => { 
+                kwtStartMap[r.id] = kwtCounter + 1; 
+                kwtCounter += (r.items ? r.items.length : 0); 
+            });
+
+            let transactions = [];
+
+            // 1. Kumpulkan Pemotongan (dari SPP)
+            [...savedRecords].forEach(r => {
+                if(r.statusAcc !== true && r.statusAcc !== "true") return; 
+                const tgl = r.tanggal ? new Date(r.tanggal) : new Date(r.bulan + " 1, " + r.tahun);
+                const startNo = kwtStartMap[r.id];
+                const namaKeg = (r.kegiatan || '').replace(/^[0-9.]+\s*/, '').trim();
+                
+                (r.items || []).forEach((item, idx) => { 
+                    const p = item.pajak || {}; 
+                    const ppn = parseFloat(p.ppn)||0; const pph21 = parseFloat(p.pph21)||0; const pph22 = parseFloat(p.pph22)||0;
+                    const pph23 = parseFloat(p.pph23)||0; const restoran = parseFloat(p.restoran)||0; const galian_c = parseFloat(p.galian_c)||0;
+                    const totalPajakItem = ppn + pph21 + pph22 + pph23 + restoran + galian_c;
+                    
+                    if (totalPajakItem > 0) { 
+                        const noKwt = `${(startNo + idx).toString().padStart(4, '0')}/KWT/02.2011/${r.tahun}`;
+                        let detailPajak = '';
+                        if (ppn > 0) detailPajak += `<div class="text-[10px] text-slate-500 print:text-black mt-0.5">- PPN: Rp ${formatRp(ppn)}</div>`;
+                        if (pph21 > 0) detailPajak += `<div class="text-[10px] text-slate-500 print:text-black mt-0.5">- PPh 21: Rp ${formatRp(pph21)}</div>`;
+                        if (pph22 > 0) detailPajak += `<div class="text-[10px] text-slate-500 print:text-black mt-0.5">- PPh 22: Rp ${formatRp(pph22)}</div>`;
+                        if (pph23 > 0) detailPajak += `<div class="text-[10px] text-slate-500 print:text-black mt-0.5">- PPh 23: Rp ${formatRp(pph23)}</div>`;
+                        if (restoran > 0) detailPajak += `<div class="text-[10px] text-slate-500 print:text-black mt-0.5">- Pajak Restoran: Rp ${formatRp(restoran)}</div>`;
+                        if (galian_c > 0) detailPajak += `<div class="text-[10px] text-slate-500 print:text-black mt-0.5">- Pajak Galian C: Rp ${formatRp(galian_c)}</div>`;
+
+                        transactions.push({
+                            type: 'potongan',
+                            idRef: r.id,
+                            date: tgl,
+                            ref: `${noKwt} (SPP #${r.noSpp})`,
+                            uraian: `<span class="text-slate-600 print:text-black italic block mb-1">${item.uraian} Kegiatan ${namaKeg}</span>${detailPajak}`,
+                            masuk: totalPajakItem,
+                            keluar: 0,
+                            hapusBtn: ''
+                        });
+                    }
+                });
+            });
+
+            // 2. Kumpulkan Penyetoran (dari form manual Buku Pajak)
+            setoranPajakRecords.forEach(s => {
+                const hapusBtn = (currentUserRole !== 'pengunjung') ? `<button onclick="deleteSetoranPajakRec('${s.id}')" class="text-red-500 hover:text-red-700 font-bold p-1 border rounded bg-white shadow-sm no-print">Hapus</button>` : '';
+                transactions.push({
+                    type: 'setoran',
+                    idRef: s.id,
+                    date: new Date(s.tanggal),
+                    ref: `Setoran ${s.jenis}`,
+                    uraian: `<span class="text-slate-700 font-bold block print:text-black">${s.uraian}</span>`,
+                    masuk: 0,
+                    keluar: parseFloat(s.nominal) || 0,
+                    hapusBtn: hapusBtn
+                });
+            });
+
+            // 3. Urutkan berdasarkan Tanggal (Potongan diutamakan dari Setoran jika harinya sama)
+            transactions.sort((a, b) => {
+                const timeA = a.date.getTime() || 0;
+                const timeB = b.date.getTime() || 0;
+                if (timeA !== timeB) return timeA - timeB;
+                if (a.type === 'potongan' && b.type === 'setoran') return -1;
+                if (a.type === 'setoran' && b.type === 'potongan') return 1;
+                return (a.ref || '').localeCompare(b.ref || '', 'id', { numeric: true });
+            });
+
+            let saldoPajak = 0, barisIdx = 1;
+            transactions.forEach(t => {
+                saldoPajak += t.masuk;
+                saldoPajak -= t.keluar;
+                const tglStr = t.date.toLocaleDateString('id-ID', {day: '2-digit', month: '2-digit', year: 'numeric'});
+                
+                tbody.innerHTML += `<tr class="hover:bg-slate-50 transition border-b border-slate-200 print:border-black">
+                    <td class="p-2 border-r border-slate-300 print:border-black text-center text-xs align-top whitespace-nowrap">${barisIdx++}</td>
+                    <td class="p-2 border-r border-slate-300 print:border-black whitespace-nowrap text-xs text-center align-top">${tglStr}</td>
+                    <td class="p-2 border-r border-slate-300 print:border-black text-xs align-top">
+                        <span class="font-bold block text-slate-700 print:text-black mb-1">${t.ref}</span>
+                        ${t.uraian}
+                    </td>
+                    <td class="p-2 border-r border-slate-300 print:border-black text-right text-green-600 print:text-black font-medium align-top whitespace-nowrap">${t.masuk > 0 ? '+ ' + formatRp(t.masuk) : '-'}</td>
+                    <td class="p-2 border-r border-slate-300 print:border-black text-right text-red-600 print:text-black font-medium align-top whitespace-nowrap">${t.keluar > 0 ? '- ' + formatRp(t.keluar) : '-'}</td>
+                    <td class="p-2 bg-blue-50 print:bg-transparent text-right text-blue-800 print:text-black font-bold align-top whitespace-nowrap">${formatRp(saldoPajak)}</td>
+                    <td class="p-2 border-slate-300 text-center align-top no-print">${t.hapusBtn}</td>
+                </tr>`;
+            });
+
+            if (transactions.length === 0) tbody.innerHTML = '<tr><td colspan="7" class="text-center p-6 text-slate-400">Belum ada transaksi pajak.</td></tr>';
+            else tbody.innerHTML += `<tr><td colspan="5" class="p-3 border border-slate-300 print:border-black text-right uppercase font-bold text-slate-700 print:text-black">Sisa Pajak Belum Disetor</td><td class="p-3 border border-slate-300 print:border-black text-right text-blue-800 print:text-black font-bold text-base bg-blue-100 print:bg-transparent">${formatRp(saldoPajak)}</td><td class="border-slate-300 no-print"></td></tr>`;
+        }
+
+        // ===============================================
+        // FUNGSI PENDUKUNG PREVIEW & CETAK (BARU DITAMBAHKAN)
+        // ===============================================
+
+        // Fungsi untuk men-switch / pindah tab dokumen di mode Preview
+        function switchDoc(type) {
+            // Sembunyikan semua page dokumen
+            document.querySelectorAll('.doc-page').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('block');
+            });
+            // Tampilkan page yang ditarget
+            const target = document.getElementById('doc_' + type);
+            if(target) {
+                target.classList.remove('hidden');
+                target.classList.add('block');
+            }
+            // Update warna tombol tab
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active-tab', 'text-slate-800');
+                btn.classList.add('text-slate-500');
+            });
+            const activeTab = document.getElementById('tab_' + type);
+            if(activeTab) {
+                activeTab.classList.add('active-tab');
+                activeTab.classList.remove('text-slate-500');
+            }
+        }
+
+        // Fungsi untuk generate HTML Kwitansi di dalam preview
+        function populateKwitansi() {
+            const wrapper = document.getElementById('kwitansi_wrapper');
+            if(!wrapper) return;
+            wrapper.innerHTML = '';
+            const thn = safeGetVal('in_tahun');
+            const startNo = getStartingKwitansiNo(currentEditId || Date.now());
+            
+            const record = currentEditId ? savedRecords.find(x => x.id === currentEditId) : null;
+            const count = currentEditId ? (record?.noSpp || '001') : (savedRecords.length + 1).toString().padStart(3, '0');
+            const namaKeg = (safeGetVal('in_kegiatan_select') || '').replace(/^[0-9.]+\s*/, '').trim();
+
+            belanjaItems.forEach((item, idx) => {
+                const kwtNo = (startNo + idx).toString().padStart(4, '0');
+                const tgl = safeGetVal('in_tanggal') ? new Date(safeGetVal('in_tanggal')).toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'}) : `.......... ${thn}`;
+                
+                const p = item.pajak || {}; 
+                const potItem = (p.ppn||0) + (p.pph21||0) + (p.pph22||0) + (p.pph23||0) + (p.restoran||0) + (p.galian_c||0);
+                const netItem = item.jumlah - potItem;
+
+                wrapper.innerHTML += `
+                <div class="page-break bg-white p-[1.5cm] shadow-xl mb-6 print:shadow-none print:mb-0 border border-black max-w-[210mm] mx-auto" style="font-family: Arial, Helvetica, sans-serif; page-break-inside: avoid;">
+                    <div class="mb-1 leading-tight relative min-h-[40px] flex items-center">
+                        <div class="w-full">
+                            <h1 class="font-bold text-[14px] uppercase text-black">PEMERINTAH DESA PANGEK</h1>
+                            <h2 class="font-bold text-[14px] uppercase text-black">KABUPATEN BANGKA BARAT</h2>
+                        </div>
+                    </div>
+                    <div class="border-b-[3px] border-black mt-2 mb-1"></div>
+                    <div class="border-b-[1px] border-black mb-4"></div>
+                    
+                    <div class="text-center mb-2 mt-2">
+                        <h4 class="font-bold text-[14px] uppercase tracking-wide text-black">TANDA BUKTI PENGELUARAN UANG</h4>
+                    </div>
+                    <div class="border-b-[1px] border-black mb-4"></div>
+                    
+                    <div class="flex justify-center mb-6 mt-4">
+                        <div class="border border-black px-8 py-0.5 font-bold text-[12px] text-black tracking-wide">NO : ${kwtNo}/KWT/02.2011/${thn}</div>
+                    </div>
+                    
+                    <div class="text-right text-[11px] mb-3 text-black">Sumberdana : ${safeGetVal('in_sumberDana')}</div>
+                    
+                    <table class="w-full text-[12px] leading-relaxed border-none text-black">
+                        <tr><td class="w-36 align-top">Sudah terima dari</td><td class="w-3 align-top">:</td><td class="align-top uppercase">KAUR KEUANGAN</td></tr>
+                        <tr><td class="align-top">Uang Sebesar</td><td class="align-top">:</td><td class="align-top font-bold">Rp ${formatRp(item.jumlah)}</td></tr>
+                        <tr><td></td><td class="align-top">:</td><td class="italic align-top">${angkaTerbilang(item.jumlah)} Rupiah</td></tr>
+                        <tr><td class="align-top">Sebagai pembayaran</td><td class="align-top">:</td><td class="align-top text-justify pr-2">${item.uraian} Kegiatan ${namaKeg}<br>SPP Nomor ${count} dari ${safeGetVal('in_sumberDana')}</td></tr>
+                        <tr><td class="align-top pt-4">Catatan Keuangan</td><td class="align-top pt-4">:</td><td class="align-top pt-4">Potongan Pajak, Pajak Daerah dan potongan Lainnya :
+                            <table class="w-[280px] mt-2 text-[12px] leading-snug">
+                                <tr><td class="w-32">Nilai</td><td class="w-8">: Rp.</td><td class="text-right border-b border-black">${formatRp(item.jumlah)}</td></tr>
+                                <tr><td class="leading-tight py-1">Pot Pajak<br>PPN/PPD</td><td class="align-bottom py-1">: Rp.</td><td class="text-right border-b border-black align-bottom py-1">${fmtPjk(p.ppn)}</td></tr>
+                                <tr><td class="py-1">Pot Pajak PPh 21</td><td class="py-1">: Rp.</td><td class="text-right border-b border-black py-1">${fmtPjk(p.pph21)}</td></tr>
+                                <tr><td class="py-1">Pot Pajak PPh 22</td><td class="py-1">: Rp.</td><td class="text-right border-b border-black py-1">${fmtPjk(p.pph22)}</td></tr>
+                                <tr><td class="py-1">Pot Pajak PPh 23</td><td class="py-1">: Rp.</td><td class="text-right border-b border-black py-1">${fmtPjk(p.pph23)}</td></tr>
+                                <tr><td class="py-1">Total potongan</td><td class="py-1">: Rp.</td><td class="text-right border-b border-black py-1">${fmtPjk(potItem)}</td></tr>
+                                <tr><td class="font-bold py-1">Dibayarkan</td><td class="font-bold py-1">: Rp.</td><td class="text-right font-bold border-b-[2px] border-black py-1">${formatRp(netItem)}</td></tr>
+                            </table>
+                        </td></tr>
+                    </table>
+                    
+                    <div class="flex justify-between text-[11px] mt-8 text-center text-black px-4">
+                        <div class="w-1/2">
+                            <p>&nbsp;</p>
+                            <p>Yang Memberi,</p>
+                            <p class="font-bold uppercase">KAUR KEUANGAN</p>
+                            <div class="h-20"></div>
+                            <p class="font-bold underline uppercase">${safeGetVal('in_namaKaurKeuangan')}</p>
+                        </div>
+                        <div class="w-1/2">
+                            <p>PANGEK, ................................ ${thn}</p>
+                            <p>Yang Menerima,</p>
+                            <p class="font-bold uppercase">${safeGetVal('in_jabatanPpkd')}</p>
+                            <div class="h-20"></div>
+                            <p class="font-bold underline uppercase">${safeGetVal('in_namaPpkd')}</p>
+                        </div>
+                    </div>
+                </div>
+                `;
+            });
+        }
+
+        // Fungsi untuk mengolah data input ke halaman preview sebelum dicetak
+        function showPreview() {
+            const kegiatanSelect = safeGetVal('in_kegiatan_select');
+            if(!kegiatanSelect) return alert('Pilih kegiatan terlebih dahulu!');
+
+            const kegiatanName = kegiatanSelect.replace(/^[0-9.]+\s*/, '').trim(); // Hapus kode angka di depan
+            const tglStr = safeGetVal('in_tanggal');
+            const tgl = tglStr ? new Date(tglStr).toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'}) : `.......... ${safeGetVal('in_tahun')}`;
+            let totalSekarang = 0;
+
+            // 1. Populate SPP Document
+            safeSetText('pr_no_spp', document.getElementById('display_spp_no').innerText);
+            safeSetText('pr_bidang', safeGetVal('in_bidang'));
+            safeSetText('pr_subBidang', safeGetVal('in_subBidang'));
+            safeSetText('pr_kegiatan', kegiatanName);
+            safeSetText('pr_waktu', safeGetVal('in_bulan') + ' ' + safeGetVal('in_tahun'));
+            safeSetText('pr_sumberDana', safeGetVal('in_sumberDana'));
+
+            const tbody = document.getElementById('pr_tableBody');
+            tbody.innerHTML = '';
+            
+            belanjaItems.forEach((item, idx) => {
+                totalSekarang += item.jumlah;
+                tbody.innerHTML += `<tr>
+                    <td class="border border-black p-2 text-center">${idx + 1}</td>
+                    <td class="border border-black p-2 uppercase">${item.uraian}</td>
+                    <td class="border border-black p-2 text-right">-</td>
+                    <td class="border border-black p-2 text-right">-</td>
+                    <td class="border border-black p-2 text-right">${formatRp(item.jumlah)}</td>
+                    <td class="border border-black p-2 text-right">-</td>
+                    <td class="border border-black p-2 text-right">-</td>
+                </tr>`;
+            });
+
+            const pagu = parseFloat(safeGetVal('in_pagu')) || 0;
+            const lalu = parseFloat(safeGetVal('in_lalu')) || 0;
+            const total = lalu + totalSekarang;
+            const sisa = pagu - total;
+
+            safeSetText('ft_pagu', formatRp(pagu));
+            safeSetText('ft_lalu', formatRp(lalu));
+            safeSetText('ft_sekarang', formatRp(totalSekarang));
+            safeSetText('ft_total', formatRp(total));
+            safeSetText('ft_sisa', formatRp(sisa));
+
+            safeSetText('pr_namaSekdes', safeGetVal('in_namaSekdes'));
+            safeSetText('pr_namaPpkd', safeGetVal('in_namaPpkd'));
+            safeSetText('pr_jabatanPpkd', safeGetVal('in_jabatanPpkd'));
+            safeSetText('pr_namaKades', safeGetVal('in_namaKades'));
+            safeSetText('pr_namaKaurKeuangan', safeGetVal('in_namaKaurKeuangan'));
+            safeSetText('pr_tgl_cetak', tgl);
+
+            // 2. Populate Cover Document
+            safeSetText('cover_no_spp', document.getElementById('display_spp_no').innerText);
+            safeSetText('cover_kegiatan', kegiatanName);
+            safeSetText('cover_belanja', 'Rp ' + formatRp(totalSekarang));
+            safeSetText('cover_sumber', safeGetVal('in_sumberDana'));
+            safeSetText('cover_ppkd', safeGetVal('in_namaPpkd'));
+            safeSetText('cover_tahun', safeGetVal('in_tahun'));
+            const logoCover = document.getElementById('logo_cover'); if(logoCover) logoCover.src = LOGO_URL;
+            const logoSpp = document.getElementById('logo_spp'); if(logoSpp) logoSpp.src = LOGO_URL;
+
+            // 3. Populate SP2D Document
+            safeSetText('sp2d_spp_ref', document.getElementById('display_spp_no').innerText);
+            safeSetText('sp2d_spp_tgl', tgl);
+            safeSetText('sp2d_tahun', safeGetVal('in_tahun'));
+            safeSetText('sp2d_jumlah', 'Rp ' + formatRp(totalSekarang));
+            safeSetText('sp2d_terbilang', angkaTerbilang(totalSekarang) + ' Rupiah');
+            safeSetText('sp2d_ppkd', safeGetVal('in_namaPpkd'));
+            safeSetText('sp2d_keperluan', 'Pembayaran Kegiatan ' + kegiatanName);
+            safeSetText('sp2d_t_jumlah1', formatRp(totalSekarang));
+            safeSetText('sp2d_t_kegiatan', kegiatanName);
+            safeSetText('sp2d_t_jumlah2', formatRp(totalSekarang));
+            const logoSp2d = document.getElementById('logo_sp2d'); if(logoSp2d) logoSp2d.src = LOGO_URL;
+
+            // Hitung pajak untuk dimasukkan ke SP2D
+            let totPpn=0, totPph21=0, totPph22=0, totPph23=0, totRest=0, totGal=0;
+            belanjaItems.forEach(item => {
+                if(item.pajak) {
+                    totPpn += item.pajak.ppn||0; totPph21 += item.pajak.pph21||0; totPph22 += item.pajak.pph22||0;
+                    totPph23 += item.pajak.pph23||0; totRest += item.pajak.restoran||0; totGal += item.pajak.galian_c||0;
+                }
+            });
+            const totalPotongan = totPpn + totPph21 + totPph22 + totPph23 + totRest + totGal;
+            safeSetText('sp2d_v_ppn', fmtPjk(totPpn));
+            safeSetText('sp2d_v_pph21', fmtPjk(totPph21));
+            safeSetText('sp2d_v_pph22', fmtPjk(totPph22));
+            safeSetText('sp2d_v_pph23', fmtPjk(totPph23));
+            safeSetText('sp2d_v_restoran', fmtPjk(totRest));
+            safeSetText('sp2d_v_galian', fmtPjk(totGal));
+            safeSetText('sp2d_t_potongan', fmtPjk(totalPotongan));
+
+            safeSetText('sp2d_s_diminta', formatRp(totalSekarang));
+            safeSetText('sp2d_s_potongan_setor', formatRp(totalPotongan));
+            const dibayarkan = totalSekarang - totalPotongan;
+            safeSetText('sp2d_s_dibayarkan', formatRp(dibayarkan));
+            safeSetText('sp2d_s_terbilang', angkaTerbilang(dibayarkan) + ' Rupiah');
+            safeSetText('sp2d_tgl_cetak_sig', tgl);
+            safeSetText('sp2d_ttd_kades_bottom', safeGetVal('in_namaKades'));
+
+            // 4. Generate Kwitansi
+            populateKwitansi();
+
+            // Pindah Tampilan ke mode Preview
+            document.getElementById('sppView')?.classList.add('hidden');
+            document.getElementById('previewView')?.classList.remove('hidden');
+            switchDoc('spp'); // Otomatis aktif di tab SPP
+            window.scrollTo(0, 0);
+        }
+
+        // Fungsi untuk menutup mode preview kembali ke form pengisian
+        function hidePreview() { 
+            document.getElementById('previewView')?.classList.add('hidden'); 
+            document.getElementById('sppView')?.classList.remove('hidden'); 
+            window.scrollTo(0, 0);
+        }
+
+        // Fungsi mencetak untuk buku kas
+        function cetakBukuKas() {
+            window.print();
+        }
+
+        function cetakDokumen() {
+            const record = currentEditId ? savedRecords.find(x => x.id === currentEditId) : null;
+            const noSpp = parseInt(record ? record.noSpp : (savedRecords.length + 1).toString(), 10);
+            const kegiatanName = (safeGetVal('in_kegiatan_select') || 'Tanpa Kegiatan').replace(/^[0-9.]+\s*/, '').trim(); 
+            
+            let docType = 'spp';
+            if (document.getElementById('doc_sp2d') && document.getElementById('doc_sp2d').classList.contains('block')) docType = 'sp2d';
+            if (document.getElementById('doc_kwitansi') && document.getElementById('doc_kwitansi').classList.contains('block')) docType = 'kwitansi';
+            if (document.getElementById('doc_cover') && document.getElementById('doc_cover').classList.contains('block')) docType = 'cover';
+            if (document.getElementById('doc_rekomendasi') && document.getElementById('doc_rekomendasi').classList.contains('block')) docType = 'rekomendasi';
+            
+            let docTitle = 'Dokumen';
+            if (docType === 'cover') { docTitle = `${noSpp} Cover SPP ${kegiatanName}`; document.body.classList.add('print-a5'); } 
+            else if (docType === 'spp') docTitle = `${noSpp} SPP ${kegiatanName}`; 
+            else if (docType === 'sp2d') docTitle = `${noSpp} sp2d ${kegiatanName}`; 
+            else if (docType === 'kwitansi') { const uraian = belanjaItems.length > 0 ? belanjaItems[0].uraian : ''; docTitle = `1 kwt ${kegiatanName} ${uraian}, spp nomor ${noSpp}`; } 
+            else if (docType === 'rekomendasi') docTitle = `Surat Rekomendasi SPJ ${kegiatanName}`;
+
+            const originalTitle = document.title; document.title = docTitle;
+            window.focus(); setTimeout(function() { try { window.print(); } catch (e) { alert("Gunakan shortcut cetak (Ctrl+P/Cmd+P)."); } setTimeout(() => { document.title = originalTitle; document.body.classList.remove('print-a5'); }, 2000); }, 150);
+        }
+
+        window.onload = () => { /* Aplikasi dimuat */ };
+    </script>
+</body>
+</html>
