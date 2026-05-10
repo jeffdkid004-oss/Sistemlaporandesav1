@@ -720,7 +720,14 @@
 
         function processBukuKasTransactions(transactions, tbody, tfoot) {
             if (transactions.length === 0) { tbody.innerHTML = '<tr><td colspan="8" class="text-center p-4 text-gray-500">Belum ada transaksi di-ACC.</td></tr>'; tfoot.innerHTML = ''; return { totalIn: 0, totalOut: 0, saldo: 0 }; }
-            transactions.sort((a, b) => a.date - b.date);
+            transactions.sort((a, b) => {
+                const timeA = a.date.getTime() || 0;
+                const timeB = b.date.getTime() || 0;
+                if (timeA !== timeB) return timeA - timeB;
+                if (a.masuk > 0 && b.masuk === 0) return -1;
+                if (a.masuk === 0 && b.masuk > 0) return 1;
+                return (a.ref || '').localeCompare(b.ref || '', 'id', { numeric: true });
+            });
             let saldo = 0, totalIn = 0, totalOut = 0, html = '';
             transactions.forEach((t, idx) => {
                 saldo += t.masuk; saldo -= t.keluar; totalIn += t.masuk; totalOut += t.keluar;
@@ -1489,7 +1496,12 @@
             });
 
             let saldoPajak = 0, hasData = false, barisIdx = 1;
-            [...savedRecords].sort((a, b) => new Date(a.tanggal || 0) - new Date(b.tanggal || 0)).forEach(r => {
+            [...savedRecords].sort((a, b) => {
+                const timeA = new Date(a.tanggal || 0).getTime() || 0;
+                const timeB = new Date(b.tanggal || 0).getTime() || 0;
+                if (timeA !== timeB) return timeA - timeB;
+                return (a.noSpp || '').localeCompare(b.noSpp || '', 'id', { numeric: true });
+            }).forEach(r => {
                 if(r.statusAcc !== true && r.statusAcc !== "true") return; 
                 const tgl = r.tanggal ? new Date(r.tanggal).toLocaleDateString('id-ID', {day: '2-digit', month: '2-digit', year: 'numeric'}) : '-';
                 const startNo = kwtStartMap[r.id];
