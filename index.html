@@ -1292,18 +1292,72 @@
             setVal(`pajak_ppn_${idx}`, p.ppn); setVal(`pajak_pph21_${idx}`, p.pph21); setVal(`pajak_pph22_${idx}`, p.pph22); setVal(`pajak_pph23_${idx}`, p.pph23); setVal(`pajak_restoran_${idx}`, p.restoran); setVal(`pajak_galian_c_${idx}`, p.galian_c);
         };
 
-        function getBelanjaOptionsHTML(selectedValue) {
+function getBelanjaOptionsHTML(selectedValue) {
             let html = '<option value="">-- Pilih Kode & Uraian Belanja --</option>', found = false;
             const belanjaGroups = [
-                {label: "5.1 BELANJA PEGAWAI", opts: ["5.1.1 Penghasilan Tetap", "5.1.2 Tunjangan", "5.1.3 Insentif", "5.1.4 Honorarium"]},
-                {label: "5.2 BELANJA BARANG DAN JASA", opts: ["5.2.1 Belanja ATK dan Benda Pos", "5.2.2 Belanja Cetak dan Penggandaan", "5.2.3 Belanja Konsumsi", "5.2.4 Belanja Perjalanan Dinas", "5.2.5 Belanja Jasa", "5.2.6 Belanja Listrik, Air dan Internet", "5.2.7 Belanja BBM dan Gas", "5.2.8 Belanja Pemeliharaan", "5.2.9 Belanja Sewa", "5.2.10 Belanja Pakaian", "5.2.11 Belanja Obat dan Kesehatan", "5.2.12 Belanja Bahan Material"]},
-                {label: "5.3 BELANJA MODAL", opts: ["5.3.1 Belanja Tanah", "5.3.2 Belanja Peralatan dan Mesin", "5.3.3 Belanja Kendaraan", "5.3.4 Belanja Gedung dan Bangunan", "5.3.5 Belanja Jalan, Irigasi dan Jaringan", "5.3.6 Belanja Aset Tetap Lainnya"]},
-                {label: "5.4 BELANJA TAK TERDUGA", opts: ["5.4.1 Penanggulangan Bencana", "5.4.2 Keadaan Darurat", "5.4.3 Keadaan Mendesak"]}
+                {
+                    label: "5.1 BELANJA PEGAWAI", 
+                    opts: [
+                        "5.1.1 Penghasilan Tetap Kepala Desa", 
+                        "5.1.2 Penghasilan Tetap Perangkat Desa", 
+                        "5.1.3 Tunjangan Kepala Desa", 
+                        "5.1.4 Tunjangan Perangkat Desa", 
+                        "5.1.5 Jaminan ketenagakerjaan Kepala Desa", 
+                        "5.1.6 Jaminan Ketenagakerjaan Perangkat Desa",
+ 			"5.2.5.8 Belanja Insentif/Operasional RT",
+			"5.2.5.90 Belanja Operasional BPD yang berasal dari BANKAB"
+
+                    ]
+                },
+                {
+                    label: "5.2 BELANJA BARANG DAN JASA", 
+                    opts: [
+                        "5.2.1 Belanja Alat Tulis dan Benda Pos", 
+                        "5.2.2 Belanja Alat-Alat Listrik", 
+                        "5.2.3 Belanja Peralatan Rumah Tangga", 
+                        "5.2.4 Belanja Konsumsi", 
+                        "5.2.5 Belanja Honorarium Petugas", 
+                        "5.2.6 Belanja Honorarium Tim yang Melaksanakan Kegiatan", 
+                        "5.2.7 Belanja Honorarium Narasumber", 
+                        "5.2.8 Belanja Perjalanan Dinas dalam Kabupaten", 
+                        "5.2.9 Belanja Perjalanan Dinas luar Kabupaten", 
+                        "5.2.10 Belanja Jasa Pemeliharaan Peralatan Kantor", 
+                        "5.2.11 Belanja Jasa Pemeliharaan Kendaraan Operasional Desa", 
+                        "5.2.12 Belanja Barang yang diserahkan ke Masyarakat", 
+                        "5.2.13 Belanja Spanduk"
+                    ]
+                },
+                {
+                    label: "5.3 BELANJA MODAL", 
+                    opts: [
+                        "5.3.1 Belanja Modal Peralatan Kantor", 
+                        "5.3.2 Belanja Modal Gedung", 
+                        "5.3.3 Belanja modal Kendaraan roda 2", 
+                        "5.3.4 Belanja modal Kendaraan roda 4", 
+                        "5.3.5 Belanja Upah Tukang-bangunan", 
+                        "5.3.6 Belanja Sewa peralatan berat-bangunan"
+                    ]
+                },
+                {
+                    label: "5.4 BELANJA TAK TERDUGA", 
+                    opts: [
+                        "5.4.1 Belanja Bantuan Langsung Tunai"
+                    ]
+                }
             ];
-            belanjaGroups.forEach(g => { html += `<optgroup label="${g.label}">`; g.opts.forEach(opt => { const isSelected = (selectedValue === opt) ? 'selected' : ''; if (isSelected) found = true; html += `<option value="${opt}" ${isSelected}>${opt}</option>`; }); html += `</optgroup>`; });
+            belanjaGroups.forEach(g => { 
+                html += `<optgroup label="${g.label}">`; 
+                g.opts.forEach(opt => { 
+                    const isSelected = (selectedValue === opt) ? 'selected' : ''; 
+                    if (isSelected) found = true; 
+                    html += `<option value="${opt}" ${isSelected}>${opt}</option>`; 
+                }); 
+                html += `</optgroup>`; 
+            });
             if (selectedValue && !found) html += `<optgroup label="Lainnya (Input Manual Lama)"><option value="${selectedValue}" selected>${selectedValue}</option></optgroup>`;
             return html;
-        }
+        }        
+
 
         function getStartingKwitansiNo(targetSppId) {
             let count = 0; for (const r of [...savedRecords].sort((a, b) => a.id - b.id)) { if (r.id === targetSppId) break; count += (r.items ? r.items.length : 0); } return count + 1;
