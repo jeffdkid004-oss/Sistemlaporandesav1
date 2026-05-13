@@ -3,26 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Pelaporan Desa v0.2.2</title>
+    <title>Sistem Pelaporan Desa v3.8.13 Cloud Safe Fix - Prime Mature</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: Arial, Helvetica, sans-serif; background-color: #f1f5f9; }
         @media print {
             .no-print { display: none !important; }
-            @page { size: A4 portrait; margin: 1.5cm; }
+            @page { size: A4 portrait; margin: 1.2cm; }
+            @page kwitansiPage { size: A4 portrait; margin: 1cm; }
+            @page coverPage { size: A5 portrait; margin: 1cm; }
             body { background-color: white; margin: 0; padding: 0; }
             .print-container { box-shadow: none !important; margin: 0 !important; padding: 0 !important; width: 100% !important; max-width: none !important; }
             table { width: 100% !important; table-layout: fixed; border-collapse: collapse; }
             .text-sm { font-size: 10pt !important; }
-            #mainAppContainer, #mainContent { display: block !important; height: auto !important; overflow: visible !important; width: 100% !important; background: white !important; }
+            #mainAppContainer, #mainContent, #previewView { display: block !important; height: auto !important; overflow: visible !important; width: 100% !important; background: white !important; padding: 0 !important; margin: 0 !important; }
             .page-break { page-break-after: always; }
             .page-break:last-child { page-break-after: auto; }
             .doc-page.hidden { display: none !important; }
             .doc-page.block { display: block !important; }
-            body.print-landscape { @page { size: A4 landscape; margin: 1.5cm; } }
-            body.print-a5 { @page { size: A5 portrait; margin: 1cm; } }
-            body.print-kwitansi { @page { size: A5 landscape; margin: 0.5cm; } }
+
+            /* Fokus cetak dokumen utama: A4 portrait, margin kertas normal, tanpa padding ganda. */
+            #doc_spp.doc-page.block,
+            #doc_sp2d.doc-page.block,
+            #doc_rekomendasi.doc-page.block {
+                width: 100% !important;
+                max-width: none !important;
+                min-height: auto !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+            }
+            #doc_spp.doc-page.block { font-size: 10.5pt !important; }
+            #doc_spp.doc-page.block table { font-size: 9pt !important; }
+            #doc_spp.doc-page.block .mt-12 { margin-top: 0.7cm !important; }
+            #doc_spp.doc-page.block .gap-y-16 { row-gap: 0.65cm !important; }
+            #doc_spp.doc-page.block .h-16 { height: 1.2cm !important; }
+            #doc_spp.doc-page.block .mb-8 { margin-bottom: 0.5cm !important; }
+            #doc_spp.doc-page.block .mb-6 { margin-bottom: 0.35cm !important; }
+
+            #doc_sp2d.doc-page.block table { font-size: 8.7pt !important; }
+            #doc_sp2d.doc-page.block td { padding-top: 0.09cm !important; padding-bottom: 0.09cm !important; }
+            #doc_sp2d.doc-page.block .p-3 { padding: 0.16cm !important; }
+            #doc_sp2d.doc-page.block .p-4 { padding: 0.2cm !important; }
+            #doc_sp2d.doc-page.block .h-16 { height: 1.1cm !important; }
+            #doc_sp2d.doc-page.block .min-h-\[75px\] { min-height: 1.45cm !important; }
+
+            /* Kwitansi dicetak di A4 portrait: prioritas tidak terpotong, 1 kwitansi per halaman bila perlu. Border tetap dipertahankan. */
+            body.print-kwitansi #doc_kwitansi,
+            body.print-kwitansi #doc_kwitansi .page-break { page: kwitansiPage; }
+            body.print-kwitansi #doc_kwitansi.doc-page.block {
+                width: 100% !important;
+                max-width: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+            }
+            body.print-kwitansi #doc_kwitansi .page-break {
+                width: 100% !important;
+                max-width: none !important;
+                min-height: auto !important;
+                height: auto !important;
+                padding: 0.55cm !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+                border: 1px solid #000 !important;
+                overflow: visible !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                page-break-after: always !important;
+                break-after: page !important;
+            }
+            body.print-kwitansi #doc_kwitansi .page-break:last-child {
+                page-break-after: auto !important;
+                break-after: auto !important;
+            }
+            body.print-kwitansi #doc_kwitansi,
+            body.print-kwitansi #doc_kwitansi * { font-family: 'Times New Roman', Times, serif !important; }
+            body.print-kwitansi #doc_kwitansi { font-size: 10pt !important; }
+            body.print-kwitansi #doc_kwitansi table { font-size: 10pt !important; line-height: 1.02 !important; }
+            body.print-kwitansi #doc_kwitansi td { padding-top: 0 !important; padding-bottom: 0 !important; }
+            body.print-kwitansi #doc_kwitansi h1,
+            body.print-kwitansi #doc_kwitansi h2,
+            body.print-kwitansi #doc_kwitansi h4 { font-size: 10pt !important; line-height: 1.02 !important; }
+            body.print-kwitansi #doc_kwitansi .h-20 { height: 2.1cm !important; }
+            body.print-kwitansi #doc_kwitansi .mt-8 { margin-top: 0.35cm !important; }
+            body.print-kwitansi #doc_kwitansi .mb-6 { margin-bottom: 0.06cm !important; }
+            body.print-kwitansi #doc_kwitansi .mb-4 { margin-bottom: 0.06cm !important; }
+            body.print-kwitansi #doc_kwitansi .mt-4 { margin-top: 0.06cm !important; }
+            body.print-kwitansi #doc_kwitansi .mb-3 { margin-bottom: 0.04cm !important; }
+            body.print-kwitansi #doc_kwitansi .mb-2 { margin-bottom: 0.04cm !important; }
+            body.print-kwitansi #doc_kwitansi .py-1 { padding-top: 0 !important; padding-bottom: 0 !important; }
+            body.print-kwitansi #doc_kwitansi .pt-4 { padding-top: 0.03cm !important; }
+            body.print-kwitansi #doc_kwitansi .px-4 { padding-left: 0.12cm !important; padding-right: 0.12cm !important; }
+
+            body.print-a5 #doc_cover { page: coverPage; }
+            body.print-a5 #doc_cover.doc-page.block { padding: 0 !important; margin: 0 !important; box-shadow: none !important; }
         }
         .form-input { width: 100%; border: 1px solid #d1d5db; padding: 0.5rem; border-radius: 0.375rem; font-size: 0.875rem; outline: none; background-color: white; transition: all 0.2s; }
         .form-input:focus { border-color: #1e4b6e; box-shadow: 0 0 0 2px rgba(30, 75, 110, 0.2); }
@@ -32,7 +108,879 @@
         .tab-btn.active-tab { background-color: white; color: #1e4b6e; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Update khusus kwitansi: font Times New Roman 10pt untuk preview dan cetak. */
+        #doc_kwitansi,
+        #doc_kwitansi * {
+            font-family: 'Times New Roman', Times, serif !important;
+            font-size: 10pt !important;
+        }
+        #doc_kwitansi h1,
+        #doc_kwitansi h2,
+        #doc_kwitansi h3,
+        #doc_kwitansi h4,
+        #doc_kwitansi table,
+        #doc_kwitansi td,
+        #doc_kwitansi p,
+        #doc_kwitansi div,
+        #doc_kwitansi span {
+            font-size: 10pt !important;
+        }
+
+        /* Update khusus SP2D: semua border tebal dibuat tipis seperti kwitansi. */
+        #doc_sp2d .border-\[3px\],
+        #doc_sp2d .border-2,
+        #doc_sp2d .border {
+            border-width: 1px !important;
+        }
+        #doc_sp2d .border-b-\[4px\],
+        #doc_sp2d .border-b-\[3px\],
+        #doc_sp2d .border-b-\[2px\],
+        #doc_sp2d .border-b {
+            border-bottom-width: 1px !important;
+        }
+        #doc_sp2d .border-r-\[3px\],
+        #doc_sp2d .border-r-\[2px\],
+        #doc_sp2d .border-r {
+            border-right-width: 1px !important;
+        }
+        #doc_sp2d .border-l-\[3px\],
+        #doc_sp2d .border-l-\[2px\],
+        #doc_sp2d .border-l {
+            border-left-width: 1px !important;
+        }
+        #doc_sp2d .border-t-\[3px\],
+        #doc_sp2d .border-t-\[2px\],
+        #doc_sp2d .border-t {
+            border-top-width: 1px !important;
+        }
+        /* Kwitansi: rincian Catatan Keuangan dibuat rapat seperti awal. Garis hanya sepanjang nominal Total potongan. */
+        .kwitansi-keuangan { margin-top: 0 !important; line-height: 1 !important; border-collapse: collapse !important; border-spacing: 0 !important; }
+        .kwitansi-keuangan tr { line-height: 1 !important; }
+        .kwitansi-keuangan td { padding: 0 !important; margin: 0 !important; height: auto !important; vertical-align: baseline; }
+        .kwitansi-keuangan .rp-col { width: 32px !important; white-space: nowrap !important; }
+        .kwitansi-keuangan .nilai-col { padding-left: 3px !important; padding-right: 0 !important; white-space: nowrap !important; }
+        .kwitansi-keuangan .total-potongan-angka { display: inline-block; border-bottom: 1px solid #000; padding-bottom: 1px; line-height: 1; width: auto !important; }
+        .kwitansi-keuangan .dibayarkan-angka { display: inline-block; border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 1px 0; line-height: 1; width: auto !important; }
+        .kwitansi-gap-payment td { padding-top: 0.28cm !important; }
+        .kwitansi-gap-catatan td { padding-top: 0.32cm !important; }
+        @media print {
+            body.print-kwitansi #doc_kwitansi .kwitansi-keuangan { margin-top: 0 !important; line-height: 1 !important; border-collapse: collapse !important; border-spacing: 0 !important; }
+            body.print-kwitansi #doc_kwitansi .kwitansi-keuangan tr { line-height: 1 !important; }
+            body.print-kwitansi #doc_kwitansi .kwitansi-keuangan td { padding: 0 !important; margin: 0 !important; height: auto !important; vertical-align: baseline; }
+            body.print-kwitansi #doc_kwitansi .kwitansi-keuangan .rp-col { width: 32px !important; white-space: nowrap !important; }
+            body.print-kwitansi #doc_kwitansi .kwitansi-keuangan .nilai-col { padding-left: 3px !important; padding-right: 0 !important; white-space: nowrap !important; }
+            body.print-kwitansi #doc_kwitansi .kwitansi-keuangan .total-potongan-angka { display: inline-block; border-bottom: 1px solid #000; padding-bottom: 1px; line-height: 1; width: auto !important; }
+            body.print-kwitansi #doc_kwitansi .kwitansi-keuangan .dibayarkan-angka { display: inline-block; border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 1px 0; line-height: 1; width: auto !important; }
+            body.print-kwitansi #doc_kwitansi .kwitansi-gap-payment td { padding-top: 0.28cm !important; }
+            body.print-kwitansi #doc_kwitansi .kwitansi-gap-catatan td { padding-top: 0.32cm !important; }
+        }
+
+
+        /* =========================================================
+           UI REFRESH BY GPT - MODERN EXECUTIVE DESA THEME
+           Fokus: tampilan aplikasi lebih modern tanpa mengubah logic.
+           Cetak dokumen tetap mengikuti style print yang sudah ada.
+        ========================================================= */
+        :root {
+            --brand-900: #0f172a;
+            --brand-800: #16324f;
+            --brand-700: #1e4b6e;
+            --brand-600: #2563eb;
+            --brand-gold: #d6a84f;
+            --surface: rgba(255,255,255,.92);
+            --surface-solid: #ffffff;
+            --line-soft: rgba(148, 163, 184, .28);
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+        }
+
+        @media screen {
+            body {
+                font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+                color: var(--text-main);
+                background:
+                    radial-gradient(circle at top left, rgba(37, 99, 235, .14), transparent 34rem),
+                    radial-gradient(circle at top right, rgba(214, 168, 79, .16), transparent 28rem),
+                    linear-gradient(135deg, #eef3f8 0%, #f8fafc 48%, #eef2f7 100%);
+            }
+
+            #loginView {
+                background:
+                    linear-gradient(135deg, rgba(15, 23, 42, .88), rgba(30, 75, 110, .78)),
+                    radial-gradient(circle at 25% 20%, rgba(214, 168, 79, .34), transparent 18rem),
+                    radial-gradient(circle at 80% 80%, rgba(37, 99, 235, .28), transparent 20rem);
+            }
+            #loginView > div {
+                border: 1px solid rgba(255,255,255,.32) !important;
+                border-top: 0 !important;
+                border-radius: 1.6rem !important;
+                background: rgba(255,255,255,.92) !important;
+                backdrop-filter: blur(18px);
+                box-shadow: 0 30px 90px rgba(15, 23, 42, .34) !important;
+                position: relative;
+                overflow: hidden;
+            }
+            #loginView > div::before {
+                content: "";
+                position: absolute;
+                inset: 0 0 auto 0;
+                height: 6px;
+                background: linear-gradient(90deg, var(--brand-gold), #60a5fa, var(--brand-700));
+            }
+            #loginView h1 { color: var(--brand-900) !important; letter-spacing: .03em; }
+
+            #mainAppContainer { background: transparent !important; }
+
+            nav.no-print {
+                background:
+                    linear-gradient(180deg, rgba(15,23,42,.98), rgba(22,50,79,.98) 48%, rgba(15,23,42,.98)) !important;
+                border-right: 1px solid rgba(255,255,255,.10);
+                box-shadow: 18px 0 50px rgba(15,23,42,.20) !important;
+            }
+            nav.no-print > div:first-child {
+                border-bottom: 1px solid rgba(255,255,255,.10) !important;
+                background: linear-gradient(135deg, rgba(255,255,255,.10), transparent);
+            }
+            nav.no-print button {
+                border-radius: 14px !important;
+                margin: 2px 0;
+                border-left-color: transparent !important;
+            }
+            nav.no-print button:hover {
+                background: rgba(255,255,255,.12) !important;
+                transform: translateX(3px);
+            }
+            nav.no-print button.border-white,
+            nav.no-print button.bg-white,
+            nav.no-print button.active-tab {
+                background: linear-gradient(135deg, rgba(255,255,255,.22), rgba(255,255,255,.08)) !important;
+                color: #fff !important;
+                box-shadow: inset 0 0 0 1px rgba(255,255,255,.16), 0 12px 24px rgba(0,0,0,.18) !important;
+            }
+            #userRoleDisplay, #mobileUserRole {
+                background: rgba(214,168,79,.18) !important;
+                border-color: rgba(214,168,79,.36) !important;
+                color: #fde68a !important;
+            }
+
+            #mainContent {
+                background: transparent !important;
+                scroll-behavior: smooth;
+            }
+            #topbarMenu {
+                background: rgba(255,255,255,.82) !important;
+                backdrop-filter: blur(18px);
+                border-bottom: 1px solid var(--line-soft) !important;
+                box-shadow: 0 14px 34px rgba(15,23,42,.08) !important;
+            }
+            #topbarMenu button {
+                border-radius: 999px !important;
+                border-color: rgba(148,163,184,.35) !important;
+                box-shadow: 0 8px 22px rgba(15,23,42,.05);
+            }
+
+            .bg-white.shadow-xl.rounded-lg,
+            #formView .bg-white,
+            #spjView .bg-white,
+            #verifikasiSpjView .bg-white,
+            #laporanView .bg-white,
+            #masterPaguView .bg-white,
+            #pendapatanView .bg-white,
+            #penarikanView .bg-white,
+            #pembiayaanView .bg-white {
+                border-radius: 1.35rem !important;
+                border: 1px solid rgba(148,163,184,.22) !important;
+                background: rgba(255,255,255,.90) !important;
+                backdrop-filter: blur(14px);
+                box-shadow: 0 24px 70px rgba(15, 23, 42, .10) !important;
+            }
+
+            .bg-\[\#1e4b6e\], .bg-blue-800, .bg-emerald-600, .bg-purple-700, .bg-teal-600 {
+                background: linear-gradient(135deg, var(--brand-900), var(--brand-700)) !important;
+            }
+            .bg-\[\#1e4b6e\].sticky,
+            #spjView .bg-\[\#1e4b6e\],
+            #verifikasiSpjView .bg-\[\#1e4b6e\],
+            #laporanView .bg-\[\#1e4b6e\] {
+                position: relative;
+                overflow: hidden;
+            }
+            .bg-\[\#1e4b6e\].sticky::after,
+            #spjView .bg-\[\#1e4b6e\]::after,
+            #verifikasiSpjView .bg-\[\#1e4b6e\]::after,
+            #laporanView .bg-\[\#1e4b6e\]::after {
+                content: "";
+                position: absolute;
+                right: -4rem;
+                top: -4rem;
+                width: 14rem;
+                height: 14rem;
+                border-radius: 999px;
+                background: rgba(214,168,79,.18);
+                pointer-events: none;
+            }
+
+            .form-input {
+                border-radius: .85rem !important;
+                border: 1px solid rgba(148,163,184,.42) !important;
+                background: rgba(255,255,255,.94) !important;
+                box-shadow: inset 0 1px 0 rgba(255,255,255,.7), 0 1px 2px rgba(15,23,42,.03);
+            }
+            .form-input:focus {
+                border-color: var(--brand-600) !important;
+                box-shadow: 0 0 0 4px rgba(37,99,235,.13), 0 10px 24px rgba(37,99,235,.09) !important;
+            }
+            label { color: #475569 !important; }
+
+            button.action-btn,
+            #btnSave,
+            #btnCetakPreview,
+            #btnSavePagu,
+            #btnSavePendapatan,
+            #btnSavePenarikan,
+            #btnSavePembiayaan,
+            button[onclick="handleLogin()"] {
+                border-radius: 1rem !important;
+                box-shadow: 0 14px 28px rgba(15,23,42,.14) !important;
+                transition: transform .18s ease, box-shadow .18s ease, filter .18s ease !important;
+            }
+            button.action-btn:hover,
+            #btnSave:hover,
+            #btnCetakPreview:hover,
+            #btnSavePagu:hover,
+            #btnSavePendapatan:hover,
+            #btnSavePenarikan:hover,
+            #btnSavePembiayaan:hover,
+            button[onclick="handleLogin()"]:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 20px 38px rgba(15,23,42,.20) !important;
+                filter: saturate(1.08);
+            }
+            #btnSave, .bg-green-600 { background: linear-gradient(135deg, #059669, #047857) !important; }
+            #btnCetakPreview, button[onclick="handleLogin()"] { background: linear-gradient(135deg, var(--brand-900), var(--brand-700)) !important; }
+            #btnAddBelanja {
+                background: linear-gradient(135deg, rgba(37,99,235,.08), rgba(214,168,79,.10)) !important;
+                border-color: rgba(30,75,110,.32) !important;
+            }
+
+            table {
+                border-radius: 1rem;
+                overflow: hidden;
+            }
+            thead {
+                background: linear-gradient(180deg, #f8fafc, #eef2f7) !important;
+            }
+            tbody tr {
+                transition: background .15s ease, transform .15s ease;
+            }
+            tbody tr:hover {
+                background: rgba(37,99,235,.045) !important;
+            }
+            th { letter-spacing: .04em; }
+            .border, .border-slate-200, .border-slate-300 { border-color: rgba(148,163,184,.30) !important; }
+
+            #savedDataList > div,
+            #lap_saldo_sumber_dana > div,
+            .bg-indigo-50, .bg-purple-50, .bg-orange-50, .bg-teal-50, .bg-blue-50 {
+                border-radius: 1rem !important;
+                box-shadow: 0 12px 30px rgba(15,23,42,.06) !important;
+            }
+
+            #toast {
+                border-radius: 999px !important;
+                box-shadow: 0 20px 45px rgba(15,23,42,.25) !important;
+                backdrop-filter: blur(12px);
+            }
+        }
+
+
+        /* Cloud Safe: indikator sumber data agar jelas data berasal dari Google Sheet, bukan dummy/localStorage. */
+        .cloud-safe-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            border-radius: 999px;
+            padding: .35rem .65rem;
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: .035em;
+            text-transform: uppercase;
+            border: 1px solid rgba(148, 163, 184, .35);
+            background: rgba(255, 255, 255, .9);
+            color: #334155;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, .08);
+        }
+        .cloud-safe-ok { color: #047857; background: #ecfdf5; border-color: #a7f3d0; }
+        .cloud-safe-warn { color: #b45309; background: #fffbeb; border-color: #fde68a; }
+        .cloud-safe-err { color: #b91c1c; background: #fef2f2; border-color: #fecaca; }
+        .cloud-safe-panel {
+            border: 1px solid rgba(30, 75, 110, .12);
+            background: linear-gradient(135deg, rgba(255,255,255,.9), rgba(239,246,255,.72));
+            border-radius: 16px;
+            padding: .85rem 1rem;
+            box-shadow: 0 10px 28px rgba(15, 23, 42, .06);
+        }
+
+
+        /* v3.8.14 - Optimasi khusus halaman Verifikasi SPJ: tanpa geser mouse, teks wrap rapi. */
+        #verifikasiSpjView {
+            max-width: none !important;
+        }
+        #verifikasiSpjView > .bg-white {
+            overflow: hidden !important;
+        }
+        #verifikasiSpjView .verifikasi-table-wrap {
+            width: 100%;
+            overflow-x: hidden !important;
+            border-radius: 18px !important;
+            background: rgba(255,255,255,.96);
+        }
+        #verifikasiSpjView .verifikasi-spj-table {
+            width: 100% !important;
+            table-layout: fixed !important;
+            border-collapse: separate !important;
+            border-spacing: 0 !important;
+        }
+        #verifikasiSpjView .verifikasi-spj-table th,
+        #verifikasiSpjView .verifikasi-spj-table td {
+            white-space: normal !important;
+            overflow-wrap: anywhere !important;
+            word-break: break-word !important;
+            vertical-align: top !important;
+            line-height: 1.28 !important;
+        }
+        #verifikasiSpjView .verifikasi-spj-table th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: #f8fafc !important;
+            color: #475569 !important;
+            font-size: 10px !important;
+            letter-spacing: .03em;
+        }
+        #verifikasiSpjView .verifikasi-spj-table th:nth-child(1),
+        #verifikasiSpjView .verifikasi-spj-table td:nth-child(1) { width: 4%; }
+        #verifikasiSpjView .verifikasi-spj-table th:nth-child(2),
+        #verifikasiSpjView .verifikasi-spj-table td:nth-child(2) { width: 22%; } /* Uraian/Kegiatan diperkecil */
+        #verifikasiSpjView .verifikasi-spj-table th:nth-child(3),
+        #verifikasiSpjView .verifikasi-spj-table td:nth-child(3) { width: 11%; }
+        #verifikasiSpjView .verifikasi-spj-table th:nth-child(4),
+        #verifikasiSpjView .verifikasi-spj-table td:nth-child(4) { width: 7%; }
+        #verifikasiSpjView .verifikasi-spj-table th:nth-child(5),
+        #verifikasiSpjView .verifikasi-spj-table td:nth-child(5) { width: 6%; }
+        #verifikasiSpjView .verifikasi-spj-table th:nth-child(6),
+        #verifikasiSpjView .verifikasi-spj-table td:nth-child(6) { width: 9%; }
+        #verifikasiSpjView .verifikasi-spj-table th:nth-child(7),
+        #verifikasiSpjView .verifikasi-spj-table td:nth-child(7) { width: 13%; }
+        #verifikasiSpjView .verifikasi-spj-table th:nth-child(8),
+        #verifikasiSpjView .verifikasi-spj-table td:nth-child(8) { width: 13%; } /* Catatan Bendahara */
+        #verifikasiSpjView .verifikasi-spj-table th:nth-child(9),
+        #verifikasiSpjView .verifikasi-spj-table td:nth-child(9) { width: 6%; }
+        #verifikasiSpjView .verifikasi-spj-table th:nth-child(10),
+        #verifikasiSpjView .verifikasi-spj-table td:nth-child(10) { width: 9%; }
+
+        #verifikasiSpjView .verif-uraian-cell,
+        #verifikasiSpjView .verif-ppkd-cell,
+        #verifikasiSpjView .verif-kelengkapan-cell,
+        #verifikasiSpjView .verif-catatan-bendahara-cell {
+            white-space: normal !important;
+            overflow-wrap: anywhere !important;
+            word-break: break-word !important;
+        }
+        #verifikasiSpjView .verif-date-cell,
+        #verifikasiSpjView .verif-jumlah-cell,
+        #verifikasiSpjView .verif-bayar-cell {
+            white-space: normal !important;
+            overflow-wrap: normal !important;
+            word-break: normal !important;
+        }
+        #verifikasiSpjView .verif-action-grid {
+            display: grid !important;
+            grid-template-columns: 1fr !important;
+            gap: 4px !important;
+            min-width: 0 !important;
+            width: 100% !important;
+        }
+        #verifikasiSpjView .verif-action-grid a,
+        #verifikasiSpjView .verif-action-grid button,
+        #verifikasiSpjView .verif-aksi-cell > button {
+            display: block !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            white-space: normal !important;
+            overflow-wrap: anywhere !important;
+            line-height: 1.15 !important;
+            padding: .38rem .45rem !important;
+            border-radius: .65rem !important;
+            font-size: 10px !important;
+            text-align: center !important;
+        }
+
+        @media (max-width: 1180px) {
+            #verifikasiSpjView { padding-left: .55rem !important; padding-right: .55rem !important; }
+            #verifikasiSpjView .p-4.md\:p-6 { padding: .8rem !important; }
+            #verifikasiSpjView .verifikasi-spj-table th,
+            #verifikasiSpjView .verifikasi-spj-table td { padding: .42rem !important; font-size: 10.5px !important; }
+            #verifikasiSpjView .verifikasi-spj-table th:nth-child(2),
+            #verifikasiSpjView .verifikasi-spj-table td:nth-child(2) { width: 20%; }
+            #verifikasiSpjView .verifikasi-spj-table th:nth-child(7),
+            #verifikasiSpjView .verifikasi-spj-table td:nth-child(7) { width: 12%; }
+            #verifikasiSpjView .verifikasi-spj-table th:nth-child(8),
+            #verifikasiSpjView .verifikasi-spj-table td:nth-child(8) { width: 13%; }
+        }
+
+        @media (max-width: 760px) {
+            #verifikasiSpjView .verifikasi-table-wrap { overflow-x: visible !important; border: 0 !important; background: transparent; }
+            #verifikasiSpjView .verifikasi-spj-table,
+            #verifikasiSpjView .verifikasi-spj-table thead,
+            #verifikasiSpjView .verifikasi-spj-table tbody,
+            #verifikasiSpjView .verifikasi-spj-table tr,
+            #verifikasiSpjView .verifikasi-spj-table td {
+                display: block !important;
+                width: 100% !important;
+            }
+            #verifikasiSpjView .verifikasi-spj-table thead { display: none !important; }
+            #verifikasiSpjView .verifikasi-spj-table tr {
+                margin-bottom: .8rem !important;
+                border: 1px solid rgba(148,163,184,.35) !important;
+                border-radius: 1rem !important;
+                overflow: hidden !important;
+                background: rgba(255,255,255,.98) !important;
+                box-shadow: 0 14px 34px rgba(15,23,42,.08) !important;
+            }
+            #verifikasiSpjView .verifikasi-spj-table td {
+                border: 0 !important;
+                border-bottom: 1px solid rgba(226,232,240,.9) !important;
+                display: grid !important;
+                grid-template-columns: 98px minmax(0,1fr) !important;
+                gap: .65rem !important;
+                text-align: left !important;
+                padding: .72rem !important;
+            }
+            #verifikasiSpjView .verifikasi-spj-table td:last-child { border-bottom: 0 !important; }
+            #verifikasiSpjView .verifikasi-spj-table td::before {
+                content: attr(data-label);
+                font-weight: 900;
+                font-size: 10px;
+                color: #64748b;
+                text-transform: uppercase;
+                letter-spacing: .04em;
+            }
+            #verifikasiSpjView .verifikasi-spj-table .verif-no-cell {
+                display: none !important;
+            }
+            #verifikasiSpjView .verif-action-grid {
+                grid-template-columns: repeat(2, minmax(0,1fr)) !important;
+            }
+        }
+
+
     </style>
+
+
+    <style id="prime-mature-ui-v388">
+        /* =========================================================
+           UI PRIME MATURE v3.8.8
+           Desain matang: executive dashboard, focus state jelas,
+           mobile lebih stabil, dan print style tetap aman.
+        ========================================================= */
+        :root {
+            --prime-navy-950: #07111f;
+            --prime-navy-900: #0f172a;
+            --prime-navy-800: #13233a;
+            --prime-blue-700: #1e4b6e;
+            --prime-blue-600: #2563eb;
+            --prime-cyan-500: #06b6d4;
+            --prime-gold-500: #d6a84f;
+            --prime-emerald-600: #059669;
+            --prime-red-600: #dc2626;
+            --prime-surface: rgba(255, 255, 255, .88);
+            --prime-surface-solid: #ffffff;
+            --prime-line: rgba(148, 163, 184, .26);
+            --prime-text: #0f172a;
+            --prime-muted: #64748b;
+            --prime-shadow-sm: 0 8px 24px rgba(15, 23, 42, .07);
+            --prime-shadow-md: 0 18px 48px rgba(15, 23, 42, .12);
+            --prime-shadow-lg: 0 30px 80px rgba(15, 23, 42, .18);
+            --prime-radius: 22px;
+        }
+
+        @media screen {
+            * { scrollbar-width: thin; scrollbar-color: rgba(30,75,110,.45) rgba(226,232,240,.65); }
+            ::-webkit-scrollbar { width: 10px; height: 10px; }
+            ::-webkit-scrollbar-track { background: rgba(226,232,240,.62); border-radius: 999px; }
+            ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, rgba(30,75,110,.62), rgba(37,99,235,.46)); border-radius: 999px; border: 2px solid rgba(226,232,240,.62); }
+
+            html { background: #edf2f7; }
+            body {
+                min-height: 100vh;
+                font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif !important;
+                color: var(--prime-text) !important;
+                background:
+                    radial-gradient(circle at 12% 8%, rgba(214, 168, 79, .22), transparent 24rem),
+                    radial-gradient(circle at 92% 14%, rgba(37, 99, 235, .18), transparent 28rem),
+                    linear-gradient(135deg, #eef4fb 0%, #f8fafc 46%, #edf2f7 100%) !important;
+            }
+
+            body::before {
+                content: "";
+                position: fixed;
+                inset: 0 auto 0 0;
+                width: min(36vw, 520px);
+                background: linear-gradient(180deg, rgba(7,17,31,.10), rgba(30,75,110,.05), transparent);
+                pointer-events: none;
+                z-index: -1;
+            }
+
+            #loginView {
+                position: fixed !important;
+                background:
+                    linear-gradient(135deg, rgba(7, 17, 31, .94), rgba(19, 35, 58, .88)),
+                    radial-gradient(circle at 24% 18%, rgba(214,168,79,.36), transparent 22rem),
+                    radial-gradient(circle at 78% 78%, rgba(6,182,212,.24), transparent 22rem) !important;
+                padding: 1.25rem !important;
+            }
+            #loginView > div {
+                width: min(100%, 430px) !important;
+                border: 1px solid rgba(255,255,255,.34) !important;
+                border-top: 0 !important;
+                border-radius: 28px !important;
+                background: rgba(255,255,255,.92) !important;
+                backdrop-filter: blur(24px) saturate(1.25);
+                box-shadow: 0 34px 100px rgba(0,0,0,.34) !important;
+                overflow: hidden;
+                position: relative;
+            }
+            #loginView > div::before {
+                content: "";
+                position: absolute;
+                inset: 0 0 auto 0;
+                height: 7px;
+                background: linear-gradient(90deg, var(--prime-gold-500), var(--prime-cyan-500), var(--prime-blue-600));
+            }
+            #loginView h1 { color: var(--prime-navy-900) !important; letter-spacing: .025em !important; }
+            #loginView p { color: var(--prime-muted) !important; }
+
+            #mainAppContainer {
+                background: transparent !important;
+            }
+            #mainContent {
+                background: transparent !important;
+                scroll-behavior: smooth;
+            }
+
+            nav.no-print {
+                width: 17.5rem !important;
+                background:
+                    radial-gradient(circle at top left, rgba(214,168,79,.16), transparent 13rem),
+                    linear-gradient(180deg, var(--prime-navy-950), var(--prime-navy-800) 52%, var(--prime-navy-950)) !important;
+                border-right: 1px solid rgba(255,255,255,.10) !important;
+                box-shadow: 22px 0 58px rgba(15, 23, 42, .22) !important;
+            }
+            nav.no-print > div:first-child {
+                min-height: 86px;
+                background: linear-gradient(135deg, rgba(255,255,255,.11), rgba(255,255,255,.03)) !important;
+                border-bottom: 1px solid rgba(255,255,255,.10) !important;
+            }
+            nav.no-print > div:first-child .text-white {
+                font-size: 1.02rem !important;
+                letter-spacing: .035em !important;
+            }
+            nav.no-print button {
+                border-radius: 15px !important;
+                margin: 2px 0 !important;
+                transition: transform .18s ease, background .18s ease, box-shadow .18s ease, color .18s ease !important;
+            }
+            nav.no-print button:hover {
+                transform: translateX(4px);
+                background: rgba(255,255,255,.115) !important;
+                box-shadow: inset 0 0 0 1px rgba(255,255,255,.09);
+            }
+            nav.no-print button.bg-\[\#153650\],
+            nav.no-print button.text-white.border-blue-400,
+            nav.no-print button.text-white.border-emerald-400,
+            nav.no-print button.text-white.border-purple-400,
+            nav.no-print button.text-white.border-teal-400,
+            nav.no-print button.text-white.border-pink-400,
+            nav.no-print button.text-white.border-yellow-400,
+            nav.no-print button.text-white.border-lime-400 {
+                background: linear-gradient(135deg, rgba(255,255,255,.22), rgba(255,255,255,.08)) !important;
+                box-shadow: inset 0 0 0 1px rgba(255,255,255,.16), 0 14px 26px rgba(0,0,0,.18) !important;
+                color: #fff !important;
+            }
+            #userRoleDisplay, #mobileUserRole {
+                border-radius: 999px !important;
+                box-shadow: inset 0 0 0 1px rgba(255,255,255,.12), 0 8px 20px rgba(0,0,0,.14) !important;
+            }
+
+            #topbarMenu {
+                top: 0 !important;
+                background: rgba(255,255,255,.80) !important;
+                backdrop-filter: blur(20px) saturate(1.2);
+                border-bottom: 1px solid var(--prime-line) !important;
+                box-shadow: 0 14px 36px rgba(15,23,42,.08) !important;
+            }
+            #topbarMenu button {
+                border-radius: 999px !important;
+                border-color: rgba(148,163,184,.30) !important;
+                box-shadow: var(--prime-shadow-sm) !important;
+            }
+            #topbarMenu button.bg-blue-600 {
+                background: linear-gradient(135deg, var(--prime-navy-900), var(--prime-blue-700)) !important;
+                color: #fff !important;
+                border-color: rgba(255,255,255,.16) !important;
+            }
+
+            #formView, #spjView, #verifikasiSpjView, #laporanView,
+            #masterPaguView, #pendapatanView, #penarikanView, #pembiayaanView,
+            #bkuView, #bktView, #bksdView, #bkpView {
+                animation: primeFadeUp .28s ease both;
+            }
+            @keyframes primeFadeUp {
+                from { opacity: 0; transform: translateY(8px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+
+            .bg-white.shadow-xl.rounded-lg,
+            #formView .bg-white,
+            #spjView .bg-white,
+            #verifikasiSpjView .bg-white,
+            #laporanView .bg-white,
+            #masterPaguView .bg-white,
+            #pendapatanView .bg-white,
+            #penarikanView .bg-white,
+            #pembiayaanView .bg-white,
+            #bkuView .bg-white,
+            #bktView .bg-white,
+            #bksdView .bg-white,
+            #bkpView .bg-white {
+                border-radius: var(--prime-radius) !important;
+                border: 1px solid var(--prime-line) !important;
+                background: var(--prime-surface) !important;
+                backdrop-filter: blur(18px) saturate(1.12);
+                box-shadow: var(--prime-shadow-md) !important;
+            }
+
+            .bg-\[\#1e4b6e\], .bg-blue-800, .bg-emerald-600, .bg-purple-700, .bg-teal-600 {
+                background:
+                    radial-gradient(circle at 92% 20%, rgba(214,168,79,.20), transparent 12rem),
+                    linear-gradient(135deg, var(--prime-navy-900), var(--prime-blue-700)) !important;
+            }
+            .bg-\[\#1e4b6e\].sticky,
+            #spjView .bg-\[\#1e4b6e\],
+            #verifikasiSpjView .bg-\[\#1e4b6e\],
+            #laporanView .bg-\[\#1e4b6e\],
+            #masterPaguView .bg-blue-800,
+            #pendapatanView .bg-emerald-600,
+            #penarikanView .bg-purple-700,
+            #pembiayaanView .bg-teal-600,
+            #bkuView .bg-blue-800,
+            #bktView .bg-blue-800,
+            #bksdView .bg-blue-800,
+            #bkpView .bg-blue-800 {
+                border-bottom: 1px solid rgba(255,255,255,.12) !important;
+                position: relative;
+                overflow: hidden;
+            }
+            .bg-\[\#1e4b6e\].sticky::after,
+            #spjView .bg-\[\#1e4b6e\]::after,
+            #verifikasiSpjView .bg-\[\#1e4b6e\]::after,
+            #laporanView .bg-\[\#1e4b6e\]::after,
+            #masterPaguView .bg-blue-800::after,
+            #pendapatanView .bg-emerald-600::after,
+            #penarikanView .bg-purple-700::after,
+            #pembiayaanView .bg-teal-600::after,
+            #bkuView .bg-blue-800::after,
+            #bktView .bg-blue-800::after,
+            #bksdView .bg-blue-800::after,
+            #bkpView .bg-blue-800::after {
+                content: "";
+                position: absolute;
+                right: -3.5rem;
+                top: -5rem;
+                width: 15rem;
+                height: 15rem;
+                border-radius: 999px;
+                background: radial-gradient(circle, rgba(255,255,255,.18), rgba(255,255,255,0) 68%);
+                pointer-events: none;
+            }
+
+            #formView section {
+                padding: 1.15rem;
+                border: 1px solid rgba(148,163,184,.22);
+                border-radius: 20px;
+                background: linear-gradient(180deg, rgba(248,250,252,.78), rgba(255,255,255,.72));
+                box-shadow: 0 8px 26px rgba(15,23,42,.045);
+            }
+            #formView section h2 {
+                display: inline-flex;
+                align-items: center;
+                gap: .45rem;
+                padding: .38rem .72rem;
+                border-radius: 999px;
+                border: 1px solid rgba(30,75,110,.16);
+                background: rgba(30,75,110,.07);
+                color: var(--prime-blue-700) !important;
+            }
+            #belanjaList > div,
+            #savedDataList > div {
+                border-radius: 18px !important;
+                border-color: rgba(148,163,184,.24) !important;
+                box-shadow: 0 12px 30px rgba(15,23,42,.055) !important;
+                transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease !important;
+            }
+            #belanjaList > div:hover,
+            #savedDataList > div:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 18px 42px rgba(15,23,42,.09) !important;
+                border-color: rgba(37,99,235,.20) !important;
+            }
+
+            .form-input {
+                min-height: 42px;
+                border-radius: 14px !important;
+                border: 1px solid rgba(148,163,184,.38) !important;
+                background: rgba(255,255,255,.96) !important;
+                box-shadow: inset 0 1px 0 rgba(255,255,255,.92), 0 1px 2px rgba(15,23,42,.035) !important;
+            }
+            textarea.form-input { min-height: unset; }
+            .form-input:focus {
+                border-color: rgba(37,99,235,.74) !important;
+                box-shadow: 0 0 0 4px rgba(37,99,235,.13), 0 10px 26px rgba(37,99,235,.08) !important;
+            }
+            .form-input[readonly], .form-input:disabled {
+                background: rgba(241,245,249,.88) !important;
+                color: #475569 !important;
+            }
+            label {
+                color: #475569 !important;
+                letter-spacing: .015em;
+            }
+
+            button {
+                touch-action: manipulation;
+            }
+            button.action-btn,
+            #btnSave, #btnCetakPreview, #btnSavePagu, #btnSavePendapatan,
+            #btnSavePenarikan, #btnSavePembiayaan,
+            button[onclick="handleLogin()"] {
+                border-radius: 16px !important;
+                box-shadow: 0 16px 34px rgba(15,23,42,.14) !important;
+                transition: transform .18s ease, box-shadow .18s ease, filter .18s ease !important;
+            }
+            button.action-btn:hover,
+            #btnSave:hover, #btnCetakPreview:hover, #btnSavePagu:hover, #btnSavePendapatan:hover,
+            #btnSavePenarikan:hover, #btnSavePembiayaan:hover,
+            button[onclick="handleLogin()"]:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 24px 48px rgba(15,23,42,.20) !important;
+                filter: saturate(1.08);
+            }
+            #btnSave, .bg-green-600 { background: linear-gradient(135deg, #10b981, #047857) !important; }
+            #btnCetakPreview, button[onclick="handleLogin()"] { background: linear-gradient(135deg, var(--prime-navy-900), var(--prime-blue-700)) !important; }
+            #btnAddBelanja {
+                background: linear-gradient(135deg, rgba(37,99,235,.08), rgba(214,168,79,.12)) !important;
+                border-color: rgba(30,75,110,.28) !important;
+            }
+            .bg-red-600, .bg-red-500 { background: linear-gradient(135deg, #ef4444, #b91c1c) !important; }
+
+            .overflow-x-auto { border-radius: 18px; }
+            table {
+                border-radius: 16px !important;
+                overflow: hidden;
+                border-color: rgba(148,163,184,.28) !important;
+            }
+            thead {
+                background: linear-gradient(180deg, #f8fafc, #eef2f7) !important;
+            }
+            th {
+                color: #475569 !important;
+                letter-spacing: .055em;
+                font-weight: 800 !important;
+            }
+            tbody tr {
+                transition: background .14s ease, box-shadow .14s ease;
+            }
+            tbody tr:nth-child(even) { background: rgba(248,250,252,.56); }
+            tbody tr:hover { background: rgba(37,99,235,.055) !important; }
+            .border, .border-slate-200, .border-slate-300 { border-color: rgba(148,163,184,.28) !important; }
+
+            #laporanView .grid > div,
+            #lap_saldo_sumber_dana > div,
+            .bg-indigo-50, .bg-purple-50, .bg-orange-50, .bg-teal-50, .bg-blue-50,
+            .bg-slate-50.border.rounded-lg {
+                border-radius: 18px !important;
+                box-shadow: 0 12px 30px rgba(15,23,42,.055) !important;
+            }
+            #lap_total_masuk, #lap_total_keluar, #lap_saldo,
+            #lap_saldo_bank, #lap_saldo_tunai, #lap_pajak_potong, #lap_pajak_setor {
+                letter-spacing: -.02em;
+            }
+
+            #confirmModal { background: rgba(15,23,42,.54) !important; backdrop-filter: blur(8px); }
+            #confirmModal > div {
+                border-radius: 24px !important;
+                border: 1px solid rgba(255,255,255,.42) !important;
+                box-shadow: var(--prime-shadow-lg) !important;
+            }
+            #toast {
+                border-radius: 999px !important;
+                box-shadow: 0 22px 52px rgba(15,23,42,.26) !important;
+                backdrop-filter: blur(14px) saturate(1.2);
+            }
+
+            .chart-fallback {
+                position: absolute;
+                inset: .5rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                padding: 1rem;
+                border: 1px dashed rgba(148,163,184,.50);
+                border-radius: 18px;
+                background: rgba(248,250,252,.82);
+                color: #64748b;
+                font-size: .78rem;
+                font-weight: 700;
+            }
+
+            @media (max-width: 767px) {
+                #mainAppContainer { height: 100vh !important; }
+                nav.no-print {
+                    width: 100% !important;
+                    height: auto !important;
+                    max-height: 178px;
+                    border-right: 0 !important;
+                    border-bottom: 1px solid rgba(255,255,255,.10) !important;
+                }
+                nav.no-print > div:first-child { min-height: 68px; }
+                nav.no-print button:hover { transform: none; }
+                #formView, #spjView, #verifikasiSpjView, #laporanView,
+                #masterPaguView, #pendapatanView, #penarikanView, #pembiayaanView,
+                #bkuView, #bktView, #bksdView, #bkpView {
+                    padding-left: .85rem !important;
+                    padding-right: .85rem !important;
+                }
+                #formView section { padding: .9rem; }
+                .bg-white.shadow-xl.rounded-lg,
+                #formView .bg-white,
+                #spjView .bg-white,
+                #verifikasiSpjView .bg-white,
+                #laporanView .bg-white,
+                #masterPaguView .bg-white,
+                #pendapatanView .bg-white,
+                #penarikanView .bg-white,
+                #pembiayaanView .bg-white {
+                    border-radius: 18px !important;
+                }
+                #btnSave, #btnCetakPreview { width: 100%; }
+                #formView .flex.gap-4.pt-4.border-t { flex-direction: column; }
+            }
+        }
+    </style>
+
 </head>
 <body class="text-slate-800">
 
@@ -89,7 +1037,7 @@
         <!-- SIDEBAR NAV -->
         <nav class="no-print w-full md:w-64 bg-[#1e4b6e] flex-shrink-0 flex flex-col h-auto md:h-screen sticky top-0 z-50 shadow-xl transition-all">
             <div class="p-4 md:p-5 border-b border-blue-800 flex justify-between items-center shrink-0">
-                <div class="text-white font-black text-lg leading-tight tracking-wide">SISTEM PELAPORAN DESA <span class="text-[10px] font-normal opacity-70 block md:inline mt-1 md:mt-0">v0.2.2</span></div>
+                <div class="text-white font-black text-lg leading-tight tracking-wide">SISTEM PELAPORAN DESA <span class="text-[10px] font-normal opacity-70 block md:inline mt-1 md:mt-0">v3.8.8 Prime</span></div>
                 <div id="mobileUserRole" class="md:hidden text-[10px] bg-blue-800 text-white px-2 py-1 rounded font-bold uppercase">ROLE</div>
             </div>
             
@@ -102,6 +1050,7 @@
                 <button onclick="switchMainPage('penarikan')" id="nav_main_penarikan" class="non-ppkd-menu text-left px-4 py-2 rounded-md md:rounded-r-lg border-b-4 md:border-b-0 md:border-l-4 border-transparent text-purple-300 hover:text-white hover:bg-[#153650] transition whitespace-nowrap text-sm font-bold flex-shrink-0 hidden">🏧 Penarikan Bank</button>
                 <button onclick="switchMainPage('pembiayaan')" id="nav_main_pembiayaan" class="non-ppkd-menu text-left px-4 py-2 rounded-md md:rounded-r-lg border-b-4 md:border-b-0 md:border-l-4 border-transparent text-teal-300 hover:text-white hover:bg-[#153650] transition whitespace-nowrap text-sm font-bold flex-shrink-0 hidden">🏛️ Pembiayaan</button>
                 <button onclick="switchMainPage('spj')" id="nav_main_spj" class="text-left px-4 py-2 rounded-md md:rounded-r-lg border-b-4 md:border-b-0 md:border-l-4 border-transparent text-yellow-300 hover:text-white hover:bg-[#153650] transition whitespace-nowrap text-sm font-bold flex-shrink-0">📄 Laporan SPJ</button>
+                <button onclick="switchMainPage('verifikasiSpj')" id="nav_main_verifikasiSpj" class="text-left px-4 py-2 rounded-md md:rounded-r-lg border-b-4 md:border-b-0 md:border-l-4 border-transparent text-lime-300 hover:text-white hover:bg-[#153650] transition whitespace-nowrap text-sm font-bold flex-shrink-0">✅ Verifikasi SPJ</button>
                 
                 <div class="non-ppkd-menu hidden md:block text-[10px] font-bold text-blue-400 mt-2 px-4 uppercase tracking-widest border-b border-blue-800/50 pb-1 mb-1">Analitik</div>
                 <button onclick="switchMainPage('laporan')" id="nav_main_laporan" class="non-ppkd-menu text-left px-4 py-2 rounded-md md:rounded-r-lg border-b-4 md:border-b-0 md:border-l-4 border-transparent text-pink-300 hover:text-white hover:bg-[#153650] transition whitespace-nowrap text-sm font-bold flex-shrink-0 hidden">📈 Grafik Laporan</button>
@@ -164,6 +1113,42 @@
                                     </tr>
                                 </thead>
                                 <tbody id="spjDataList"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW VERIFIKASI SPJ -->
+            <div id="verifikasiSpjView" class="hidden max-w-full mx-auto px-3 md:px-5 lg:px-6 py-5 mt-2 no-print">
+                <div class="bg-white shadow-xl rounded-lg overflow-hidden border border-slate-200">
+                    <div class="bg-[#1e4b6e] text-white p-4 flex justify-between items-center">
+                        <div>
+                            <h1 class="text-lg font-bold uppercase tracking-tight">Verifikasi SPJ</h1>
+                            <p class="text-xs text-blue-200 opacity-80">Ringkasan status SPJ, catatan Bendahara, dan pembayaran untuk PPKD</p>
+                        </div>
+                    </div>
+                    <div class="p-4 md:p-6">
+                        <div class="bg-blue-50 border-l-4 border-blue-500 p-3 mb-4 rounded-r text-xs text-blue-800">
+                            PPKD hanya melihat SPJ miliknya sendiri. Kolom tanggal memakai <b>Tanggal SPP</b> dari form input. Catatan batal ACC SPJ tampil di <b>Kelengkapan SPJ</b>, sedangkan catatan batal ACC SPP/KWT tampil di kolom <b>Catatan Bendahara</b>.
+                        </div>
+                        <div class="verifikasi-table-wrap border border-slate-200 rounded-lg">
+                            <table class="verifikasi-spj-table w-full text-left text-xs border-collapse table-fixed">
+                                <thead class="bg-slate-100 text-[10px] uppercase text-slate-600">
+                                    <tr>
+                                        <th class="p-2 border border-slate-300 text-center">No</th>
+                                        <th class="p-2 border border-slate-300">Uraian / Kegiatan</th>
+                                        <th class="p-2 border border-slate-300">Nama PPKD</th>
+                                        <th class="p-2 border border-slate-300">Tgl SPP</th>
+                                        <th class="p-2 border border-slate-300">Dana</th>
+                                        <th class="p-2 border border-slate-300 text-right">Jumlah</th>
+                                        <th class="p-2 border border-slate-300">Kelengkapan SPJ</th>
+                                        <th class="p-2 border border-slate-300">Catatan Bendahara</th>
+                                        <th class="p-2 border border-slate-300 text-center">Bayar</th>
+                                        <th class="p-2 border border-slate-300 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="verifikasiSpjDataList"></tbody>
                             </table>
                         </div>
                     </div>
@@ -607,8 +1592,9 @@
                         </div>
                         <div class="bg-white p-4 rounded-lg border shadow-sm flex flex-col h-[600px]">
                             <div class="flex flex-col gap-2 mb-3 border-b pb-3">
-                                <div class="flex justify-between items-center">
+                                <div class="flex justify-between items-center gap-2">
                                     <h3 class="text-xs font-bold text-slate-500 uppercase">Riwayat SPP</h3>
+                                    <span id="sppCloudStatus" class="cloud-safe-badge cloud-safe-warn" title="Status koneksi data SPP">⏳ Google Sheet</span>
                                     <button id="btnAddSpp" onclick="resetForm()" class="action-btn bg-[#1e4b6e] text-white px-3 py-1.5 rounded text-[10px] font-bold hover:bg-[#153650] transition shadow hover:shadow-md flex items-center gap-1"><span>➕</span> Tambah Baru</button>
                                 </div>
                                 <div class="mt-1">
@@ -861,7 +1847,32 @@
             };
         }
 
+        // Gunakan URL Web App Apps Script berakhiran /exec. Jangan memakai URL library /macros/library/d/... karena itu bukan endpoint doGet/doPost.
+        // DEPLOY URL SUDAH DIPASANG: Web App URL Apps Script terbaru dari user.
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxmxE234SAdXc_IfzpWpTHYtY-h02ZRBnFxA9oFtk3RVdvJvJEi3RSyj7C5WsFWCnCqXw/exec'; 
+        function isStatusBayarAktif(value) { const v = String(value || '').toLowerCase().trim(); return value === true || value === 'true' || v === 'lunas' || v === 'sudah dibayar' || v === 'dibayar' || v === 'paid'; }
+        function formatDateForInput(value) {
+            if (!value) return '';
+            if (typeof value === 'string') {
+                const trimmed = value.trim();
+                const direct = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})/);
+                if (direct) return `${direct[1]}-${direct[2]}-${direct[3]}`;
+                const slash = trimmed.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+                if (slash) return `${slash[3]}-${String(slash[2]).padStart(2,'0')}-${String(slash[1]).padStart(2,'0')}`;
+            }
+            const d = new Date(value);
+            if (Number.isNaN(d.getTime())) return '';
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        }
+        // Alias kompatibilitas: beberapa renderer lama memanggil formatDateInput().
+        // Tanpa alias ini, data SPP sebenarnya sudah berhasil ditarik dari Sheet,
+        // tetapi render Verifikasi SPJ berhenti dengan error "formatDateInput is not defined".
+        function formatDateInput(value) { return formatDateForInput(value); }
+
+        function normalizeSppRecord(r) { r.tanggal = formatDateForInput(r.tanggal); r.tanggalBayar = formatDateForInput(r.tanggalBayar || r.tglBayar); r.statusAcc = (r.statusAcc === true || r.statusAcc === 'true'); r.spjAcc = (r.spjAcc === true || r.spjAcc === 'true'); r.statusBayar = (isStatusBayarAktif(r.statusBayar) || !!r.tanggalBayar); r.sppBatalMsg = r.sppBatalMsg || r.catatanBatalAcc || ''; r.spjBatalMsg = r.spjBatalMsg || r.catatanBatalSpj || ''; r.printLink = r.printLink || r.linkCetak || ''; r.tglSpj = formatDateForInput(r.tglSpj || r.tanggalSpj); return r; }
         const LOGO_URL = 'https://drive.google.com/uc?id=1udqyICVQgZildQdBCepEvUwnWQrJ7OAp';
 
         function getBukuKasHelperHTML(totalIn, totalOut, saldo, isTunai) {
@@ -884,12 +1895,25 @@
             transactions.forEach((t, idx) => {
                 saldo += t.masuk; saldo -= t.keluar; totalIn += t.masuk; totalOut += t.keluar;
                 const tgl = !isNaN(t.date.getTime()) ? t.date.toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) : '-';
-                html += `<tr class="hover:bg-slate-50 transition border-b border-slate-200 print:border-black"><td class="p-2 border-r border-slate-300 print:border-black text-center text-xs whitespace-nowrap">${idx + 1}</td><td class="p-2 border-r border-slate-300 print:border-black whitespace-nowrap text-xs">${tgl}</td><td class="p-2 border-r border-slate-300 print:border-black font-mono text-[11px] break-all">${t.ref}</td><td class="p-2 border-r border-slate-300 print:border-black text-xs"><span class="${t.masuk > 0 ? 'text-emerald-700' : 'text-slate-700'} block print:text-black">${t.uraian}</span></td><td class="p-2 border-r border-slate-300 print:border-black text-xs text-center"><span class="bg-blue-100 print:bg-transparent text-blue-800 print:text-black px-2 py-0.5 rounded font-bold">${t.sumber || ''}</span></td><td class="p-2 border-r border-slate-300 print:border-black text-right text-emerald-600 print:text-black whitespace-nowrap">${t.masuk > 0 ? formatRp(t.masuk) : '-'}</td><td class="p-2 border-r border-slate-300 print:border-black text-right text-red-600 print:text-black whitespace-nowrap">${t.keluar > 0 ? formatRp(t.keluar) : '-'}</td><td class="p-2 text-right text-blue-700 font-bold print:text-black whitespace-nowrap">${formatRp(saldo)}</td></tr>`;
+                const safeRef = escapeHtml(t.ref || '');
+                const safeUraian = escapeHtml(t.uraian || '');
+                const safeSumber = escapeHtml(t.sumber || '');
+                html += `<tr class="hover:bg-slate-50 transition border-b border-slate-200 print:border-black"><td class="p-2 border-r border-slate-300 print:border-black text-center text-xs whitespace-nowrap">${idx + 1}</td><td class="p-2 border-r border-slate-300 print:border-black whitespace-nowrap text-xs">${tgl}</td><td class="p-2 border-r border-slate-300 print:border-black font-mono text-[11px] break-all">${safeRef}</td><td class="p-2 border-r border-slate-300 print:border-black text-xs"><span class="${t.masuk > 0 ? 'text-emerald-700' : 'text-slate-700'} block print:text-black">${safeUraian}</span></td><td class="p-2 border-r border-slate-300 print:border-black text-xs text-center"><span class="bg-blue-100 print:bg-transparent text-blue-800 print:text-black px-2 py-0.5 rounded font-bold">${safeSumber}</span></td><td class="p-2 border-r border-slate-300 print:border-black text-right text-emerald-600 print:text-black whitespace-nowrap">${t.masuk > 0 ? formatRp(t.masuk) : '-'}</td><td class="p-2 border-r border-slate-300 print:border-black text-right text-red-600 print:text-black whitespace-nowrap">${t.keluar > 0 ? formatRp(t.keluar) : '-'}</td><td class="p-2 text-right text-blue-700 font-bold print:text-black whitespace-nowrap">${formatRp(saldo)}</td></tr>`;
             });
             tbody.innerHTML = html;
             tfoot.innerHTML = `<tr><td colspan="5" class="p-3 border border-slate-300 print:border-black text-right uppercase text-slate-700 print:text-black">Jumlah Total S.D Saat Ini</td><td class="p-3 border border-slate-300 print:border-black text-right text-emerald-600 print:text-black">${formatRp(totalIn)}</td><td class="p-3 border border-slate-300 print:border-black text-right text-red-600 print:text-black">${formatRp(totalOut)}</td><td class="p-3 border border-slate-300 print:border-black text-right text-blue-700 print:text-black text-base">${formatRp(saldo)}</td></tr>`;
             return { totalIn, totalOut, saldo };
         }
+
+
+        // Prime UX: tekan Enter di form login langsung masuk.
+        window.addEventListener('DOMContentLoaded', () => {
+            const pass = document.getElementById('login_password');
+            const role = document.getElementById('login_role');
+            [pass, role].forEach(el => el && el.addEventListener('keydown', (ev) => {
+                if (ev.key === 'Enter') handleLogin();
+            }));
+        });
 
         const SUMBER_DANA_OPTIONS = ["ADD", "SILPA ADD", "APBN", "SILPA APBN", "PARET", "SILPA PARET", "BANKAB", "BANGUB", "PAD", "SILPA PAD", "DLL", "BUNGA BANK", "SILPA BUNGA BANK"];
         const KEGIATAN_OPTIONS = [
@@ -981,26 +2005,26 @@
         }
 
         function switchMainPage(page) {
-            const sidebarPages = ['spp', 'pagu', 'pendapatan', 'penarikan', 'pembiayaan', 'spj', 'laporan'], topbarPages = ['bku', 'bkt', 'bksd', 'bkp'];
+            const sidebarPages = ['spp', 'pagu', 'pendapatan', 'penarikan', 'pembiayaan', 'spj', 'verifikasiSpj', 'laporan'], topbarPages = ['bku', 'bkt', 'bksd', 'bkp'];
             sidebarPages.forEach(p => {
                 const btn = document.getElementById('nav_main_' + p);
-                if(btn) { btn.classList.remove('bg-[#153650]', 'text-white', 'border-blue-400', 'border-emerald-400', 'border-purple-400', 'border-teal-400', 'border-pink-400', 'border-yellow-400'); btn.classList.add('border-transparent');
-                    if (p === 'pendapatan') btn.classList.add('text-emerald-300'); else if (p === 'penarikan') btn.classList.add('text-purple-300'); else if (p === 'pembiayaan') btn.classList.add('text-teal-300'); else if (p === 'spj') btn.classList.add('text-yellow-300'); else if (p === 'laporan') btn.classList.add('text-pink-300'); else btn.classList.add('text-blue-200');
+                if(btn) { btn.classList.remove('bg-[#153650]', 'text-white', 'border-blue-400', 'border-emerald-400', 'border-purple-400', 'border-teal-400', 'border-pink-400', 'border-yellow-400', 'border-lime-400'); btn.classList.add('border-transparent');
+                    if (p === 'pendapatan') btn.classList.add('text-emerald-300'); else if (p === 'penarikan') btn.classList.add('text-purple-300'); else if (p === 'pembiayaan') btn.classList.add('text-teal-300'); else if (p === 'spj') btn.classList.add('text-yellow-300'); else if (p === 'verifikasiSpj') btn.classList.add('text-lime-300'); else if (p === 'laporan') btn.classList.add('text-pink-300'); else btn.classList.add('text-blue-200');
                 }
             });
             topbarPages.forEach(p => { const btn = document.getElementById('nav_top_' + p); if(btn) { btn.classList.remove('bg-blue-600', 'text-white', 'border-blue-600'); btn.classList.add('bg-white', 'text-slate-600', 'border-slate-200'); } });
             if (sidebarPages.includes(page)) {
                 const activeBtn = document.getElementById('nav_main_' + page);
-                if(activeBtn) { activeBtn.classList.remove('text-blue-200', 'text-emerald-300', 'text-purple-300', 'text-teal-300', 'text-pink-300', 'text-yellow-300', 'border-transparent');
-                    let borderClass = 'border-blue-400'; if(page === 'pendapatan') borderClass = 'border-emerald-400'; else if(page === 'penarikan') borderClass = 'border-purple-400'; else if(page === 'pembiayaan') borderClass = 'border-teal-400'; else if(page === 'spj') borderClass = 'border-yellow-400'; else if(page === 'laporan') borderClass = 'border-pink-400';
+                if(activeBtn) { activeBtn.classList.remove('text-blue-200', 'text-emerald-300', 'text-purple-300', 'text-teal-300', 'text-pink-300', 'text-yellow-300', 'text-lime-300', 'border-transparent');
+                    let borderClass = 'border-blue-400'; if(page === 'pendapatan') borderClass = 'border-emerald-400'; else if(page === 'penarikan') borderClass = 'border-purple-400'; else if(page === 'pembiayaan') borderClass = 'border-teal-400'; else if(page === 'spj') borderClass = 'border-yellow-400'; else if(page === 'verifikasiSpj') borderClass = 'border-lime-400'; else if(page === 'laporan') borderClass = 'border-pink-400';
                     activeBtn.classList.add('bg-[#153650]', 'text-white', borderClass);
                 }
             } else if (topbarPages.includes(page)) {
                 const activeBtn = document.getElementById('nav_top_' + page);
                 if(activeBtn) { activeBtn.classList.remove('bg-white', 'text-slate-600', 'border-slate-200'); activeBtn.classList.add('bg-blue-600', 'text-white', 'border-blue-600'); }
             }
-            ['form', 'masterPagu', 'pendapatan', 'penarikan', 'pembiayaan', 'spj', 'bku', 'bkt', 'bksd', 'bkp', 'laporan', 'preview'].forEach(v => { const el = document.getElementById(v + 'View'); if(el) el.classList.add('hidden'); });
-            if(page === 'spp') document.getElementById('formView').classList.remove('hidden'); else if(page === 'pagu') document.getElementById('masterPaguView').classList.remove('hidden'); else if(page === 'pendapatan') document.getElementById('pendapatanView').classList.remove('hidden'); else if(page === 'penarikan') document.getElementById('penarikanView').classList.remove('hidden'); else if(page === 'pembiayaan') document.getElementById('pembiayaanView').classList.remove('hidden'); else if(page === 'spj') { document.getElementById('spjView').classList.remove('hidden'); renderSPJ(); } else if(page === 'bku') { document.getElementById('bkuView').classList.remove('hidden'); renderBKU(); } else if(page === 'bkt') { document.getElementById('bktView').classList.remove('hidden'); renderBKT(); } else if(page === 'bksd') { document.getElementById('bksdView').classList.remove('hidden'); renderBKSD(); } else if(page === 'bkp') { document.getElementById('bkpView').classList.remove('hidden'); renderBKP(); } else if(page === 'laporan') { document.getElementById('laporanView').classList.remove('hidden'); renderLaporan(); }
+            ['form', 'masterPagu', 'pendapatan', 'penarikan', 'pembiayaan', 'spj', 'verifikasiSpj', 'bku', 'bkt', 'bksd', 'bkp', 'laporan', 'preview'].forEach(v => { const el = document.getElementById(v + 'View'); if(el) el.classList.add('hidden'); });
+            if(page === 'spp') document.getElementById('formView').classList.remove('hidden'); else if(page === 'pagu') document.getElementById('masterPaguView').classList.remove('hidden'); else if(page === 'pendapatan') document.getElementById('pendapatanView').classList.remove('hidden'); else if(page === 'penarikan') document.getElementById('penarikanView').classList.remove('hidden'); else if(page === 'pembiayaan') document.getElementById('pembiayaanView').classList.remove('hidden'); else if(page === 'spj') { document.getElementById('spjView').classList.remove('hidden'); renderSPJ(); } else if(page === 'verifikasiSpj') { document.getElementById('verifikasiSpjView').classList.remove('hidden'); renderVerifikasiSPJ(); } else if(page === 'bku') { document.getElementById('bkuView').classList.remove('hidden'); renderBKU(); } else if(page === 'bkt') { document.getElementById('bktView').classList.remove('hidden'); renderBKT(); } else if(page === 'bksd') { document.getElementById('bksdView').classList.remove('hidden'); renderBKSD(); } else if(page === 'bkp') { document.getElementById('bkpView').classList.remove('hidden'); renderBKP(); } else if(page === 'laporan') { document.getElementById('laporanView').classList.remove('hidden'); renderLaporan(); }
         }
 
         function angkaTerbilang(angka) {
@@ -1013,44 +2037,197 @@
 
         const safeSetText = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
         const safeGetVal = (id) => document.getElementById(id)?.value || '';
+        function safeUrl(url) {
+            const value = String(url || '').trim();
+            if (!value) return '';
+            try {
+                const parsed = new URL(value, window.location.origin);
+                return ['http:', 'https:', 'mailto:'].includes(parsed.protocol) ? value : '';
+            } catch (e) { return ''; }
+        }
+        function escapeHtml(value) {
+            return String(value || '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+        }
+        async function postToBackendOrFail(action, payload) {
+            if (!SCRIPT_URL) throw new Error('SCRIPT_URL belum diisi. Data tidak boleh disimpan secara lokal/palsu.');
+            const res = await fetch(SCRIPT_URL + '?action=' + encodeURIComponent(action), {
+                method: 'POST',
+                body: JSON.stringify(payload || {}),
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+            });
+            const text = await res.text();
+            let out = {};
+            try { out = text ? JSON.parse(text) : {}; } catch(e) { throw new Error('Respon backend bukan JSON valid: ' + text.slice(0, 120)); }
+            if (out.status && out.status !== 'success') throw new Error(out.message || 'Backend menolak perubahan.');
+            return out;
+        }
+
+        // Cloud Safe v3.8.13: semua data utama wajib berasal dari backend Google Sheet.
+        // Tidak ada fallback ke localStorage/dummy. Loader ini hanya membuat pembacaan lebih tahan terhadap variasi format respons Apps Script.
+        const CLOUD_DATA_STATUS = {
+            spp: { source: 'Google Sheet', ok: false, count: 0, message: 'Belum dimuat' },
+            pagu: { source: 'Google Sheet', ok: false, count: 0, message: 'Belum dimuat' },
+            pendapatan: { source: 'Google Sheet', ok: false, count: 0, message: 'Belum dimuat' },
+            penarikan: { source: 'Google Sheet', ok: false, count: 0, message: 'Belum dimuat' },
+            pembiayaan: { source: 'Google Sheet', ok: false, count: 0, message: 'Belum dimuat' },
+            pajak: { source: 'Google Sheet', ok: false, count: 0, message: 'Belum dimuat' }
+        };
+        window.CLOUD_DATA_STATUS = CLOUD_DATA_STATUS;
+
+        function setCloudStatus(key, ok, count, message) {
+            const info = CLOUD_DATA_STATUS[key] || { source: 'Google Sheet' };
+            info.ok = !!ok;
+            info.count = Number(count || 0);
+            info.message = message || (ok ? 'Tersambung' : 'Gagal memuat');
+            CLOUD_DATA_STATUS[key] = info;
+            if (key === 'spp') {
+                const badge = document.getElementById('sppCloudStatus');
+                if (badge) {
+                    badge.classList.remove('cloud-safe-ok', 'cloud-safe-warn', 'cloud-safe-err');
+                    badge.classList.add(ok ? 'cloud-safe-ok' : 'cloud-safe-err');
+                    badge.textContent = ok ? `☁️ Sheet: ${info.count}` : '⚠️ Sheet gagal';
+                    badge.title = info.message;
+                }
+            }
+        }
+
+        function extractArrayFromBackendResponse(raw, preferredKeys) {
+            if (Array.isArray(raw)) return raw;
+            if (!raw || typeof raw !== 'object') return [];
+            const keys = preferredKeys || ['data', 'records', 'rows', 'items', 'result'];
+            for (const key of keys) {
+                if (Array.isArray(raw[key])) return raw[key];
+            }
+            if (raw.status === 'success') {
+                for (const value of Object.values(raw)) {
+                    if (Array.isArray(value)) return value;
+                }
+            }
+            return [];
+        }
+
+        async function fetchBackendJson(url) {
+            const res = await fetch(url, { cache: 'no-store' });
+            const text = await res.text();
+            if (!res.ok) throw new Error(`HTTP ${res.status}: ${text.slice(0, 120)}`);
+            try { return text ? JSON.parse(text) : []; }
+            catch (e) { throw new Error('Respon backend bukan JSON valid: ' + text.slice(0, 160)); }
+        }
+
+        async function fetchBackendArrayStrict(key, endpoints, preferredKeys) {
+            if (!SCRIPT_URL) throw new Error('SCRIPT_URL belum diisi. Data tidak boleh dibaca dari penyimpanan lokal/palsu.');
+            let lastError = null;
+            for (const endpoint of endpoints) {
+                try {
+                    const url = endpoint ? SCRIPT_URL + endpoint : SCRIPT_URL;
+                    const raw = await fetchBackendJson(url);
+                    if (raw && raw.status && raw.status !== 'success' && !Array.isArray(raw)) {
+                        lastError = new Error(raw.message || `Backend menolak endpoint ${endpoint || '(default)'}`);
+                        continue;
+                    }
+                    const arr = extractArrayFromBackendResponse(raw, preferredKeys);
+                    if (Array.isArray(arr)) {
+                        setCloudStatus(key, true, arr.length, `Berhasil memuat ${arr.length} data dari Google Sheet via ${endpoint || 'default endpoint'}.`);
+                        return arr;
+                    }
+                } catch (err) {
+                    lastError = err;
+                    console.warn(`[Cloud Safe] Gagal memuat ${key} dari endpoint ${endpoint || '(default)'}`, err);
+                }
+            }
+            throw lastError || new Error('Backend tidak mengembalikan array data.');
+        }
+
+        function isOwnedByCurrentPpkd(r) {
+            if (currentUserRole !== 'ppkd') return true;
+            const jabatan = String(currentPpkdJabatan || '').trim().toLowerCase();
+            const recJabatan = String(r?.pejabat?.jabatanPpkd || '').trim().toLowerCase();
+            return !jabatan || recJabatan === jabatan;
+        }
         function formatRp(n) { return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2 }).format(n || 0); }
         function fmtPjk(n) { return (n && n > 0) ? formatRp(n) : '-'; }
 
         async function loadDataFromCloud() {
             const listContainer = document.getElementById('savedDataList');
-            if(!SCRIPT_URL) { savedRecords = JSON.parse(localStorage.getItem('spp_records_pangek_v5') || '[]'); renderSavedData(); return; }
-            if(listContainer) listContainer.innerHTML = '<div class="text-center p-4 text-blue-500 font-bold animate-pulse">Memuat Data SPP...</div>';
+            if(!SCRIPT_URL) {
+                savedRecords = [];
+                setCloudStatus('spp', false, 0, 'SCRIPT_URL belum diisi. Data SPP tidak dibaca dari localStorage/dummy.');
+                renderSavedData(); renderSPJ(); renderVerifikasiSPJ(); calculate();
+                showToast('SCRIPT_URL belum diisi. Data SPP tidak dibaca dari penyimpanan lokal.', true);
+                return;
+            }
+            if (SCRIPT_URL.includes('/macros/library/')) {
+                savedRecords = [];
+                const msg = 'SCRIPT_URL memakai URL Library Apps Script. Pakai Web App URL yang berakhiran /exec.';
+                setCloudStatus('spp', false, 0, msg);
+                if(listContainer) listContainer.innerHTML = `<div class="cloud-safe-panel text-center text-red-700 text-xs font-bold">⚠️ Data SPP gagal dimuat dari Google Sheet.<br><span class="font-normal text-red-600">${escapeHtml(msg)}</span><br><span class="font-normal text-slate-500">Buka Apps Script → Deploy → Manage deployments → salin Web app URL.</span></div>`;
+                renderSPJ(); renderVerifikasiSPJ(); calculate();
+                showToast(msg, true);
+                return;
+            }
+            if(listContainer) listContainer.innerHTML = '<div class="text-center p-4 text-blue-500 font-bold animate-pulse">Memuat Data SPP dari Google Sheet...</div>';
+
+            let data = [];
             try {
-                const res = await fetch(SCRIPT_URL); const data = await res.json();
-                savedRecords = (Array.isArray(data) ? data : []).map(r => { if (r.statusAcc === undefined && r.items && r.items.length > 0 && r.items[0]._statusAcc !== undefined) { r.statusAcc = r.items[0]._statusAcc; } r.statusAcc = (r.statusAcc === true || r.statusAcc === "true"); return r; });
-                renderSavedData(); localStorage.setItem('spp_records_pangek_v5', JSON.stringify(savedRecords));
-            } catch(e) { savedRecords = JSON.parse(localStorage.getItem('spp_records_pangek_v5') || '[]'); renderSavedData(); }
+                // Endpoint pertama sengaja memakai default karena versi lama yang terbukti jalan memakai fetch(SCRIPT_URL).
+                // Endpoint action disiapkan sebagai cadangan bila backend Apps Script diubah menjadi action-based.
+                data = await fetchBackendArrayStrict('spp', ['', '?action=get_spp', '?action=get_data', '?action=list_spp'], ['data', 'spp', 'records', 'rows', 'items', 'result']);
+                savedRecords = data.map(r => {
+                    if (r.statusAcc === undefined && r.items && r.items.length > 0 && r.items[0]._statusAcc !== undefined) { r.statusAcc = r.items[0]._statusAcc; }
+                    return normalizeSppRecord(r);
+                });
+            } catch(e) {
+                savedRecords = [];
+                setCloudStatus('spp', false, 0, 'Gagal memuat Data SPP dari Google Sheet: ' + e.message);
+                if(listContainer) listContainer.innerHTML = `<div class="cloud-safe-panel text-center text-red-700 text-xs font-bold">⚠️ Data SPP gagal dimuat dari Google Sheet.<br><span class="font-normal text-red-600">${escapeHtml(e.message)}</span><br><span class="font-normal text-slate-500">Aplikasi tidak memakai data dummy/localStorage.</span></div>`;
+                renderSPJ(); renderVerifikasiSPJ(); calculate();
+                showToast('Gagal memuat Data SPP dari Google Sheet: ' + e.message, true);
+                return;
+            }
+
+            try {
+                renderSavedData();
+                renderSPJ();
+                renderVerifikasiSPJ();
+            } catch(renderErr) {
+                console.error('[Cloud Safe] Data SPP berhasil dimuat, tetapi renderer gagal:', renderErr);
+                setCloudStatus('spp', true, savedRecords.length, `Data SPP berhasil dimuat, tetapi ada error tampilan: ${renderErr.message}`);
+                if(listContainer && savedRecords.length) {
+                    try { renderSavedData(); } catch(e) {}
+                }
+                showToast('Data SPP berhasil dimuat, tetapi tampilan perlu diperbaiki: ' + renderErr.message, true);
+            }
             calculate();
         }
 
         async function loadPaguFromCloud() {
-            if(!SCRIPT_URL) { paguRecords = JSON.parse(localStorage.getItem('spp_pagu_pangek_v1') || '[]'); renderPaguData(); return; }
-            try { const res = await fetch(SCRIPT_URL + '?action=get_pagu'); const data = await res.json(); if(data.length > 0 && data[0].noSpp !== undefined) return; paguRecords = data; renderPaguData(); localStorage.setItem('spp_pagu_pangek_v1', JSON.stringify(paguRecords)); } catch(e) { paguRecords = JSON.parse(localStorage.getItem('spp_pagu_pangek_v1') || '[]'); renderPaguData(); }
+            if(!SCRIPT_URL) { paguRecords = []; setCloudStatus('pagu', false, 0, 'SCRIPT_URL belum diisi.'); renderPaguData(); showToast('SCRIPT_URL belum diisi. Data pagu tidak dibaca dari penyimpanan lokal.', true); return; }
+            try {
+                const data = await fetchBackendArrayStrict('pagu', ['?action=get_pagu'], ['data', 'pagu', 'records', 'rows', 'items', 'result']);
+                if(data.length > 0 && data[0].noSpp !== undefined) throw new Error('Endpoint pagu mengembalikan data SPP. Periksa doGet Apps Script untuk action=get_pagu.');
+                paguRecords = data;
+                renderPaguData();
+            } catch(e) { paguRecords = []; setCloudStatus('pagu', false, 0, e.message); renderPaguData(); showToast('Gagal memuat Pagu dari Google Sheet: ' + e.message, true); }
         }
 
         async function loadPendapatanFromCloud() {
-            if(!SCRIPT_URL) { pendapatanRecords = JSON.parse(localStorage.getItem('spp_pendapatan_pangek_v1') || '[]'); renderPendapatanData(); return; }
-            try { const res = await fetch(SCRIPT_URL + '?action=get_pendapatan'); const data = await res.json(); pendapatanRecords = data; renderPendapatanData(); localStorage.setItem('spp_pendapatan_pangek_v1', JSON.stringify(pendapatanRecords)); } catch(e) { pendapatanRecords = JSON.parse(localStorage.getItem('spp_pendapatan_pangek_v1') || '[]'); renderPendapatanData(); }
+            if(!SCRIPT_URL) { pendapatanRecords = []; setCloudStatus('pendapatan', false, 0, 'SCRIPT_URL belum diisi.'); renderPendapatanData(); showToast('SCRIPT_URL belum diisi. Data pendapatan tidak dibaca dari penyimpanan lokal.', true); return; }
+            try { const data = await fetchBackendArrayStrict('pendapatan', ['?action=get_pendapatan'], ['data', 'pendapatan', 'records', 'rows', 'items', 'result']); pendapatanRecords = data; renderPendapatanData(); } catch(e) { pendapatanRecords = []; setCloudStatus('pendapatan', false, 0, e.message); renderPendapatanData(); showToast('Gagal memuat Pendapatan dari Google Sheet: ' + e.message, true); }
         }
 
         async function loadPenarikanFromCloud() {
-            if(!SCRIPT_URL) { penarikanRecords = JSON.parse(localStorage.getItem('spp_penarikan_pangek_v1') || '[]'); renderPenarikanData(); return; }
-            try { const res = await fetch(SCRIPT_URL + '?action=get_penarikan'); const data = await res.json(); penarikanRecords = data; renderPenarikanData(); localStorage.setItem('spp_penarikan_pangek_v1', JSON.stringify(penarikanRecords)); } catch(e) { penarikanRecords = JSON.parse(localStorage.getItem('spp_penarikan_pangek_v1') || '[]'); renderPenarikanData(); }
+            if(!SCRIPT_URL) { penarikanRecords = []; setCloudStatus('penarikan', false, 0, 'SCRIPT_URL belum diisi.'); renderPenarikanData(); showToast('SCRIPT_URL belum diisi. Data penarikan tidak dibaca dari penyimpanan lokal.', true); return; }
+            try { const data = await fetchBackendArrayStrict('penarikan', ['?action=get_penarikan'], ['data', 'penarikan', 'records', 'rows', 'items', 'result']); penarikanRecords = data; renderPenarikanData(); } catch(e) { penarikanRecords = []; setCloudStatus('penarikan', false, 0, e.message); renderPenarikanData(); showToast('Gagal memuat Penarikan dari Google Sheet: ' + e.message, true); }
         }
 
         async function loadPembiayaanFromCloud() {
-            if(!SCRIPT_URL) { pembiayaanRecords = JSON.parse(localStorage.getItem('spp_pembiayaan_pangek_v1') || '[]'); renderPembiayaanData(); return; }
-            try { const res = await fetch(SCRIPT_URL + '?action=get_pembiayaan'); const data = await res.json(); pembiayaanRecords = data; renderPembiayaanData(); localStorage.setItem('spp_pembiayaan_pangek_v1', JSON.stringify(pembiayaanRecords)); } catch(e) { pembiayaanRecords = JSON.parse(localStorage.getItem('spp_pembiayaan_pangek_v1') || '[]'); renderPembiayaanData(); }
+            if(!SCRIPT_URL) { pembiayaanRecords = []; setCloudStatus('pembiayaan', false, 0, 'SCRIPT_URL belum diisi.'); renderPembiayaanData(); showToast('SCRIPT_URL belum diisi. Data pembiayaan tidak dibaca dari penyimpanan lokal.', true); return; }
+            try { const data = await fetchBackendArrayStrict('pembiayaan', ['?action=get_pembiayaan'], ['data', 'pembiayaan', 'records', 'rows', 'items', 'result']); pembiayaanRecords = data; renderPembiayaanData(); } catch(e) { pembiayaanRecords = []; setCloudStatus('pembiayaan', false, 0, e.message); renderPembiayaanData(); showToast('Gagal memuat Pembiayaan dari Google Sheet: ' + e.message, true); }
         }
 
         async function loadSetoranPajakFromCloud() {
-            if(!SCRIPT_URL) { setoranPajakRecords = JSON.parse(localStorage.getItem('spp_setoran_pajak_v1') || '[]'); renderBKP(); return; }
-            try { const res = await fetch(SCRIPT_URL + '?action=get_setoran_pajak'); const data = await res.json(); setoranPajakRecords = data; renderBKP(); localStorage.setItem('spp_setoran_pajak_v1', JSON.stringify(setoranPajakRecords)); } catch(e) { setoranPajakRecords = JSON.parse(localStorage.getItem('spp_setoran_pajak_v1') || '[]'); renderBKP(); }
+            if(!SCRIPT_URL) { setoranPajakRecords = []; setCloudStatus('pajak', false, 0, 'SCRIPT_URL belum diisi.'); renderSetoranPajakData(); showToast('SCRIPT_URL belum diisi. Data setoran pajak tidak dibaca dari penyimpanan lokal.', true); return; }
+            try { const data = await fetchBackendArrayStrict('pajak', ['?action=get_setoran_pajak'], ['data', 'setoranPajak', 'pajak', 'records', 'rows', 'items', 'result']); setoranPajakRecords = data; renderSetoranPajakData(); } catch(e) { setoranPajakRecords = []; setCloudStatus('pajak', false, 0, e.message); renderSetoranPajakData(); showToast('Gagal memuat Setoran Pajak dari Google Sheet: ' + e.message, true); }
         }
 
         async function saveSetoranPajakData() {
@@ -1068,7 +2245,6 @@
             
             const rec = { id: Date.now(), idPotongan: idPotongan, tanggal: tgl, jenis: jenis, uraian: uraian, ntpn: ntpn, nominal: nominal, linkBukti: linkBukti };
             setoranPajakRecords.unshift(rec); 
-            localStorage.setItem('spp_setoran_pajak_v1', JSON.stringify(setoranPajakRecords)); 
             renderBKP();
             refreshSemuaLaporan();
             
@@ -1091,7 +2267,6 @@
         function deleteSetoranPajakRec(id) {
             showConfirm('Yakin hapus data penyetoran pajak ini?', async () => {
                 setoranPajakRecords = setoranPajakRecords.filter(x => x.id.toString() !== id.toString()); 
-                localStorage.setItem('spp_setoran_pajak_v1', JSON.stringify(setoranPajakRecords)); 
                 renderBKP();
                 refreshSemuaLaporan();
                 
@@ -1109,7 +2284,7 @@
             if(!tgl || !uraian || nominal <= 0) return showToast('Data tidak valid!', true);
             const btnSave = document.getElementById('btnSavePembiayaan'); const origText = btnSave.innerHTML; btnSave.innerHTML = '⏳ Menyimpan...'; btnSave.disabled = true;
             const rec = { id: Date.now(), tanggal: tgl, jenis: jenis, sumberDana: sumber, uraian: uraian, nominal: nominal };
-            pembiayaanRecords.unshift(rec); localStorage.setItem('spp_pembiayaan_pangek_v1', JSON.stringify(pembiayaanRecords)); renderPembiayaanData();
+            pembiayaanRecords.unshift(rec); renderPembiayaanData();
             if(SCRIPT_URL) { try { await fetch(SCRIPT_URL + '?action=save_pembiayaan', { method: 'POST', body: JSON.stringify(rec), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); } catch(e) {} }
             btnSave.innerHTML = origText; btnSave.disabled = false; document.getElementById('in_pembiayaan_uraian').value = ''; document.getElementById('in_pembiayaan_nominal').value = '0';
             showToast('Pembiayaan berhasil disimpan');
@@ -1129,8 +2304,7 @@
 
         function deletePembiayaanRec(id) {
             showConfirm('Yakin hapus data pembiayaan ini? Data Buku Kas akan menyesuaikan otomatis.', async () => {
-                pembiayaanRecords = pembiayaanRecords.filter(x => x.id.toString() !== id.toString());
-                localStorage.setItem('spp_pembiayaan_pangek_v1', JSON.stringify(pembiayaanRecords)); renderPembiayaanData();
+                pembiayaanRecords = pembiayaanRecords.filter(x => x.id.toString() !== id.toString()); renderPembiayaanData();
                 if (SCRIPT_URL) { try { await fetch(SCRIPT_URL + '?action=delete_pembiayaan', { method: 'POST', body: JSON.stringify({ id: id }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); } catch(e) {} }
                 showToast('Data pembiayaan dihapus', true);
             });
@@ -1141,7 +2315,7 @@
             if(!tgl || !uraian || nominal <= 0) return showToast('Data tidak valid!', true);
             const btnSave = document.getElementById('btnSavePenarikan'); const origText = btnSave.innerHTML; btnSave.innerHTML = '⏳ Menyimpan...'; btnSave.disabled = true;
             const rec = { id: Date.now(), tanggal: tgl, sumberDana: sumber, uraian: uraian, nominal: nominal };
-            penarikanRecords.unshift(rec); localStorage.setItem('spp_penarikan_pangek_v1', JSON.stringify(penarikanRecords)); renderPenarikanData();
+            penarikanRecords.unshift(rec); renderPenarikanData();
             if(SCRIPT_URL) { try { await fetch(SCRIPT_URL + '?action=save_penarikan', { method: 'POST', body: JSON.stringify(rec), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); } catch(e) {} }
             btnSave.innerHTML = origText; btnSave.disabled = false; document.getElementById('in_penarikan_uraian').value = ''; document.getElementById('in_penarikan_nominal').value = '0';
             showToast('Penarikan berhasil disimpan');
@@ -1160,7 +2334,7 @@
 
         function deletePenarikanRec(id) {
             showConfirm('Yakin hapus data penarikan ini?', async () => {
-                penarikanRecords = penarikanRecords.filter(x => x.id.toString() !== id.toString()); localStorage.setItem('spp_penarikan_pangek_v1', JSON.stringify(penarikanRecords)); renderPenarikanData();
+                penarikanRecords = penarikanRecords.filter(x => x.id.toString() !== id.toString()); renderPenarikanData();
                 if (SCRIPT_URL) { try { await fetch(SCRIPT_URL + '?action=delete_penarikan', { method: 'POST', body: JSON.stringify({ id: id }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); } catch(e) {} }
                 showToast('Data penarikan dihapus', true);
             });
@@ -1171,7 +2345,7 @@
             if(!tgl || !uraian || nominal <= 0) return showToast('Data tidak valid!', true);
             const btnSave = document.getElementById('btnSavePendapatan'); const origText = btnSave.innerHTML; btnSave.innerHTML = '⏳ Menyimpan...'; btnSave.disabled = true;
             const rec = { id: Date.now(), tanggal: tgl, sumberDana: sumber, uraian: uraian, nominal: nominal };
-            pendapatanRecords.unshift(rec); localStorage.setItem('spp_pendapatan_pangek_v1', JSON.stringify(pendapatanRecords)); renderPendapatanData();
+            pendapatanRecords.unshift(rec); renderPendapatanData();
             if(SCRIPT_URL) { try { await fetch(SCRIPT_URL + '?action=save_pendapatan', { method: 'POST', body: JSON.stringify(rec), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); } catch(e) {} }
             btnSave.innerHTML = origText; btnSave.disabled = false; document.getElementById('in_pendapatan_uraian').value = ''; document.getElementById('in_pendapatan_nominal').value = '0';
             showToast('Pendapatan berhasil disimpan');
@@ -1190,7 +2364,7 @@
 
         function deletePendapatanRec(id) {
             showConfirm('Yakin hapus data pendapatan ini?', async () => {
-                pendapatanRecords = pendapatanRecords.filter(x => x.id.toString() !== id.toString()); localStorage.setItem('spp_pendapatan_pangek_v1', JSON.stringify(pendapatanRecords)); renderPendapatanData();
+                pendapatanRecords = pendapatanRecords.filter(x => x.id.toString() !== id.toString()); renderPendapatanData();
                 if (SCRIPT_URL) { try { await fetch(SCRIPT_URL + '?action=delete_pendapatan', { method: 'POST', body: JSON.stringify({ id: id }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); } catch(e) {} }
                 showToast('Data pendapatan dihapus', true);
             });
@@ -1210,8 +2384,7 @@
             if(!keg || !jumlah || jumlah <= 0) return showToast('Data tidak valid!', true);
             const btnSave = document.getElementById('btnSavePagu'); const origText = btnSave.innerHTML; btnSave.innerHTML = '⏳ Menyimpan...'; btnSave.disabled = true;
             const rec = { id: Date.now(), kegiatan: keg, bidang: safeGetVal('pagu_bidang'), subBidang: safeGetVal('pagu_subBidang'), pagu: jumlah };
-            const existIndex = paguRecords.findIndex(p => p.kegiatan === keg); if (existIndex > -1) { rec.id = paguRecords[existIndex].id; paguRecords[existIndex] = rec; } else { paguRecords.unshift(rec); }
-            localStorage.setItem('spp_pagu_pangek_v1', JSON.stringify(paguRecords)); renderPaguData();
+            const existIndex = paguRecords.findIndex(p => p.kegiatan === keg); if (existIndex > -1) { rec.id = paguRecords[existIndex].id; paguRecords[existIndex] = rec; } else { paguRecords.unshift(rec); } renderPaguData();
             if(SCRIPT_URL) { try { await fetch(SCRIPT_URL + '?action=save_pagu', { method: 'POST', body: JSON.stringify(rec), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); } catch(e) {} }
             btnSave.innerHTML = origText; btnSave.disabled = false; autoCalculateLalu(); 
             showToast('Pagu Anggaran Berhasil Disimpan!');
@@ -1229,7 +2402,7 @@
 
         function deletePaguRec(id, namaKeg) {
             showConfirm(`Yakin hapus pagu untuk:\n${namaKeg}?`, async () => {
-                paguRecords = paguRecords.filter(x => x.id.toString() !== id.toString()); localStorage.setItem('spp_pagu_pangek_v1', JSON.stringify(paguRecords)); renderPaguData();
+                paguRecords = paguRecords.filter(x => x.id.toString() !== id.toString()); renderPaguData();
                 if (SCRIPT_URL) { try { await fetch(SCRIPT_URL + '?action=delete_pagu', { method: 'POST', body: JSON.stringify({ id: id }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); } catch(e) {} }
                 autoCalculateLalu();
                 showToast('Pagu Anggaran Dihapus', true);
@@ -1462,43 +2635,107 @@ function getBelanjaOptionsHTML(selectedValue) {
             const keg = safeGetVal('in_kegiatan_select');
             if(!keg) return showToast('Pilih kegiatan terlebih dahulu!', true);
             if(parseFloat(safeGetVal('in_pagu')) <= 0) return showToast('Pagu Anggaran untuk kegiatan ini masih 0. Atur di Master Pagu.', true);
+            if(!SCRIPT_URL) return showToast('SCRIPT_URL belum diisi. Data tidak disimpan lokal agar tidak terjadi data palsu.', true);
             
-            const btnSave = document.getElementById('btnSave'); const originalText = btnSave.innerHTML; btnSave.innerHTML = '⏳ Menyimpan...'; btnSave.disabled = true; btnSave.classList.add('opacity-75', 'cursor-not-allowed');
-            let itemsToSave = JSON.parse(JSON.stringify(belanjaItems)); let isAcc = currentUserRole === 'bendahara' ? currentIsAcc : false; if (itemsToSave.length > 0) itemsToSave[0]._statusAcc = isAcc; 
-
-            // Ambil nomor dari input field
-            let finalNoSpp = safeGetVal('display_spp_no');
-            if(!finalNoSpp) finalNoSpp = '001';
-
-            const rec = { id: currentEditId || Date.now(), noSpp: finalNoSpp, bulan: safeGetVal('in_bulan'), tahun: safeGetVal('in_tahun'), tanggal: safeGetVal('in_tanggal'), bidang: safeGetVal('in_bidang'), subBidang: safeGetVal('in_subBidang'), kegiatan: keg, sumberDana: safeGetVal('in_sumberDana'), pagu: safeGetVal('in_pagu'), lalu: safeGetVal('in_lalu'), pejabat: { kades: safeGetVal('in_namaKades'), sekdes: safeGetVal('in_namaSekdes'), ppkd: safeGetVal('in_namaPpkd'), jabatanPpkd: safeGetVal('in_jabatanPpkd'), bendahara: safeGetVal('in_namaKaurKeuangan') }, items: itemsToSave, statusAcc: isAcc, spjLink: currentEditId ? savedRecords.find(x=>x.id===currentEditId).spjLink : '', printLink: currentEditId ? savedRecords.find(x=>x.id===currentEditId).printLink : '' };
-            if(currentEditId) savedRecords = savedRecords.map(r => r.id === currentEditId ? rec : r); else savedRecords.unshift(rec);
-            localStorage.setItem('spp_records_pangek_v5', JSON.stringify(savedRecords)); renderSavedData();
-            if(SCRIPT_URL) { try { await fetch(SCRIPT_URL + '?action=save', { method: 'POST', body: JSON.stringify(rec), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); } catch(e) {} }
-            resetForm(); btnSave.innerHTML = originalText; btnSave.disabled = false; btnSave.classList.remove('opacity-75', 'cursor-not-allowed'); 
-            showToast('Data SPP Berhasil Disimpan!');
+            const btnSave = document.getElementById('btnSave');
+            const originalText = btnSave.innerHTML;
+            btnSave.innerHTML = '⏳ Menyimpan ke Google Sheet...';
+            btnSave.disabled = true;
+            btnSave.classList.add('opacity-75', 'cursor-not-allowed');
+            try {
+                let itemsToSave = JSON.parse(JSON.stringify(belanjaItems));
+                let isAcc = currentUserRole === 'bendahara' ? currentIsAcc : false;
+                if (itemsToSave.length > 0) itemsToSave[0]._statusAcc = isAcc;
+                let finalNoSpp = safeGetVal('display_spp_no');
+                if(!finalNoSpp) finalNoSpp = '001';
+                const oldRec = currentEditId ? savedRecords.find(x => x.id === currentEditId) : null;
+                const rec = {
+                    id: currentEditId || Date.now(), noSpp: finalNoSpp, bulan: safeGetVal('in_bulan'), tahun: safeGetVal('in_tahun'), tanggal: safeGetVal('in_tanggal'),
+                    tanggalBayar: oldRec ? (oldRec.tanggalBayar || '') : '',
+                    statusBayar: oldRec ? (oldRec.statusBayar === true || oldRec.statusBayar === "true" || oldRec.statusBayar === "Lunas") : false,
+                    bidang: safeGetVal('in_bidang'), subBidang: safeGetVal('in_subBidang'), kegiatan: keg, sumberDana: safeGetVal('in_sumberDana'), pagu: safeGetVal('in_pagu'), lalu: safeGetVal('in_lalu'),
+                    pejabat: { kades: safeGetVal('in_namaKades'), sekdes: safeGetVal('in_namaSekdes'), ppkd: safeGetVal('in_namaPpkd'), jabatanPpkd: safeGetVal('in_jabatanPpkd'), bendahara: safeGetVal('in_namaKaurKeuangan') },
+                    items: itemsToSave, statusAcc: isAcc,
+                    spjLink: oldRec ? (oldRec.spjLink || '') : '', printLink: oldRec ? (oldRec.printLink || '') : '', spjAcc: oldRec ? (oldRec.spjAcc || false) : false,
+                    tglSpj: oldRec ? (oldRec.tglSpj || '') : '', spjBatalMsg: oldRec ? (oldRec.spjBatalMsg || '') : '', sppBatalMsg: oldRec ? (oldRec.sppBatalMsg || '') : ''
+                };
+                await postToBackendOrFail('save', rec);
+                await loadDataFromCloud();
+                resetForm();
+                showToast('Data SPP berhasil disimpan ke Google Sheet.');
+            } catch(e) {
+                showToast('Gagal menyimpan ke backend: ' + e.message, true);
+            } finally {
+                btnSave.innerHTML = originalText;
+                btnSave.disabled = false;
+                btnSave.classList.remove('opacity-75', 'cursor-not-allowed');
+            }
         }
 
         async function toggleAccSpp(id, isAcc) {
             if(currentUserRole !== 'bendahara') return;
             const r = savedRecords.find(x => x.id === id);
-            if(r) { r.statusAcc = isAcc; if (r.items && r.items.length > 0) r.items[0]._statusAcc = isAcc; localStorage.setItem('spp_records_pangek_v5', JSON.stringify(savedRecords)); renderSavedData(); if(SCRIPT_URL) { try { await fetch(SCRIPT_URL + '?action=save', { method: 'POST', body: JSON.stringify(r), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); } catch(e) {} } }
-            showToast(isAcc ? 'Dokumen di-ACC' : 'ACC Dibatalkan');
+            if(!r) return showToast('Data SPP tidak ditemukan.', true);
+            let cleanPesan = '';
+            if(!isAcc) {
+                const pesan = prompt('Masukkan alasan/pesan pembatalan ACC untuk PPKD:', r.sppBatalMsg || '');
+                if(pesan === null) return;
+                cleanPesan = String(pesan || '').trim();
+                if(!cleanPesan) return showToast('Pesan pembatalan wajib diisi agar PPKD mengetahui alasan batal ACC.', true);
+            }
+            try {
+                await postToBackendOrFail('update_acc', { id: r.id, statusAcc: isAcc, catatanBatalAcc: cleanPesan, sppBatalMsg: cleanPesan, pesan: cleanPesan });
+                await loadDataFromCloud();
+                renderVerifikasiSPJ();
+                showToast(isAcc ? 'Dokumen di-ACC dan tersimpan ke backend.' : 'ACC dibatalkan, pesan tersimpan dan pembayaran dibersihkan di backend.');
+            } catch(e) {
+                showToast('Gagal menyimpan ACC ke backend: ' + e.message, true);
+            }
+        }
+
+        async function confirmPayment(id) {
+            if(currentUserRole !== 'bendahara') return;
+            const r = savedRecords.find(x => x.id === id);
+            if(!r) return showToast('Data SPP tidak ditemukan.', true);
+            const isAcc = r.statusAcc === true || r.statusAcc === "true";
+            if(!isAcc) return showToast('SPP harus di-ACC terlebih dahulu sebelum dikonfirmasi dibayar.', true);
+            const today = new Date().toISOString().slice(0, 10);
+            const oldDate = r.tanggalBayar || today;
+            const input = prompt('Masukkan tanggal bayar real (format YYYY-MM-DD):', oldDate);
+            if(input === null) return;
+            const tglBayar = String(input || '').trim();
+            const validFormat = /^\d{4}-\d{2}-\d{2}$/.test(tglBayar);
+            const parsedDate = new Date(tglBayar + 'T00:00:00');
+            if(!validFormat || Number.isNaN(parsedDate.getTime())) return showToast('Format tanggal bayar tidak valid. Gunakan YYYY-MM-DD.', true);
+            try {
+                await postToBackendOrFail('confirm_bayar', { id: r.id, tanggalBayar: tglBayar, statusBayar: 'Lunas' });
+                await loadDataFromCloud();
+                renderVerifikasiSPJ();
+                showToast('Pembayaran dikonfirmasi dan tersimpan permanen ke Google Sheet.');
+            } catch(e) {
+                showToast('Gagal menyimpan pembayaran ke backend: ' + e.message, true);
+            }
         }
 
         function renderSavedData() {
             const list = document.getElementById('savedDataList'); if(!list) return;
             const searchInput = document.getElementById('searchSpp'); const query = searchInput ? searchInput.value.toLowerCase() : '';
             if(!list.innerHTML.includes('Peringatan') && !list.innerHTML.includes('gagal') && !list.innerHTML.includes('Memuat')) list.innerHTML = ''; else Array.from(list.children).forEach(child => { if(child.innerHTML.includes('Memuat')) list.removeChild(child); });
-            let recordsToRender = savedRecords;
-            if (query) recordsToRender = savedRecords.filter(r => String(r.noSpp || '').toLowerCase().includes(query) || String(r.kegiatan || '').toLowerCase().includes(query) || String(r.bulan || '').toLowerCase().includes(query) || String(r.sumberDana || '').toLowerCase().includes(query));
+            let recordsToRender = (currentUserRole === 'ppkd') ? savedRecords.filter(isOwnedByCurrentPpkd) : savedRecords;
+            if (query) recordsToRender = recordsToRender.filter(r => String(r.noSpp || '').toLowerCase().includes(query) || String(r.kegiatan || '').toLowerCase().includes(query) || String(r.bulan || '').toLowerCase().includes(query) || String(r.sumberDana || '').toLowerCase().includes(query));
             if(recordsToRender.length === 0) { list.innerHTML = `<div class="text-center text-gray-400 p-4">${query ? 'Data tidak ditemukan.' : 'Belum ada data.'}</div>`; return; }
             list.innerHTML = ''; 
             recordsToRender.forEach(r => {
                 const d = document.createElement('div'); d.className = 'bg-slate-50 p-3 border rounded-lg hover:bg-slate-100 transition shadow-sm';
-                const isAcc = r.statusAcc === true || r.statusAcc === "true"; const statusBadge = isAcc ? `<span class="bg-emerald-100 text-emerald-800 border border-emerald-300 px-1.5 py-0.5 rounded text-[9px] font-bold ml-2">✅ ACC</span>` : `<span class="bg-orange-100 text-orange-800 border border-orange-300 px-1.5 py-0.5 rounded text-[9px] font-bold ml-2">⏳ Menunggu ACC</span>`;
+                const isAcc = r.statusAcc === true || r.statusAcc === "true";
+                const isPaid = r.statusBayar === true || r.statusBayar === "true" || !!r.tanggalBayar;
+                const tglBayarLabel = r.tanggalBayar ? new Date(r.tanggalBayar).toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'}) : '';
+                const statusBadge = isAcc ? `<span class="bg-emerald-100 text-emerald-800 border border-emerald-300 px-1.5 py-0.5 rounded text-[9px] font-bold ml-2">✅ ACC</span>` : `<span class="bg-orange-100 text-orange-800 border border-orange-300 px-1.5 py-0.5 rounded text-[9px] font-bold ml-2">⏳ Menunggu ACC</span>`;
+                const bayarBadge = isPaid ? `<span class="bg-blue-100 text-blue-800 border border-blue-300 px-1.5 py-0.5 rounded text-[9px] font-bold ml-2">💵 Dibayar ${tglBayarLabel}</span>` : `<span class="bg-slate-100 text-slate-600 border border-slate-300 px-1.5 py-0.5 rounded text-[9px] font-bold ml-2">Belum dibayar</span>`;
+                const sppBatalNote = (currentUserRole === 'ppkd' && r.sppBatalMsg) ? `<div class="mt-2 text-[10px] bg-red-50 border border-red-200 text-red-700 rounded p-2"><b>Pesan Bendahara:</b> ${escapeHtml(r.sppBatalMsg)}</div>` : '';
                 let actionButtons = '';
-                if (currentUserRole === 'bendahara') { const btnAcc = isAcc ? `<button onclick="toggleAccSpp(${r.id}, false)" class="text-orange-600 font-semibold hover:bg-orange-100 border border-orange-200 px-2 py-0.5 rounded bg-white transition">Batal ACC</button>` : `<button onclick="toggleAccSpp(${r.id}, true)" class="text-emerald-600 font-semibold hover:bg-emerald-100 border border-emerald-200 px-2 py-0.5 rounded bg-white transition">✅ ACC SPP</button>`; actionButtons = `<div class="flex gap-2 border-t border-slate-200 pt-2 mt-2 items-center flex-wrap">${btnAcc}<button onclick="editRec(${r.id})" class="text-blue-600 font-semibold hover:bg-blue-100 border border-blue-200 px-2 py-0.5 rounded bg-white transition">✏️ Edit</button><button onclick="deleteRec(${r.id})" class="text-red-500 font-semibold hover:bg-red-100 border border-red-200 px-2 py-0.5 rounded bg-white transition">🗑️ Hapus</button></div>`; } else if (currentUserRole === 'ppkd') { if (isAcc) actionButtons = `<div class="flex gap-2 border-t pt-2 mt-2 items-center flex-wrap"><button onclick="editRec(${r.id})" class="text-blue-600 font-semibold hover:bg-blue-100 border px-2 py-0.5 rounded bg-white transition">🖨️ Buka & Cetak</button></div>`; else actionButtons = `<div class="flex gap-2 border-t pt-2 mt-2 items-center flex-wrap"><button onclick="editRec(${r.id})" class="text-blue-600 font-semibold hover:bg-blue-100 border px-2 py-0.5 rounded bg-white transition">✏️ Edit</button></div>`; } else { actionButtons = `<div class="flex gap-2 border-t pt-2 mt-2 items-center flex-wrap"><button onclick="editRec(${r.id})" class="text-blue-600 font-semibold hover:bg-blue-100 border px-2 py-0.5 rounded bg-white transition">👁️ Lihat Dokumen</button></div>`; }
-                d.innerHTML = `<div class="flex justify-between items-start mb-1"><div class="font-bold text-[#1e4b6e] flex items-center flex-wrap">#${r.noSpp} | ${r.bulan} ${r.tahun} ${statusBadge}</div><div class="text-[9px] bg-blue-200 font-bold px-1.5 py-0.5 rounded text-blue-800">${r.sumberDana}</div></div><div class="text-slate-600 text-xs mb-1 leading-tight">${r.kegiatan}</div>${actionButtons}`;
+                if (currentUserRole === 'bendahara') { const btnAcc = isAcc ? `<button onclick="toggleAccSpp(${r.id}, false)" class="text-orange-600 font-semibold hover:bg-orange-100 border border-orange-200 px-2 py-0.5 rounded bg-white transition">Batal ACC</button>` : `<button onclick="toggleAccSpp(${r.id}, true)" class="text-emerald-600 font-semibold hover:bg-emerald-100 border border-emerald-200 px-2 py-0.5 rounded bg-white transition">✅ ACC SPP</button>`; const btnBayar = isAcc ? `<button onclick="confirmPayment(${r.id})" class="text-green-700 font-semibold hover:bg-green-100 border border-green-300 px-2 py-0.5 rounded bg-white transition">💵 ${isPaid ? 'Ubah Tanggal Bayar' : 'Konfirmasi Pembayaran'}</button>` : ''; actionButtons = `<div class="flex gap-2 border-t border-slate-200 pt-2 mt-2 items-center flex-wrap">${btnAcc}${btnBayar}<button onclick="editRec(${r.id})" class="text-blue-600 font-semibold hover:bg-blue-100 border border-blue-200 px-2 py-0.5 rounded bg-white transition">✏️ Edit</button><button onclick="deleteRec(${r.id})" class="text-red-500 font-semibold hover:bg-red-100 border border-red-200 px-2 py-0.5 rounded bg-white transition">🗑️ Hapus</button></div>`; } else if (currentUserRole === 'ppkd') { if (isAcc) actionButtons = `<div class="flex gap-2 border-t pt-2 mt-2 items-center flex-wrap"><button onclick="editRec(${r.id})" class="text-blue-600 font-semibold hover:bg-blue-100 border px-2 py-0.5 rounded bg-white transition">🖨️ Buka & Cetak</button></div>`; else actionButtons = `<div class="flex gap-2 border-t pt-2 mt-2 items-center flex-wrap"><button onclick="editRec(${r.id})" class="text-blue-600 font-semibold hover:bg-blue-100 border px-2 py-0.5 rounded bg-white transition">✏️ Edit</button></div>`; } else { actionButtons = `<div class="flex gap-2 border-t pt-2 mt-2 items-center flex-wrap"><button onclick="editRec(${r.id})" class="text-blue-600 font-semibold hover:bg-blue-100 border px-2 py-0.5 rounded bg-white transition">👁️ Lihat Dokumen</button></div>`; }
+                d.innerHTML = `<div class="flex justify-between items-start mb-1"><div class="font-bold text-[#1e4b6e] flex items-center flex-wrap">#${r.noSpp} | ${r.bulan} ${r.tahun} ${statusBadge}${bayarBadge}</div><div class="text-[9px] bg-blue-200 font-bold px-1.5 py-0.5 rounded text-blue-800">${r.sumberDana}</div></div><div class="text-slate-600 text-xs mb-1 leading-tight">${r.kegiatan}</div>${sppBatalNote}${actionButtons}`;
                 list.appendChild(d);
             });
         }
@@ -1510,7 +2747,7 @@ function getBelanjaOptionsHTML(selectedValue) {
             // Set Nomor SPP manual
             setVal('display_spp_no', r.noSpp);
             
-            setVal('in_bulan', r.bulan); setVal('in_tahun', r.tahun); setVal('in_tanggal', r.tanggal); setVal('in_kegiatan_select', r.kegiatan); setVal('in_sumberDana', r.sumberDana); setVal('in_pagu', r.pagu); setVal('in_lalu', r.lalu); setVal('in_namaKades', r.pejabat?.kades); setVal('in_namaSekdes', r.pejabat?.sekdes); setVal('in_namaPpkd', r.pejabat?.ppkd); setVal('in_jabatanPpkd', r.pejabat?.jabatanPpkd); setVal('in_namaKaurKeuangan', r.pejabat?.bendahara);
+            setVal('in_bulan', r.bulan); setVal('in_tahun', r.tahun); setVal('in_tanggal', formatDateForInput(r.tanggal)); setVal('in_kegiatan_select', r.kegiatan); setVal('in_sumberDana', r.sumberDana); setVal('in_pagu', r.pagu); setVal('in_lalu', r.lalu); setVal('in_namaKades', r.pejabat?.kades); setVal('in_namaSekdes', r.pejabat?.sekdes); setVal('in_namaPpkd', r.pejabat?.ppkd); setVal('in_jabatanPpkd', r.pejabat?.jabatanPpkd); setVal('in_namaKaurKeuangan', r.pejabat?.bendahara);
             belanjaItems = (Array.isArray(r.items) ? r.items : []).map(item => ({ ...item, keterangan: item.keterangan || '', pajak: item.pajak || {ppn:0, pph21:0, pph22:0, pph23:0, restoran:0, galian_c:0} }));
             updateInfoAuto(true); renderBelanjaList(); calculate();
             const btnSave = document.getElementById('btnSave'), btnCetak = document.getElementById('btnCetakPreview'), btnAddBelanja = document.getElementById('btnAddBelanja');
@@ -1520,20 +2757,128 @@ function getBelanjaOptionsHTML(selectedValue) {
 
         function deleteRec(id) {
             if(currentUserRole === 'pengunjung' || currentUserRole === 'ppkd') return showToast("Akses ditolak: Hanya Bendahara yang dapat menghapus dokumen.", true);
-            showConfirm('Apakah Anda yakin ingin menghapus data ini dari Database?', async () => {
-                savedRecords = savedRecords.filter(x => x.id !== id); localStorage.setItem('spp_records_pangek_v5', JSON.stringify(savedRecords)); renderSavedData();
-                if (SCRIPT_URL) {
-                    const listContainer = document.getElementById('savedDataList'); if(listContainer) listContainer.innerHTML = '<div id="delIndicator" class="text-center p-2 bg-red-100 text-red-600 text-xs font-bold mb-2 rounded animate-pulse">🗑️ Menghapus data dari Cloud...</div>' + listContainer.innerHTML;
-                    try { await fetch(SCRIPT_URL + '?action=delete', { method: 'POST', body: JSON.stringify({ id: id }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); showToast('Data berhasil dihapus'); } catch(e) { showToast('Gagal menghapus di cloud', true); } finally { const delInd = document.getElementById('delIndicator'); if(delInd) delInd.remove(); }
+            showConfirm('Apakah Anda yakin ingin menghapus data ini dari Google Sheet?', async () => {
+                try {
+                    await postToBackendOrFail('delete', { id: id });
+                    await loadDataFromCloud();
+                    renderVerifikasiSPJ();
+                    showToast('Data berhasil dihapus dari Google Sheet.');
+                } catch(e) {
+                    showToast('Gagal menghapus di backend: ' + e.message, true);
                 }
+            });
+        }
+
+        function getKwitansiStartMap() {
+            const kwtStartMap = {};
+            let kwtCounter = 0;
+            [...savedRecords].sort((a, b) => (a.id || 0) - (b.id || 0)).forEach(r => {
+                kwtStartMap[r.id] = kwtCounter + 1;
+                kwtCounter += (r.items && r.items.length ? r.items.length : 1);
+            });
+            return kwtStartMap;
+        }
+
+        function getKwitansiLabel(r, kwtStartMap) {
+            const itemCount = (r.items && r.items.length) ? r.items.length : 1;
+            const startNo = kwtStartMap[r.id] || 1;
+            const endNo = startNo + itemCount - 1;
+            const tahun = r.tahun || new Date().getFullYear();
+            const first = String(startNo).padStart(4, '0');
+            const last = String(endNo).padStart(4, '0');
+            return itemCount > 1 ? `${first}-${last}/KWT/02.2011/${tahun}` : `${first}/KWT/02.2011/${tahun}`;
+        }
+
+        function getTotalSpp(r) {
+            return (r.items || []).reduce((sum, item) => sum + (parseFloat(item.jumlah) || 0), 0);
+        }
+
+        function getUraianBkuForVerifikasi(r) {
+            const namaKeg = (r.kegiatan || '').replace(/^[0-9.]+\s*/, '').trim();
+            const kodeKeg = (r.kegiatan || '').split(' ')[0] || '';
+            const items = Array.isArray(r.items) ? r.items : [];
+            if (!items.length) return escapeHtml(r.kegiatan || '-');
+            return items.map((item, idx) => {
+                const keteranganTambahan = item.keterangan ? " " + item.keterangan : "";
+                const kodeBelanja = (item.uraian || '').split(' ')[0] || '';
+                const namaBelanja = (item.uraian || '').substring(kodeBelanja.length).trim();
+                const teksKwitansi = `${kodeKeg}-${kodeBelanja} ${namaBelanja} Kegiatan ${namaKeg}${keteranganTambahan}, SPP Nomor ${r.noSpp} dari ${r.sumberDana}`.trim();
+                return `<div class="${idx > 0 ? 'mt-1 pt-1 border-t border-slate-200' : ''}"><span class="font-bold text-slate-500">${idx + 1}.</span> ${escapeHtml(teksKwitansi)}</div>`;
+            }).join('');
+        }
+
+        function renderVerifikasiSPJ() {
+            const list = document.getElementById('verifikasiSpjDataList');
+            if (!list) return;
+            list.innerHTML = '';
+            const records = savedRecords.filter(r => ((r.statusAcc === true || r.statusAcc === "true") || String(r.sppBatalMsg || r.catatanBatalAcc || '').trim()) && isOwnedByCurrentPpkd(r));
+            if (records.length === 0) {
+                list.innerHTML = `<tr><td colspan="10" class="text-center p-4 text-gray-500">${currentUserRole === 'ppkd' ? 'Belum ada SPJ milik Anda.' : 'Belum ada data SPJ untuk diverifikasi.'}</td></tr>`;
+                return;
+            }
+            const kwtStartMap = getKwitansiStartMap();
+            records.forEach((r, idx) => {
+                const isSpjAcc = r.spjAcc === true || r.spjAcc === "true";
+                const isPaid = r.statusBayar === true || r.statusBayar === "true" || r.statusBayar === "Lunas" || !!r.tanggalBayar;
+                const pesanBendahara = String(r.spjBatalMsg || r.catatanBatalSpj || '').trim();
+                const hasNote = !!pesanBendahara;
+                const catatanAccSpp = String(r.sppBatalMsg || r.catatanBatalAcc || '').trim();
+                const isSppAcc = r.statusAcc === true || r.statusAcc === "true";
+                const catatanAccSppHtml = catatanAccSpp
+                    ? `<div class="bg-amber-50 border border-amber-200 text-amber-800 rounded-lg p-2 leading-snug break-words"><b>⚠️ Batal ACC SPP/KWT:</b><br>${escapeHtml(catatanAccSpp)}</div>`
+                    : `<span class="text-slate-400 italic text-[10px]">Tidak ada catatan</span>`;
+                const spjUrl = safeUrl(r.spjLink);
+                let statusFileSpj = '';
+                if (isSpjAcc) {
+                    statusFileSpj = `<span class="inline-block bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-1 rounded font-bold">✅ Lengkap / ACC</span>`;
+                } else if (spjUrl) {
+                    statusFileSpj = `<a href="${spjUrl}" target="_blank" rel="noopener noreferrer" class="inline-block bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 px-2 py-1 rounded font-bold underline">📎 File SPJ terkirim</a><div class="text-[10px] text-orange-700 mt-1 font-semibold">⏳ Menunggu verifikasi Bendahara</div>`;
+                } else {
+                    statusFileSpj = `<span class="inline-block bg-slate-100 text-slate-600 border border-slate-300 px-2 py-1 rounded font-bold">Belum kirim SPJ</span>`;
+                }
+                const catatanBendahara = hasNote
+                    ? `<div class="mt-2 bg-red-50 border border-red-200 text-red-700 rounded p-2 leading-snug break-words"><b>⚠️ Pesan Bendahara:</b><br>${escapeHtml(pesanBendahara)}</div>`
+                    : '';
+                const kelengkapan = `<div class="space-y-1">${statusFileSpj}${catatanBendahara}</div>`;
+
+                let aksi = '';
+                if (currentUserRole === 'bendahara') {
+                    const bukaSpj = safeUrl(r.spjLink) ? `<a href="${safeUrl(r.spjLink)}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline font-bold">Buka SPJ</a>` : `<span class="text-slate-400 italic">Belum ada link SPJ</span>`;
+                    const btnSpj = r.spjLink ? (isSpjAcc
+                        ? `<button onclick="batalAccSPJ(${r.id})" class="text-orange-700 font-bold border border-orange-300 bg-orange-50 hover:bg-orange-100 px-2 py-1 rounded">Batal ACC SPJ</button>`
+                        : `<button onclick="accSPJ(${r.id})" class="text-emerald-700 font-bold border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 rounded">✅ ACC SPJ</button>`)
+                        : '';
+                    const btnBayar = `<button onclick="confirmPayment(${r.id})" class="text-green-700 font-bold border border-green-300 bg-green-50 hover:bg-green-100 px-2 py-1 rounded">💵 ${isPaid ? 'Ubah Tgl Bayar' : 'Konfirmasi Bayar'}</button>`;
+                    aksi = `<div class="verif-action-grid">${bukaSpj}${btnSpj}${btnBayar}<button onclick="editRec(${r.id})" class="text-blue-700 font-bold border border-blue-300 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded">✏️ Edit</button><button onclick="deleteRec(${r.id})" class="text-red-700 font-bold border border-red-300 bg-red-50 hover:bg-red-100 px-2 py-1 rounded">🗑️ Hapus</button>${isSpjAcc ? `<button onclick="previewRekomendasi(${r.id})" class="bg-slate-700 text-white font-bold px-2 py-1 rounded">Preview Surat</button>` : ''}</div>`;
+                } else if (currentUserRole === 'ppkd') {
+                    aksi = `<div class="verif-action-grid">${safeUrl(r.spjLink) ? `<a href="${safeUrl(r.spjLink)}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline font-bold">Lihat SPJ</a>` : `<span class="text-slate-500">Upload melalui menu Laporan SPJ</span>`}<button onclick="editRec(${r.id})" class="text-blue-700 font-bold border border-blue-300 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded">🖨️ Buka / Cetak</button></div>`;
+                } else {
+                    aksi = `<button onclick="editRec(${r.id})" class="text-blue-700 font-bold border border-blue-300 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded">👁️ Lihat</button>`;
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50';
+                tr.innerHTML = `
+                    <td data-label="No" class="p-2 border border-slate-300 align-top text-center font-bold verif-no-cell">${idx + 1}</td>
+                    <td data-label="Uraian / Kegiatan" class="p-2 border border-slate-300 align-top leading-snug text-[11px] verif-uraian-cell">${getUraianBkuForVerifikasi(r)}</td>
+                    <td data-label="Nama PPKD" class="p-2 border border-slate-300 align-top verif-ppkd-cell"><div class="font-bold text-slate-700">${escapeHtml(r.pejabat?.ppkd || '-')}</div><div class="text-[10px] text-slate-500 leading-tight mt-0.5">${escapeHtml(r.pejabat?.jabatanPpkd || '')}</div></td>
+                    <td data-label="Tgl SPP" class="p-2 border border-slate-300 align-top verif-date-cell">${escapeHtml(formatDateForInput(r.tanggal) || r.tanggal || '-')}</td>
+                    <td data-label="Dana" class="p-2 border border-slate-300 align-top verif-dana-cell">${escapeHtml(r.sumberDana || '-')}</td>
+                    <td data-label="Jumlah" class="p-2 border border-slate-300 align-top text-right font-bold verif-jumlah-cell">Rp ${formatRp(getTotalSpp(r))}</td>
+                    <td data-label="Kelengkapan SPJ" class="p-2 border border-slate-300 align-top verif-kelengkapan-cell">${kelengkapan}</td>
+                    <td data-label="Catatan Bendahara" class="p-2 border border-slate-300 align-top verif-catatan-bendahara-cell">${catatanAccSppHtml}</td>
+                    <td data-label="Bayar" class="p-2 border border-slate-300 align-top text-center verif-bayar-cell">${isPaid ? `<span class="bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-1 rounded font-bold">Lunas</span><div class="text-[10px] text-slate-500 mt-1">${escapeHtml(r.tanggalBayar || '')}</div>` : `<span class="bg-orange-100 text-orange-800 border border-orange-300 px-2 py-1 rounded font-bold">Belum</span>`}</td>
+                    <td data-label="Aksi" class="p-2 border border-slate-300 align-top text-center verif-aksi-cell">${aksi}</td>
+                `;
+                list.appendChild(tr);
             });
         }
 
         // --- MANAJEMEN SPJ (LAPORAN) ---
         function renderSPJ() {
             const list = document.getElementById('spjDataList'); if (!list) return; list.innerHTML = '';
-            const accRecords = savedRecords.filter(r => r.statusAcc === true || r.statusAcc === "true");
-            if (accRecords.length === 0) { list.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-gray-500">Belum ada SPP yang di-ACC.</td></tr>`; return; }
+            const accRecords = savedRecords.filter(r => (r.statusAcc === true || r.statusAcc === "true") && isOwnedByCurrentPpkd(r));
+            if (accRecords.length === 0) { list.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-gray-500">${currentUserRole === 'ppkd' ? 'Belum ada SPP/SPJ milik Anda yang di-ACC.' : 'Belum ada SPP yang di-ACC.'}</td></tr>`; return; }
 
             accRecords.forEach(r => {
                 const isSpjAcc = r.spjAcc === true || r.spjAcc === "true";
@@ -1541,9 +2886,10 @@ function getBelanjaOptionsHTML(selectedValue) {
                 // --- Kolom SPJ PPKD ---
                 let spjCol = '';
                 if (currentUserRole === 'ppkd') {
-                    spjCol = `<input type="text" id="link_spj_${r.id}" placeholder="Paste Link GDrive SPJ..." class="form-input text-[10px] p-1.5 mb-1 w-full" value="${r.spjLink || ''}"><button onclick="kirimSPJ(${r.id})" class="bg-blue-600 text-white font-bold hover:bg-blue-700 px-2 py-1.5 rounded-md text-[10px] w-full transition shadow-sm border border-blue-600">⬆️ Kirim SPJ</button>`;
+                    const spjBatalNote = r.spjBatalMsg ? `<div class="mb-2 text-left text-[10px] bg-red-50 border border-red-200 text-red-700 rounded p-2"><b>Pesan Bendahara:</b> ${escapeHtml(r.spjBatalMsg)}</div>` : '';
+                    spjCol = `${spjBatalNote}<input type="text" id="link_spj_${r.id}" placeholder="Paste Link GDrive SPJ..." class="form-input text-[10px] p-1.5 mb-1 w-full" value="${escapeHtml(r.spjLink || '')}"><button onclick="kirimSPJ(${r.id})" class="bg-blue-600 text-white font-bold hover:bg-blue-700 px-2 py-1.5 rounded-md text-[10px] w-full transition shadow-sm border border-blue-600">⬆️ Kirim SPJ</button>`;
                 } else {
-                    spjCol = r.spjLink ? `<a href="${r.spjLink}" target="_blank" class="text-blue-600 underline text-xs font-medium hover:text-blue-800">Buka SPJ (PDF)</a>` : `<span class="text-slate-400 text-xs italic">Belum ada</span>`;
+                    spjCol = safeUrl(r.spjLink) ? `<a href="${safeUrl(r.spjLink)}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline text-xs font-medium hover:text-blue-800">Buka SPJ (PDF)</a>` : `<span class="text-slate-400 text-xs italic">Belum ada</span>`;
                 }
 
                 // --- Kolom Berkas Cetak Bendahara ---
@@ -1551,7 +2897,7 @@ function getBelanjaOptionsHTML(selectedValue) {
                 if (currentUserRole === 'bendahara') {
                     printCol = `<input type="text" id="link_print_${r.id}" placeholder="Paste Link Berkas Cetak..." class="form-input text-[10px] p-1.5 mb-1 w-full" value="${r.printLink || ''}"><button onclick="kirimLinkCetak(${r.id})" class="bg-[#1e4b6e] text-white font-bold hover:bg-[#153650] px-2 py-1.5 rounded-md text-[10px] w-full transition shadow-sm border border-[#1e4b6e]">Kirim Link Cetak</button>`;
                 } else {
-                    printCol = r.printLink ? `<a href="${r.printLink}" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-md text-[10px] shadow block text-center mt-1">🖨️ Download Dokumen</a>` : `<span class="text-slate-400 text-[10px] italic">Belum dikirim Bendahara</span>`;
+                    printCol = safeUrl(r.printLink) ? `<a href="${safeUrl(r.printLink)}" target="_blank" rel="noopener noreferrer" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-md text-[10px] shadow block text-center mt-1">🖨️ Download Dokumen</a>` : `<span class="text-slate-400 text-[10px] italic">Belum dikirim Bendahara</span>`;
                 }
                 
                 // --- Kolom Verifikasi & Aksi ---
@@ -1589,19 +2935,63 @@ function getBelanjaOptionsHTML(selectedValue) {
         }
 
         async function kirimSPJ(id) {
-            const linkInput = document.getElementById(`link_spj_${id}`).value; if (!linkInput) return showToast('Masukkan link Google Drive SPJ terlebih dahulu!', true);
+            const linkInput = document.getElementById(`link_spj_${id}`).value.trim();
+            if (!linkInput) return showToast('Masukkan link Google Drive SPJ terlebih dahulu!', true);
+            if (!safeUrl(linkInput)) return showToast('Link SPJ tidak valid. Gunakan link http/https.', true);
             const r = savedRecords.find(x => x.id === id);
-            if(r) { r.spjLink = linkInput; localStorage.setItem('spp_records_pangek_v5', JSON.stringify(savedRecords)); renderSPJ(); if(SCRIPT_URL) { try { await fetch(SCRIPT_URL + '?action=save', { method: 'POST', body: JSON.stringify(r), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); } catch(e) {} } showToast('Link SPJ berhasil dikirim ke Bendahara!'); }
+            if(!r) return showToast('Data SPJ tidak ditemukan.', true);
+            const tglSpj = r.tglSpj || new Date().toISOString().slice(0,10);
+            try {
+                await postToBackendOrFail('update_spj', { id: r.id, spjLink: linkInput, tglSpj: tglSpj, spjAcc: false, catatanBatalSpj: '' });
+                await loadDataFromCloud();
+                renderSPJ(); renderVerifikasiSPJ();
+                showToast('Link SPJ berhasil dikirim dan tersimpan ke Google Sheet.');
+            } catch(e) { showToast('Gagal mengirim SPJ ke backend: ' + e.message, true); }
         }
 
         async function kirimLinkCetak(id) {
-            const linkInput = document.getElementById(`link_print_${id}`).value; if (!linkInput) return showToast('Masukkan link Berkas Cetak terlebih dahulu!', true);
+            const linkInput = document.getElementById(`link_print_${id}`).value.trim();
+            if (!linkInput) return showToast('Masukkan link Berkas Cetak terlebih dahulu!', true);
+            if (!safeUrl(linkInput)) return showToast('Link Berkas Cetak tidak valid. Gunakan link http/https.', true);
             const r = savedRecords.find(x => x.id === id);
-            if(r) { r.printLink = linkInput; localStorage.setItem('spp_records_pangek_v5', JSON.stringify(savedRecords)); renderSPJ(); if(SCRIPT_URL) { try { await fetch(SCRIPT_URL + '?action=save', { method: 'POST', body: JSON.stringify(r), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); } catch(e) {} } showToast('Link Berkas Cetak berhasil dikirim ke PPKD!'); }
+            if(!r) return showToast('Data tidak ditemukan.', true);
+            try {
+                await postToBackendOrFail('update_spj', { id: r.id, printLink: linkInput });
+                await loadDataFromCloud();
+                renderSPJ(); renderVerifikasiSPJ();
+                showToast('Link Berkas Cetak berhasil tersimpan ke Google Sheet.');
+            } catch(e) { showToast('Gagal menyimpan link cetak ke backend: ' + e.message, true); }
         }
 
-        async function accSPJ(id) { const r = savedRecords.find(x => x.id === id); if(r) { r.spjAcc = true; localStorage.setItem('spp_records_pangek_v5', JSON.stringify(savedRecords)); renderSPJ(); if(SCRIPT_URL) { try { await fetch(SCRIPT_URL + '?action=save', { method: 'POST', body: JSON.stringify(r) }); } catch(e) {} } } }
-        async function batalAccSPJ(id) { const r = savedRecords.find(x => x.id === id); if(r) { r.spjAcc = false; localStorage.setItem('spp_records_pangek_v5', JSON.stringify(savedRecords)); renderSPJ(); if(SCRIPT_URL) { try { await fetch(SCRIPT_URL + '?action=save', { method: 'POST', body: JSON.stringify(r) }); } catch(e) {} } } }
+        async function accSPJ(id) {
+            if(currentUserRole !== 'bendahara') return;
+            const r = savedRecords.find(x => x.id === id);
+            if(!r) return showToast('Data SPJ tidak ditemukan.', true);
+            if(!r.spjLink) return showToast('SPJ belum dikirim PPKD.', true);
+            const tglSpj = r.tglSpj || new Date().toISOString().slice(0,10);
+            try {
+                await postToBackendOrFail('update_spj', { id: r.id, spjAcc: true, tglSpj: tglSpj, catatanBatalSpj: '' });
+                await loadDataFromCloud();
+                renderSPJ(); renderVerifikasiSPJ();
+                showToast('SPJ berhasil di-ACC dan tersimpan ke Google Sheet.');
+            } catch(e) { showToast('Gagal ACC SPJ ke backend: ' + e.message, true); }
+        }
+
+        async function batalAccSPJ(id) {
+            if(currentUserRole !== 'bendahara') return;
+            const r = savedRecords.find(x => x.id === id);
+            if(!r) return showToast('Data SPJ tidak ditemukan.', true);
+            const pesan = prompt('Masukkan pesan/alasan batal ACC SPJ untuk PPKD:', r.spjBatalMsg || '');
+            if(pesan === null) return;
+            const cleanPesan = String(pesan || '').trim();
+            if(!cleanPesan) return showToast('Pesan batal ACC wajib diisi.', true);
+            try {
+                await postToBackendOrFail('update_spj', { id: r.id, spjAcc: false, catatanBatalSpj: cleanPesan, pesan: cleanPesan });
+                await loadDataFromCloud();
+                renderSPJ(); renderVerifikasiSPJ();
+                showToast('ACC SPJ dibatalkan dan catatan tersimpan untuk PPKD.');
+            } catch(e) { showToast('Gagal batal ACC SPJ ke backend: ' + e.message, true); }
+        }
 
         function previewRekomendasi(id) {
             const r = savedRecords.find(x => x.id === id); if(!r) return;
@@ -1609,7 +2999,7 @@ function getBelanjaOptionsHTML(selectedValue) {
             const namaKeg = (r.kegiatan || '').replace(/^[0-9.]+\s*/, '').trim();
             safeSetText('rek_bidang', r.bidang); safeSetText('rek_kegiatan', namaKeg); safeSetText('rek_no_spp', `${r.noSpp}/SPP/2011/${r.tahun}`); safeSetText('rek_ppkd', r.pejabat?.ppkd); safeSetText('rek_total_belanja', 'Rp ' + formatRp(totalSpp)); safeSetText('rek_namaSekdes', r.pejabat?.sekdes || '....................................'); safeSetText('rek_namaKades', r.pejabat?.kades || '....................................'); safeSetText('rek_tgl_cetak', r.tanggal ? new Date(r.tanggal).toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'}) : `.......... ${r.tahun}`);
             const logoRekomendasi = document.getElementById('logo_rekomendasi'); if(logoRekomendasi) logoRekomendasi.src = LOGO_URL;
-            ['form', 'masterPagu', 'pendapatan', 'penarikan', 'pembiayaan', 'spj', 'bku', 'bkt', 'bksd', 'bkp', 'laporan'].forEach(p => { const el = document.getElementById(p + 'View'); if(el) el.classList.add('hidden'); });
+            ['form', 'masterPagu', 'pendapatan', 'penarikan', 'pembiayaan', 'spj', 'verifikasiSpj', 'bku', 'bkt', 'bksd', 'bkp', 'laporan'].forEach(p => { const el = document.getElementById(p + 'View'); if(el) el.classList.add('hidden'); });
             document.getElementById('previewView')?.classList.remove('hidden'); switchDoc('rekomendasi'); window.scrollTo(0, 0); currentEditId = id;
         }
 
@@ -1629,7 +3019,7 @@ function getBelanjaOptionsHTML(selectedValue) {
                 let nom = parseFloat(s.nominal) || 0; totalPajakSetor += nom; saldoTunai -= nom; 
             });
             
-            savedRecords.forEach(s => { if (s.statusAcc === true || s.statusAcc === "true") { let sumSpp = 0, sumPajakSPP = 0; (s.items || []).forEach(item => { sumSpp += parseFloat(item.jumlah) || 0; const p = item.pajak || {}; sumPajakSPP += (parseFloat(p.ppn)||0) + (parseFloat(p.pph21)||0) + (parseFloat(p.pph22)||0) + (parseFloat(p.pph23)||0) + (parseFloat(p.restoran)||0) + (parseFloat(p.galian_c)||0); }); totalKeluarGlobal += sumSpp; saldoTunai -= sumSpp; totalPajakPotong += sumPajakSPP; let sumber = s.sumberDana || 'Lainnya'; saldoTunaiPerSumber[sumber] = (saldoTunaiPerSumber[sumber] || 0) - sumSpp; keluarPerSumber[sumber] = (keluarPerSumber[sumber] || 0) + sumSpp; let bln = s.bulan; if(bln && bln.includes(' S.D ')) bln = 'Desember'; if (keluarPerBulan[bln] !== undefined) keluarPerBulan[bln] += sumSpp; } });
+            savedRecords.forEach(s => { if ((s.statusAcc === true || s.statusAcc === "true") && s.tanggalBayar) { let sumSpp = 0, sumPajakSPP = 0; (s.items || []).forEach(item => { sumSpp += parseFloat(item.jumlah) || 0; const p = item.pajak || {}; sumPajakSPP += (parseFloat(p.ppn)||0) + (parseFloat(p.pph21)||0) + (parseFloat(p.pph22)||0) + (parseFloat(p.pph23)||0) + (parseFloat(p.restoran)||0) + (parseFloat(p.galian_c)||0); }); totalKeluarGlobal += sumSpp; saldoTunai -= sumSpp; totalPajakPotong += sumPajakSPP; let sumber = s.sumberDana || 'Lainnya'; saldoTunaiPerSumber[sumber] = (saldoTunaiPerSumber[sumber] || 0) - sumSpp; keluarPerSumber[sumber] = (keluarPerSumber[sumber] || 0) + sumSpp; let bln = new Date(s.tanggalBayar).toLocaleString('id-ID', {month: 'long'}); if(bln && bln.includes(' S.D ')) bln = 'Desember'; if (keluarPerBulan[bln] !== undefined) keluarPerBulan[bln] += sumSpp; } });
 
             saldoTunai += totalPajakPotong; // Karena uang pajak dipotong dari kuitansi tunai, uang fisiknya tertinggal di brankas sampai disetorkan
 
@@ -1639,9 +3029,20 @@ function getBelanjaOptionsHTML(selectedValue) {
             if (sisaSumberContainer) { sisaSumberContainer.innerHTML = ''; let adaSumber = false; for (let key in saldoTunaiPerSumber) { if (saldoTunaiPerSumber[key] !== 0) { adaSumber = true; let val = saldoTunaiPerSumber[key]; sisaSumberContainer.innerHTML += `<div class="bg-slate-50 border border-slate-200 p-3 rounded-xl"><div class="text-[10px] font-bold text-slate-500 uppercase mb-1 truncate" title="${key}">${key}</div><div class="text-sm font-black ${val < 0 ? 'text-red-600' : 'text-slate-800'}">Rp ${formatRp(val)}</div></div>`; } } if (!adaSumber) sisaSumberContainer.innerHTML = `<div class="col-span-full text-xs text-slate-400">Belum ada rincian mutasi.</div>`; }
 
             const ctxSumber = document.getElementById('chartSumberDana');
-            if (ctxSumber) { if (chartSumberDanaInstance) chartSumberDanaInstance.destroy(); chartSumberDanaInstance = new Chart(ctxSumber.getContext('2d'), { type: 'doughnut', data: { labels: Object.keys(keluarPerSumber).length ? Object.keys(keluarPerSumber) : ['Belum ada data'], datasets: [{ data: Object.values(keluarPerSumber).length ? Object.values(keluarPerSumber) : [1], backgroundColor: Object.values(keluarPerSumber).length ? ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'] : ['#e2e8f0'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } }); }
             const ctxBulan = document.getElementById('chartTrendBulan');
-            if (ctxBulan) { if (chartTrendBulanInstance) chartTrendBulanInstance.destroy(); chartTrendBulanInstance = new Chart(ctxBulan.getContext('2d'), { type: 'bar', data: { labels: Object.keys(keluarPerBulan), datasets: [{ label: 'Pengeluaran', data: Object.values(keluarPerBulan), backgroundColor: '#1e4b6e', borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } } }); }
+            if (typeof Chart === 'undefined') {
+                [ctxSumber, ctxBulan].forEach(canvas => {
+                    if (!canvas || !canvas.parentElement) return;
+                    canvas.style.display = 'none';
+                    if (!canvas.parentElement.querySelector('.chart-fallback')) {
+                        canvas.parentElement.insertAdjacentHTML('beforeend', '<div class="chart-fallback">Grafik belum dapat dimuat. Pastikan koneksi internet aktif agar Chart.js dari CDN berhasil terbaca.</div>');
+                    }
+                });
+                return;
+            }
+            document.querySelectorAll('.chart-fallback').forEach(el => el.remove());
+            if (ctxSumber) { ctxSumber.style.display = ''; if (chartSumberDanaInstance) chartSumberDanaInstance.destroy(); chartSumberDanaInstance = new Chart(ctxSumber.getContext('2d'), { type: 'doughnut', data: { labels: Object.keys(keluarPerSumber).length ? Object.keys(keluarPerSumber) : ['Belum ada data'], datasets: [{ data: Object.values(keluarPerSumber).length ? Object.values(keluarPerSumber) : [1], backgroundColor: Object.values(keluarPerSumber).length ? ['#2563eb', '#059669', '#d97706', '#dc2626', '#7c3aed', '#db2777', '#0891b2', '#ea580c'] : ['#e2e8f0'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } }); }
+            if (ctxBulan) { ctxBulan.style.display = ''; if (chartTrendBulanInstance) chartTrendBulanInstance.destroy(); chartTrendBulanInstance = new Chart(ctxBulan.getContext('2d'), { type: 'bar', data: { labels: Object.keys(keluarPerBulan), datasets: [{ label: 'Pengeluaran', data: Object.values(keluarPerBulan), backgroundColor: '#1e4b6e', borderRadius: 8 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } } }); }
         }
 
         // ===============================================
@@ -1654,7 +3055,7 @@ function getBelanjaOptionsHTML(selectedValue) {
             pembiayaanRecords.forEach(p => { let isPenerimaan = p.jenis === 'Penerimaan'; transactions.push({ id: 'PB-' + p.id, date: new Date(p.tanggal), ref: (isPenerimaan ? 'SILPA-' : 'BMDS-') + String(p.id).slice(-4), uraian: p.uraian, sumber: p.sumberDana, masuk: isPenerimaan ? (parseFloat(p.nominal) || 0) : 0, keluar: !isPenerimaan ? (parseFloat(p.nominal) || 0) : 0 }); });
             const kwtStartMap = {}; let kwtCounter = 0; [...savedRecords].sort((a, b) => a.id - b.id).forEach(r => { kwtStartMap[r.id] = kwtCounter + 1; kwtCounter += (r.items ? r.items.length : 0); });
             savedRecords.forEach(s => { 
-                if(s.statusAcc === true || s.statusAcc === "true") { 
+                if((s.statusAcc === true || s.statusAcc === "true") && s.tanggalBayar) { 
                     const startNo = kwtStartMap[s.id]; 
                     const namaKeg = (s.kegiatan || '').replace(/^[0-9.]+\s*/, '').trim();
                     const kodeKeg = (s.kegiatan || '').split(' ')[0];
@@ -1665,7 +3066,7 @@ function getBelanjaOptionsHTML(selectedValue) {
                         const teksKwitansi = `${kodeKeg}-${kodeBelanja} ${namaBelanja} Kegiatan ${namaKeg}${keteranganTambahan}, SPP Nomor ${s.noSpp} dari ${s.sumberDana}`;
                         transactions.push({ 
                             id: s.id + '-' + idx, 
-                            date: new Date(s.tanggal || s.bulan + " 1, " + s.tahun), 
+                            date: new Date(s.tanggalBayar), 
                             ref: `${(startNo + idx).toString().padStart(4, '0')}/KWT/02.2011/${s.tahun}`, 
                             uraian: teksKwitansi, 
                             sumber: s.sumberDana, 
@@ -1686,7 +3087,7 @@ function getBelanjaOptionsHTML(selectedValue) {
             penarikanRecords.forEach(p => { transactions.push({ id: p.id, date: new Date(p.tanggal), ref: 'TARIK-' + String(p.id).slice(-4), uraian: p.uraian + ' (Dari Rek. Desa)', masuk: parseFloat(p.nominal) || 0, keluar: 0 }); });
             const kwtStartMap = {}; let kwtCounter = 0; [...savedRecords].sort((a, b) => a.id - b.id).forEach(r => { kwtStartMap[r.id] = kwtCounter + 1; kwtCounter += (r.items ? r.items.length : 0); });
             savedRecords.forEach(s => { 
-                if(s.statusAcc === true || s.statusAcc === "true") { 
+                if((s.statusAcc === true || s.statusAcc === "true") && s.tanggalBayar) { 
                     const startNo = kwtStartMap[s.id]; 
                     const namaKeg = (s.kegiatan || '').replace(/^[0-9.]+\s*/, '').trim();
                     const kodeKeg = (s.kegiatan || '').split(' ')[0];
@@ -1697,7 +3098,7 @@ function getBelanjaOptionsHTML(selectedValue) {
                         const teksKwitansi = `${kodeKeg}-${kodeBelanja} ${namaBelanja} Kegiatan ${namaKeg}${keteranganTambahan}, SPP Nomor ${s.noSpp} dari ${s.sumberDana}`;
                         transactions.push({ 
                             id: s.id + '-' + idx, 
-                            date: new Date(s.tanggal || s.bulan + " 1, " + s.tahun), 
+                            date: new Date(s.tanggalBayar), 
                             ref: `${(startNo + idx).toString().padStart(4, '0')}/KWT/02.2011/${s.tahun}`, 
                             uraian: teksKwitansi, 
                             masuk: 0, 
@@ -1719,7 +3120,7 @@ function getBelanjaOptionsHTML(selectedValue) {
             pembiayaanRecords.forEach(p => { if (filterVal === '' || p.sumberDana === filterVal) { let isPenerimaan = p.jenis === 'Penerimaan'; transactions.push({ id: 'PB-' + p.id, date: new Date(p.tanggal), ref: (isPenerimaan ? 'SILPA-' : 'BMDS-') + String(p.id).slice(-4), sumber: p.sumberDana, uraian: p.uraian, masuk: isPenerimaan ? (parseFloat(p.nominal) || 0) : 0, keluar: !isPenerimaan ? (parseFloat(p.nominal) || 0) : 0 }); } });
             const kwtStartMap = {}; let kwtCounter = 0; [...savedRecords].sort((a, b) => a.id - b.id).forEach(r => { kwtStartMap[r.id] = kwtCounter + 1; kwtCounter += (r.items ? r.items.length : 0); });
             savedRecords.forEach(s => { 
-                if ((filterVal === '' || s.sumberDana === filterVal) && (s.statusAcc === true || s.statusAcc === "true")) { 
+                if ((filterVal === '' || s.sumberDana === filterVal) && (s.statusAcc === true || s.statusAcc === "true") && s.tanggalBayar) { 
                     const startNo = kwtStartMap[s.id]; 
                     const namaKeg = (s.kegiatan || '').replace(/^[0-9.]+\s*/, '').trim();
                     const kodeKeg = (s.kegiatan || '').split(' ')[0];
@@ -1730,7 +3131,7 @@ function getBelanjaOptionsHTML(selectedValue) {
                         const teksKwitansi = `${kodeKeg}-${kodeBelanja} ${namaBelanja} Kegiatan ${namaKeg}${keteranganTambahan}, SPP Nomor ${s.noSpp} dari ${s.sumberDana}`;
                         transactions.push({ 
                             id: s.id + '-' + idx, 
-                            date: new Date(s.tanggal || s.bulan + " 1, " + s.tahun), 
+                            date: new Date(s.tanggalBayar), 
                             ref: `${(startNo + idx).toString().padStart(4, '0')}/KWT/02.2011/${s.tahun}`, 
                             sumber: s.sumberDana, 
                             uraian: teksKwitansi, 
@@ -1758,8 +3159,8 @@ function getBelanjaOptionsHTML(selectedValue) {
 
             // 1. Kumpulkan Pemotongan (dari SPP)
             [...savedRecords].forEach(r => {
-                if(r.statusAcc !== true && r.statusAcc !== "true") return; 
-                const tgl = r.tanggal ? new Date(r.tanggal) : new Date(r.bulan + " 1, " + r.tahun);
+                if((r.statusAcc !== true && r.statusAcc !== "true") || !r.tanggalBayar) return; 
+                const tgl = new Date(r.tanggalBayar);
                 const startNo = kwtStartMap[r.id];
                 const namaKeg = (r.kegiatan || '').replace(/^[0-9.]+\s*/, '').trim();
                 const kodeKeg = (r.kegiatan || '').split(' ')[0];
@@ -1816,7 +3217,7 @@ function getBelanjaOptionsHTML(selectedValue) {
                 
                 let uraianText = `<span class="text-slate-700 font-bold block print:text-black">${s.uraian}</span>`;
                 if (s.ntpn) uraianText += `<span class="text-[10px] bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded inline-block mt-1 mr-1 font-mono border border-blue-200">NTPN: ${s.ntpn}</span>`;
-                if (s.linkBukti) uraianText += `<a href="${s.linkBukti}" target="_blank" class="text-[10px] bg-emerald-100 hover:bg-emerald-200 text-emerald-800 px-1.5 py-0.5 rounded inline-block mt-1 font-bold border border-emerald-200 no-print transition">🔗 Buka Bukti Pajak</a>`;
+                if (safeUrl(s.linkBukti)) uraianText += `<a href="${safeUrl(s.linkBukti)}" target="_blank" rel="noopener noreferrer" class="text-[10px] bg-emerald-100 hover:bg-emerald-200 text-emerald-800 px-1.5 py-0.5 rounded inline-block mt-1 font-bold border border-emerald-200 no-print transition">🔗 Buka Bukti Pajak</a>`;
 
                 transactions.push({
                     type: 'setoran',
@@ -1948,46 +3349,46 @@ function getBelanjaOptionsHTML(selectedValue) {
                 const keteranganTambahan = item.keterangan ? " " + item.keterangan : "";
 
                 wrapper.innerHTML += `
-                <div class="page-break bg-white p-[1.5cm] shadow-xl mb-6 print:shadow-none print:mb-0 border border-black max-w-[210mm] mx-auto" style="font-family: Arial, Helvetica, sans-serif; page-break-inside: avoid;">
+                <div class="page-break bg-white p-[1.5cm] shadow-xl mb-6 print:shadow-none print:mb-0 border border-black max-w-[210mm] mx-auto" style="font-family: 'Times New Roman', Times, serif; page-break-inside: avoid;">
                     <div class="mb-1 leading-tight relative min-h-[40px] flex items-center">
                         <div class="w-full">
-                            <h1 class="font-bold text-[14px] uppercase text-black">PEMERINTAH DESA PANGEK</h1>
-                            <h2 class="font-bold text-[14px] uppercase text-black">KABUPATEN BANGKA BARAT</h2>
+                            <h1 class="font-bold text-[12pt] uppercase text-black">PEMERINTAH DESA PANGEK</h1>
+                            <h2 class="font-bold text-[12pt] uppercase text-black">KABUPATEN BANGKA BARAT</h2>
                         </div>
                     </div>
                     <div class="border-b-[3px] border-black mt-2 mb-1"></div>
                     <div class="border-b-[1px] border-black mb-4"></div>
                     
                     <div class="text-center mb-2 mt-2">
-                        <h4 class="font-bold text-[14px] uppercase tracking-wide text-black">TANDA BUKTI PENGELUARAN UANG</h4>
+                        <h4 class="font-bold text-[12pt] uppercase tracking-wide text-black">TANDA BUKTI PENGELUARAN UANG</h4>
                     </div>
                     <div class="border-b-[1px] border-black mb-4"></div>
                     
                     <div class="flex justify-center mb-6 mt-4">
-                        <div class="border border-black px-8 py-0.5 font-bold text-[12px] text-black tracking-wide">NO : ${kwtNo}/KWT/02.2011/${thn}</div>
+                        <div class="border border-black px-8 py-0.5 font-bold text-[12pt] text-black tracking-wide">NO : ${kwtNo}/KWT/02.2011/${thn}</div>
                     </div>
                     
-                    <div class="text-right text-[11px] mb-3 text-black">Sumberdana : ${safeGetVal('in_sumberDana')}</div>
+                    <div class="text-right text-[12pt] mb-3 text-black">Sumberdana : ${safeGetVal('in_sumberDana')}</div>
                     
-                    <table class="w-full text-[12px] leading-relaxed border-none text-black">
+                    <table class="w-full text-[12pt] leading-relaxed border-none text-black">
                         <tr><td class="w-36 align-top">Sudah terima dari</td><td class="w-3 align-top">:</td><td class="align-top uppercase">KAUR KEUANGAN</td></tr>
                         <tr><td class="align-top">Uang Sebesar</td><td class="align-top">:</td><td class="align-top font-bold">Rp ${formatRp(item.jumlah)}</td></tr>
                         <tr><td></td><td class="align-top">:</td><td class="italic align-top">${angkaTerbilang(item.jumlah)} Rupiah</td></tr>
-                        <tr><td class="align-top">Sebagai pembayaran</td><td class="align-top">:</td><td class="align-top text-justify pr-2">${item.uraian} Kegiatan ${namaKeg}${keteranganTambahan}<br>SPP Nomor ${count} dari ${safeGetVal('in_sumberDana')}</td></tr>
-                        <tr><td class="align-top pt-4">Catatan Keuangan</td><td class="align-top pt-4">:</td><td class="align-top pt-4">Potongan Pajak, Pajak Daerah dan potongan Lainnya :
-                            <table class="w-[280px] mt-2 text-[12px] leading-snug">
-                                <tr><td class="w-32">Nilai</td><td class="w-8">: Rp.</td><td class="text-right border-b border-black">${formatRp(item.jumlah)}</td></tr>
-                                <tr><td class="leading-tight py-1">Pot Pajak<br>PPN/PPD</td><td class="align-bottom py-1">: Rp.</td><td class="text-right border-b border-black align-bottom py-1">${fmtPjk(p.ppn)}</td></tr>
-                                <tr><td class="py-1">Pot Pajak PPh 21</td><td class="py-1">: Rp.</td><td class="text-right border-b border-black py-1">${fmtPjk(p.pph21)}</td></tr>
-                                <tr><td class="py-1">Pot Pajak PPh 22</td><td class="py-1">: Rp.</td><td class="text-right border-b border-black py-1">${fmtPjk(p.pph22)}</td></tr>
-                                <tr><td class="py-1">Pot Pajak PPh 23</td><td class="py-1">: Rp.</td><td class="text-right border-b border-black py-1">${fmtPjk(p.pph23)}</td></tr>
-                                <tr><td class="py-1">Total potongan</td><td class="py-1">: Rp.</td><td class="text-right border-b border-black py-1">${fmtPjk(potItem)}</td></tr>
-                                <tr><td class="font-bold py-1">Dibayarkan</td><td class="font-bold py-1">: Rp.</td><td class="text-right font-bold border-b-[2px] border-black py-1">${formatRp(netItem)}</td></tr>
+                        <tr class="kwitansi-gap-payment"><td class="align-top">Sebagai pembayaran</td><td class="align-top">:</td><td class="align-top text-justify pr-2">${item.uraian} Kegiatan ${namaKeg}${keteranganTambahan}<br>SPP Nomor ${count} dari ${safeGetVal('in_sumberDana')}</td></tr>
+                        <tr class="kwitansi-gap-catatan"><td class="align-top">Catatan Keuangan</td><td class="align-top">:</td><td class="align-top">Potongan Pajak, Pajak Daerah dan potongan Lainnya :
+                            <table class="kwitansi-keuangan w-auto text-[12pt] leading-none border-collapse">
+                                <tr><td class="w-32">Nilai</td><td class="rp-col">: Rp.</td><td class="nilai-col">${formatRp(item.jumlah)}</td></tr>
+                                <tr><td class="leading-tight">Pot Pajak<br>PPN/PPD</td><td class="rp-col align-bottom">: Rp.</td><td class="nilai-col align-bottom">${fmtPjk(p.ppn)}</td></tr>
+                                <tr><td>Pot Pajak PPh 21</td><td class="rp-col">: Rp.</td><td class="nilai-col">${fmtPjk(p.pph21)}</td></tr>
+                                <tr><td>Pot Pajak PPh 22</td><td class="rp-col">: Rp.</td><td class="nilai-col">${fmtPjk(p.pph22)}</td></tr>
+                                <tr><td>Pot Pajak PPh 23</td><td class="rp-col">: Rp.</td><td class="nilai-col">${fmtPjk(p.pph23)}</td></tr>
+                                <tr><td>Total potongan</td><td class="rp-col">: Rp.</td><td class="nilai-col"><span class="total-potongan-angka">${fmtPjk(potItem)}</span></td></tr>
+                                <tr><td class="font-bold">Dibayarkan</td><td class="rp-col font-bold">: Rp.</td><td class="nilai-col font-bold"><span class="dibayarkan-angka">${formatRp(netItem)}</span></td></tr>
                             </table>
                         </td></tr>
                     </table>
                     
-                    <div class="flex justify-between text-[11px] mt-8 text-center text-black px-4">
+                    <div class="flex justify-between text-[12pt] mt-8 text-center text-black px-4">
                         <div class="w-1/2">
                             <p>&nbsp;</p>
                             <p>Yang Memberi,</p>
@@ -2073,6 +3474,8 @@ function getBelanjaOptionsHTML(selectedValue) {
             const logoSpp = document.getElementById('logo_spp'); if(logoSpp) logoSpp.src = LOGO_URL;
 
             // 3. Populate SP2D Document
+            const nomorSp2dUrut = String(finalNoSpp).trim().replace(/^0+(?=\d)/, '');
+            safeSetText('sp2d_no_dok', `900/${nomorSp2dUrut}/SPPD/${safeGetVal('in_tahun')}`);
             safeSetText('sp2d_spp_ref', `${finalNoSpp}/SPP/2011/${safeGetVal('in_tahun')}`);
             safeSetText('sp2d_spp_tgl', tgl);
             safeSetText('sp2d_tahun', safeGetVal('in_tahun'));
@@ -2114,7 +3517,7 @@ function getBelanjaOptionsHTML(selectedValue) {
             populateKwitansi();
 
             // Pindah Tampilan ke mode Preview
-            document.getElementById('sppView')?.classList.add('hidden');
+            document.getElementById('formView')?.classList.add('hidden');
             document.getElementById('previewView')?.classList.remove('hidden');
             switchDoc('spp'); // Otomatis aktif di tab SPP
             window.scrollTo(0, 0);
@@ -2123,7 +3526,7 @@ function getBelanjaOptionsHTML(selectedValue) {
         // Fungsi untuk menutup mode preview kembali ke form pengisian
         function hidePreview() { 
             document.getElementById('previewView')?.classList.add('hidden'); 
-            document.getElementById('sppView')?.classList.remove('hidden'); 
+            document.getElementById('formView')?.classList.remove('hidden'); 
             window.scrollTo(0, 0);
         }
 
@@ -2150,7 +3553,7 @@ function getBelanjaOptionsHTML(selectedValue) {
             else if (docType === 'kwitansi') { 
                 const uraian = belanjaItems.length > 0 ? belanjaItems[0].uraian : ''; 
                 docTitle = `1 kwt ${kegiatanName} ${uraian}, spp nomor ${noSpp}`; 
-                document.body.classList.add('print-kwitansi'); // Trigger css ukuran A5 Landscape
+                document.body.classList.add('print-kwitansi'); // Trigger css ukuran A4 Portrait, 2 kwitansi per lembar
             } 
             else if (docType === 'rekomendasi') docTitle = `Surat Rekomendasi SPJ ${kegiatanName}`;
 
