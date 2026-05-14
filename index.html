@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Pelaporan Desa v3.8.13 Cloud Safe Fix - Prime Mature</title>
+    <title>Sistem Pelaporan Desa v3.8.28 AI Agent Bendahara</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -423,7 +423,7 @@
         }
 
 
-        /* v3.8.14 - Optimasi khusus halaman Verifikasi SPJ: tanpa geser mouse, teks wrap rapi. */
+        /* v3.8.26 - Verifikasi SPJ tampil semua kwitansi termasuk SPP belum ACC dan tombol ACC SPP. */
         #verifikasiSpjView {
             max-width: none !important;
         }
@@ -460,25 +460,21 @@
             letter-spacing: .03em;
         }
         #verifikasiSpjView .verifikasi-spj-table th:nth-child(1),
-        #verifikasiSpjView .verifikasi-spj-table td:nth-child(1) { width: 4%; }
+        #verifikasiSpjView .verifikasi-spj-table td:nth-child(1) { width: 5%; }
         #verifikasiSpjView .verifikasi-spj-table th:nth-child(2),
-        #verifikasiSpjView .verifikasi-spj-table td:nth-child(2) { width: 22%; } /* Uraian/Kegiatan diperkecil */
+        #verifikasiSpjView .verifikasi-spj-table td:nth-child(2) { width: 17%; } /* Uraian/Kegiatan per kwitansi */
         #verifikasiSpjView .verifikasi-spj-table th:nth-child(3),
-        #verifikasiSpjView .verifikasi-spj-table td:nth-child(3) { width: 11%; }
+        #verifikasiSpjView .verifikasi-spj-table td:nth-child(3) { width: 12%; }
         #verifikasiSpjView .verifikasi-spj-table th:nth-child(4),
-        #verifikasiSpjView .verifikasi-spj-table td:nth-child(4) { width: 7%; }
+        #verifikasiSpjView .verifikasi-spj-table td:nth-child(4) { width: 11%; } /* Tanggal + sumber dana */
         #verifikasiSpjView .verifikasi-spj-table th:nth-child(5),
-        #verifikasiSpjView .verifikasi-spj-table td:nth-child(5) { width: 6%; }
+        #verifikasiSpjView .verifikasi-spj-table td:nth-child(5) { width: 11%; }
         #verifikasiSpjView .verifikasi-spj-table th:nth-child(6),
-        #verifikasiSpjView .verifikasi-spj-table td:nth-child(6) { width: 9%; }
+        #verifikasiSpjView .verifikasi-spj-table td:nth-child(6) { width: 15%; } /* Kelengkapan + catatan */
         #verifikasiSpjView .verifikasi-spj-table th:nth-child(7),
-        #verifikasiSpjView .verifikasi-spj-table td:nth-child(7) { width: 13%; }
+        #verifikasiSpjView .verifikasi-spj-table td:nth-child(7) { width: 14%; } /* Bayar */
         #verifikasiSpjView .verifikasi-spj-table th:nth-child(8),
-        #verifikasiSpjView .verifikasi-spj-table td:nth-child(8) { width: 13%; } /* Catatan Bendahara */
-        #verifikasiSpjView .verifikasi-spj-table th:nth-child(9),
-        #verifikasiSpjView .verifikasi-spj-table td:nth-child(9) { width: 6%; }
-        #verifikasiSpjView .verifikasi-spj-table th:nth-child(10),
-        #verifikasiSpjView .verifikasi-spj-table td:nth-child(10) { width: 9%; }
+        #verifikasiSpjView .verifikasi-spj-table td:nth-child(8) { width: 15%; }
 
         #verifikasiSpjView .verif-uraian-cell,
         #verifikasiSpjView .verif-ppkd-cell,
@@ -494,6 +490,40 @@
             white-space: normal !important;
             overflow-wrap: normal !important;
             word-break: normal !important;
+        }
+        #verifikasiSpjView .verif-bayar-cell {
+            padding-left: .35rem !important;
+            padding-right: .35rem !important;
+            text-align: center !important;
+        }
+        #verifikasiSpjView .verif-bayar-cell span {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            min-width: 58px !important;
+            max-width: 100% !important;
+            white-space: nowrap !important;
+            word-break: keep-all !important;
+            overflow-wrap: normal !important;
+            line-height: 1.05 !important;
+            font-size: 10px !important;
+            padding: .28rem .45rem !important;
+        }
+        #verifikasiSpjView .verif-bayar-cell div {
+            white-space: nowrap !important;
+            word-break: keep-all !important;
+            overflow-wrap: normal !important;
+            font-size: 10px !important;
+        }
+        #verifikasiSpjView .verif-kelengkapan-cell span,
+        #verifikasiSpjView .verif-kelengkapan-cell a {
+            padding: .25rem .42rem !important;
+            font-size: 10px !important;
+            line-height: 1.1 !important;
+        }
+        #verifikasiSpjView .verif-kelengkapan-cell div {
+            font-size: 10px !important;
+            line-height: 1.18 !important;
         }
         #verifikasiSpjView .verif-action-grid {
             display: grid !important;
@@ -523,11 +553,11 @@
             #verifikasiSpjView .verifikasi-spj-table th,
             #verifikasiSpjView .verifikasi-spj-table td { padding: .42rem !important; font-size: 10.5px !important; }
             #verifikasiSpjView .verifikasi-spj-table th:nth-child(2),
-            #verifikasiSpjView .verifikasi-spj-table td:nth-child(2) { width: 20%; }
+            #verifikasiSpjView .verifikasi-spj-table td:nth-child(2) { width: 18%; }
+            #verifikasiSpjView .verifikasi-spj-table th:nth-child(6),
+            #verifikasiSpjView .verifikasi-spj-table td:nth-child(6) { width: 15%; }
             #verifikasiSpjView .verifikasi-spj-table th:nth-child(7),
-            #verifikasiSpjView .verifikasi-spj-table td:nth-child(7) { width: 12%; }
-            #verifikasiSpjView .verifikasi-spj-table th:nth-child(8),
-            #verifikasiSpjView .verifikasi-spj-table td:nth-child(8) { width: 13%; }
+            #verifikasiSpjView .verifikasi-spj-table td:nth-child(7) { width: 14%; }
         }
 
         @media (max-width: 760px) {
@@ -575,6 +605,15 @@
             }
         }
 
+
+
+        .bkk-table th, .bkk-table td { vertical-align: top; }
+        @media print {
+            #bkkView { width: 100% !important; max-width: none !important; }
+            #bkkView table { font-size: 8.5pt !important; table-layout: fixed; }
+            #bkkView th, #bkkView td { padding: 0.08cm !important; }
+            #bkkView .bkk-uraian { white-space: normal !important; word-break: break-word !important; }
+        }
 
     </style>
 
@@ -979,6 +1018,872 @@
                 #formView .flex.gap-4.pt-4.border-t { flex-direction: column; }
             }
         }
+
+        .bkk-table th, .bkk-table td { vertical-align: top; }
+        @media print {
+            #bkkView { width: 100% !important; max-width: none !important; }
+            #bkkView table { font-size: 8.5pt !important; table-layout: fixed; }
+            #bkkView th, #bkkView td { padding: 0.08cm !important; }
+            #bkkView .bkk-uraian { white-space: normal !important; word-break: break-word !important; }
+        }
+
+    </style>
+
+
+
+    <style id="buku-kas-landscape-v3821">
+        /* =========================================================
+           v3.8.27 - CETAK BUKU KAS A4 LANDSCAPE
+           Berlaku untuk BKU, BKT, BKSD, BKP, dan Buku Kas Kegiatan.
+           Dokumen SPP/SP2D/Kwitansi/Cover tetap memakai aturan cetak masing-masing.
+        ========================================================= */
+        @media print {
+            @page bukuKasLandscapePage { size: A4 landscape; margin: 0.5in; }
+
+            .print-landscape,
+            #bkuView,
+            #bktView,
+            #bksdView,
+            #bkpView,
+            #bkkView {
+                page: bukuKasLandscapePage !important;
+                width: 100% !important;
+                max-width: none !important;
+                min-height: auto !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                background: #fff !important;
+                box-shadow: none !important;
+                border: 0 !important;
+            }
+
+            .print-landscape > div,
+            #bkuView > div,
+            #bktView > div,
+            #bksdView > div,
+            #bkpView > div,
+            #bkkView > div {
+                box-shadow: none !important;
+                border: 0 !important;
+                border-radius: 0 !important;
+                width: 100% !important;
+                max-width: none !important;
+            }
+
+            .print-landscape .overflow-x-auto,
+            #bkuView .overflow-x-auto,
+            #bktView .overflow-x-auto,
+            #bksdView .overflow-x-auto,
+            #bkpView .overflow-x-auto,
+            #bkkView .overflow-x-auto {
+                overflow: visible !important;
+            }
+
+            #bkuView table,
+            #bktView table,
+            #bksdView table,
+            #bkpView table,
+            #bkkView table {
+                width: 100% !important;
+                table-layout: fixed !important;
+                border-collapse: collapse !important;
+                font-size: 8.2pt !important;
+                line-height: 1.15 !important;
+            }
+
+            #bkkView table { font-size: 8pt !important; }
+
+            #bkuView th, #bkuView td,
+            #bktView th, #bktView td,
+            #bksdView th, #bksdView td,
+            #bkpView th, #bkpView td,
+            #bkkView th, #bkkView td {
+                padding: 0.09cm !important;
+                vertical-align: top !important;
+                border-color: #000 !important;
+                word-break: break-word !important;
+                overflow-wrap: anywhere !important;
+            }
+
+            #bkuView .hidden.print\:block,
+            #bktView .hidden.print\:block,
+            #bksdView .hidden.print\:block,
+            #bkpView .hidden.print\:block,
+            #bkkView .hidden.print\:block {
+                display: block !important;
+            }
+
+            #bkkHeaderInfo {
+                font-size: 9pt !important;
+                line-height: 1.25 !important;
+                margin-bottom: 0.35cm !important;
+            }
+        }
+    </style>
+
+
+
+    <style id="buku-kas-print-repeat-wrap-v3823">
+        /* =========================================================
+           v3.8.26 - OPTIMASI CETAK BUKU KAS
+           - Header tabel dan footer/totals tabel diulang di setiap halaman print.
+           - Row tidak dipotong di tengah halaman.
+           - Kolom Uraian/Kegiatan dibuat lebih luas daripada Nomor Bukti.
+           - Nomor Bukti dibuat wrap text agar tidak melebar.
+        ========================================================= */
+        @media print {
+            body.print-buku-kas #bkuView table,
+            body.print-buku-kas #bktView table,
+            body.print-buku-kas #bksdView table,
+            body.print-buku-kas #bkpView table,
+            body.print-buku-kas #bkkView table {
+                page-break-inside: auto !important;
+                break-inside: auto !important;
+                table-layout: fixed !important;
+                width: 100% !important;
+            }
+
+            body.print-buku-kas #bkuView thead,
+            body.print-buku-kas #bktView thead,
+            body.print-buku-kas #bksdView thead,
+            body.print-buku-kas #bkpView thead,
+            body.print-buku-kas #bkkView thead {
+                display: table-header-group !important;
+                position: static !important;
+            }
+
+            body.print-buku-kas #bkuView tfoot,
+            body.print-buku-kas #bktView tfoot,
+            body.print-buku-kas #bksdView tfoot,
+            body.print-buku-kas #bkpView tfoot,
+            body.print-buku-kas #bkkView tfoot {
+                display: table-footer-group !important;
+            }
+
+            body.print-buku-kas #bkuView tr,
+            body.print-buku-kas #bktView tr,
+            body.print-buku-kas #bksdView tr,
+            body.print-buku-kas #bkpView tr,
+            body.print-buku-kas #bkkView tr {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+            body.print-buku-kas #bkuView th,
+            body.print-buku-kas #bkuView td,
+            body.print-buku-kas #bktView th,
+            body.print-buku-kas #bktView td,
+            body.print-buku-kas #bksdView th,
+            body.print-buku-kas #bksdView td,
+            body.print-buku-kas #bkpView th,
+            body.print-buku-kas #bkpView td,
+            body.print-buku-kas #bkkView th,
+            body.print-buku-kas #bkkView td {
+                white-space: normal !important;
+                overflow: visible !important;
+                text-overflow: clip !important;
+                word-break: normal !important;
+                overflow-wrap: break-word !important;
+                hyphens: auto !important;
+            }
+
+            /* BKU/BKT/BKSD: Uraian lebih luas, Nomor Bukti wrap. */
+            body.print-buku-kas #bkuView th:nth-child(1), body.print-buku-kas #bkuView td:nth-child(1),
+            body.print-buku-kas #bktView th:nth-child(1), body.print-buku-kas #bktView td:nth-child(1),
+            body.print-buku-kas #bksdView th:nth-child(1), body.print-buku-kas #bksdView td:nth-child(1) { width: 4% !important; }
+            body.print-buku-kas #bkuView th:nth-child(2), body.print-buku-kas #bkuView td:nth-child(2),
+            body.print-buku-kas #bktView th:nth-child(2), body.print-buku-kas #bktView td:nth-child(2),
+            body.print-buku-kas #bksdView th:nth-child(2), body.print-buku-kas #bksdView td:nth-child(2) { width: 8% !important; }
+            body.print-buku-kas #bkuView th:nth-child(3), body.print-buku-kas #bkuView td:nth-child(3),
+            body.print-buku-kas #bktView th:nth-child(3), body.print-buku-kas #bktView td:nth-child(3),
+            body.print-buku-kas #bksdView th:nth-child(3), body.print-buku-kas #bksdView td:nth-child(3) {
+                width: 11% !important;
+                white-space: normal !important;
+                word-break: break-word !important;
+                overflow-wrap: anywhere !important;
+                font-size: 7.3pt !important;
+                line-height: 1.05 !important;
+            }
+            body.print-buku-kas #bkuView th:nth-child(4), body.print-buku-kas #bkuView td:nth-child(4),
+            body.print-buku-kas #bktView th:nth-child(4), body.print-buku-kas #bktView td:nth-child(4),
+            body.print-buku-kas #bksdView th:nth-child(4), body.print-buku-kas #bksdView td:nth-child(4) {
+                width: 33% !important;
+                white-space: normal !important;
+                word-break: normal !important;
+                overflow-wrap: break-word !important;
+            }
+            body.print-buku-kas #bkuView th:nth-child(5), body.print-buku-kas #bkuView td:nth-child(5),
+            body.print-buku-kas #bktView th:nth-child(5), body.print-buku-kas #bktView td:nth-child(5),
+            body.print-buku-kas #bksdView th:nth-child(5), body.print-buku-kas #bksdView td:nth-child(5) { width: 8% !important; }
+            body.print-buku-kas #bkuView th:nth-child(6), body.print-buku-kas #bkuView td:nth-child(6),
+            body.print-buku-kas #bkuView th:nth-child(7), body.print-buku-kas #bkuView td:nth-child(7),
+            body.print-buku-kas #bkuView th:nth-child(8), body.print-buku-kas #bkuView td:nth-child(8),
+            body.print-buku-kas #bktView th:nth-child(6), body.print-buku-kas #bktView td:nth-child(6),
+            body.print-buku-kas #bktView th:nth-child(7), body.print-buku-kas #bktView td:nth-child(7),
+            body.print-buku-kas #bktView th:nth-child(8), body.print-buku-kas #bktView td:nth-child(8),
+            body.print-buku-kas #bksdView th:nth-child(6), body.print-buku-kas #bksdView td:nth-child(6),
+            body.print-buku-kas #bksdView th:nth-child(7), body.print-buku-kas #bksdView td:nth-child(7),
+            body.print-buku-kas #bksdView th:nth-child(8), body.print-buku-kas #bksdView td:nth-child(8) { width: 12% !important; }
+
+            /* Buku Pajak: kolom bukti/uraian pajak dibuat lebar dan wrap. */
+            body.print-buku-kas #bkpView th:nth-child(1), body.print-buku-kas #bkpView td:nth-child(1) { width: 4% !important; }
+            body.print-buku-kas #bkpView th:nth-child(2), body.print-buku-kas #bkpView td:nth-child(2) { width: 8% !important; }
+            body.print-buku-kas #bkpView th:nth-child(3), body.print-buku-kas #bkpView td:nth-child(3) {
+                width: 44% !important;
+                white-space: normal !important;
+                word-break: break-word !important;
+                overflow-wrap: anywhere !important;
+            }
+            body.print-buku-kas #bkpView th:nth-child(4), body.print-buku-kas #bkpView td:nth-child(4),
+            body.print-buku-kas #bkpView th:nth-child(5), body.print-buku-kas #bkpView td:nth-child(5) { width: 14% !important; }
+            body.print-buku-kas #bkpView th:nth-child(6), body.print-buku-kas #bkpView td:nth-child(6) { width: 16% !important; }
+            body.print-buku-kas #bkpView th:nth-child(7), body.print-buku-kas #bkpView td:nth-child(7) { display: none !important; }
+
+            /* Buku Kas Kegiatan: Uraian dibuat dominan, Nomor Bukti wrap. */
+            body.print-buku-kas #bkkView th:nth-child(1), body.print-buku-kas #bkkView td:nth-child(1) { width: 4% !important; }
+            body.print-buku-kas #bkkView th:nth-child(2), body.print-buku-kas #bkkView td:nth-child(2) { width: 8% !important; }
+            body.print-buku-kas #bkkView th:nth-child(3), body.print-buku-kas #bkkView td:nth-child(3) {
+                width: 10% !important;
+                white-space: normal !important;
+                word-break: break-word !important;
+                overflow-wrap: anywhere !important;
+                font-size: 7.2pt !important;
+                line-height: 1.05 !important;
+            }
+            body.print-buku-kas #bkkView th:nth-child(4), body.print-buku-kas #bkkView td:nth-child(4) {
+                width: 30% !important;
+                white-space: normal !important;
+                word-break: normal !important;
+                overflow-wrap: break-word !important;
+            }
+            body.print-buku-kas #bkkView th:nth-child(5), body.print-buku-kas #bkkView td:nth-child(5) { width: 10% !important; }
+            body.print-buku-kas #bkkView th:nth-child(6), body.print-buku-kas #bkkView td:nth-child(6) { width: 12% !important; }
+            body.print-buku-kas #bkkView th:nth-child(7), body.print-buku-kas #bkkView td:nth-child(7) { width: 9% !important; }
+            body.print-buku-kas #bkkView th:nth-child(8), body.print-buku-kas #bkkView td:nth-child(8) { width: 8% !important; }
+            body.print-buku-kas #bkkView th:nth-child(9), body.print-buku-kas #bkkView td:nth-child(9) { width: 9% !important; }
+
+            body.print-buku-kas #bkuView td:nth-child(6), body.print-buku-kas #bkuView td:nth-child(7), body.print-buku-kas #bkuView td:nth-child(8),
+            body.print-buku-kas #bktView td:nth-child(6), body.print-buku-kas #bktView td:nth-child(7), body.print-buku-kas #bktView td:nth-child(8),
+            body.print-buku-kas #bksdView td:nth-child(6), body.print-buku-kas #bksdView td:nth-child(7), body.print-buku-kas #bksdView td:nth-child(8),
+            body.print-buku-kas #bkpView td:nth-child(4), body.print-buku-kas #bkpView td:nth-child(5), body.print-buku-kas #bkpView td:nth-child(6),
+            body.print-buku-kas #bkkView td:nth-child(5), body.print-buku-kas #bkkView td:nth-child(6), body.print-buku-kas #bkkView td:nth-child(7), body.print-buku-kas #bkkView td:nth-child(8), body.print-buku-kas #bkkView td:nth-child(9) {
+                white-space: nowrap !important;
+                font-size: 7.4pt !important;
+            }
+        }
+
+        @media screen {
+            #bkuView table, #bktView table, #bksdView table, #bkpView table, #bkkView table { table-layout: fixed; }
+            #bkuView td:nth-child(3), #bktView td:nth-child(3), #bksdView td:nth-child(3), #bkkView td:nth-child(3), #bkpView td:nth-child(3) {
+                white-space: normal !important;
+                word-break: break-word !important;
+                overflow-wrap: anywhere !important;
+            }
+            #bkuView td:nth-child(4), #bktView td:nth-child(4), #bksdView td:nth-child(4), #bkkView td:nth-child(4) {
+                white-space: normal !important;
+                word-break: normal !important;
+                overflow-wrap: break-word !important;
+            }
+        }
+    </style>
+
+
+
+    <style id="buku-kas-paginated-print-v3823">
+        /* =========================================================
+           v3.8.26 - FIX CETAK BUKU KAS PAGINATED
+           - Hanya area buku kas yang dicetak, preview SPP/SP2D disembunyikan.
+           - Header + footer dibuat ulang per halaman A4 landscape.
+           - Footer tidak dipaksa masuk setelah tabel panjang; data dipecah per halaman.
+           - Kolom Uraian lebih luas dari Nomor Bukti, Nomor Bukti tetap wrap.
+        ========================================================= */
+        #bukuKasPrintPages { display: none; }
+        @media print {
+            body.print-buku-kas #loginView,
+            body.print-buku-kas #mainAppContainer,
+            body.print-buku-kas #previewView,
+            body.print-buku-kas #toast,
+            body.print-buku-kas #confirmModal {
+                display: none !important;
+            }
+
+            body.print-buku-kas {
+                background: #fff !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            body.print-buku-kas #bukuKasPrintPages {
+                display: block !important;
+                background: #fff !important;
+                color: #000 !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            body.print-buku-kas .bk-print-page {
+                page: bukuKasLandscapePage;
+                width: 100% !important;
+                min-height: 184mm !important;
+                box-sizing: border-box !important;
+                display: flex !important;
+                flex-direction: column !important;
+                page-break-after: always !important;
+                break-after: page !important;
+                overflow: hidden !important;
+                background: #fff !important;
+                color: #000 !important;
+                font-family: Arial, Helvetica, sans-serif !important;
+            }
+
+            body.print-buku-kas .bk-print-page:last-child {
+                page-break-after: auto !important;
+                break-after: auto !important;
+            }
+
+            body.print-buku-kas .bk-print-header {
+                flex: 0 0 auto !important;
+                margin: 0 0 0.16cm 0 !important;
+                padding: 0 !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+            body.print-buku-kas .bk-print-header .hidden,
+            body.print-buku-kas .bk-print-footer .hidden {
+                display: block !important;
+            }
+
+            body.print-buku-kas .bk-print-header h1 {
+                font-size: 9.5pt !important;
+                line-height: 1.08 !important;
+                margin: 0 !important;
+            }
+
+            body.print-buku-kas .bk-print-header h2,
+            body.print-buku-kas .bk-print-header h3,
+            body.print-buku-kas .bk-print-header p {
+                font-size: 8.4pt !important;
+                line-height: 1.08 !important;
+                margin: 0 !important;
+            }
+
+            body.print-buku-kas .bk-print-info {
+                font-size: 7.2pt !important;
+                line-height: 1.08 !important;
+                margin: 0.08cm 0 0.14cm 0 !important;
+                display: grid !important;
+                grid-template-columns: 2.2cm 0.2cm 1fr !important;
+                gap: 0.02cm 0.08cm !important;
+                font-weight: 700 !important;
+            }
+
+            body.print-buku-kas .bk-print-table-wrap {
+                flex: 0 1 auto !important;
+                width: 100% !important;
+                overflow: visible !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+            body.print-buku-kas table.bk-print-table {
+                width: 100% !important;
+                table-layout: fixed !important;
+                border-collapse: collapse !important;
+                border: 1px solid #000 !important;
+                font-size: 6.45pt !important;
+                line-height: 1.04 !important;
+                color: #000 !important;
+            }
+
+            body.print-buku-kas .bk-print-table th,
+            body.print-buku-kas .bk-print-table td {
+                border: 1px solid #000 !important;
+                padding: 0.035cm 0.045cm !important;
+                vertical-align: top !important;
+                color: #000 !important;
+                background: transparent !important;
+                white-space: normal !important;
+                word-break: normal !important;
+                overflow-wrap: break-word !important;
+                text-overflow: clip !important;
+                overflow: visible !important;
+            }
+
+            body.print-buku-kas .bk-print-table thead th {
+                background: #d9d9d9 !important;
+                font-weight: 700 !important;
+                text-align: center !important;
+                vertical-align: middle !important;
+            }
+
+            body.print-buku-kas .bk-print-table tfoot td {
+                font-weight: 700 !important;
+                background: #fff !important;
+            }
+
+            body.print-buku-kas .bk-print-table td:nth-child(3),
+            body.print-buku-kas .bk-print-table th:nth-child(3) {
+                overflow-wrap: anywhere !important;
+                word-break: break-word !important;
+                font-size: 5.85pt !important;
+                line-height: 1 !important;
+            }
+
+            body.print-buku-kas .bk-print-table td:nth-child(4),
+            body.print-buku-kas .bk-print-table th:nth-child(4) {
+                overflow-wrap: break-word !important;
+                word-break: normal !important;
+            }
+
+            body.print-buku-kas .bk-print-table td:nth-last-child(-n+3) {
+                white-space: nowrap !important;
+                font-size: 6.05pt !important;
+            }
+
+            body.print-buku-kas .bk-print-footer {
+                flex: 0 0 auto !important;
+                margin-top: auto !important;
+                padding-top: 0.14cm !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                font-size: 6.15pt !important;
+                line-height: 1.02 !important;
+                color: #000 !important;
+            }
+
+            body.print-buku-kas .bk-print-footer * {
+                color: #000 !important;
+                line-height: 1.02 !important;
+                font-size: 6.15pt !important;
+            }
+
+            body.print-buku-kas .bk-print-footer table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                border: 0 !important;
+                table-layout: auto !important;
+                font-size: 6.05pt !important;
+            }
+
+            body.print-buku-kas .bk-print-footer table td {
+                border: 0 !important;
+                padding: 0 !important;
+                font-size: 6.05pt !important;
+            }
+
+            body.print-buku-kas .bk-print-footer .mb-8,
+            body.print-buku-kas .bk-print-footer .mb-6,
+            body.print-buku-kas .bk-print-footer .mb-4,
+            body.print-buku-kas .bk-print-footer .mb-3,
+            body.print-buku-kas .bk-print-footer .mb-2 {
+                margin-bottom: 0.06cm !important;
+            }
+
+            body.print-buku-kas .bk-print-footer .mt-16,
+            body.print-buku-kas .bk-print-footer .mt-8,
+            body.print-buku-kas .bk-print-footer .mt-4,
+            body.print-buku-kas .bk-print-footer .mt-3,
+            body.print-buku-kas .bk-print-footer .mt-2 {
+                margin-top: 0.08cm !important;
+            }
+
+            body.print-buku-kas .bk-print-footer .h-20,
+            body.print-buku-kas .bk-print-footer .h-16 {
+                height: 0.55cm !important;
+            }
+
+            body.print-buku-kas .bk-print-footer .flex {
+                display: flex !important;
+            }
+
+            body.print-buku-kas .bk-print-footer .w-1\/3 {
+                width: 33.333333% !important;
+            }
+
+            body.print-buku-kas .bk-print-footer p {
+                margin: 0 !important;
+            }
+
+            body.print-buku-kas .bk-print-page .no-print,
+            body.print-buku-kas .bk-print-page button,
+            body.print-buku-kas .bk-print-page input,
+            body.print-buku-kas .bk-print-page select,
+            body.print-buku-kas .bk-print-page textarea {
+                display: none !important;
+            }
+        }
+    </style>
+
+
+
+    <style id="bku-footer-readable-v3825">
+        /* v3.8.26 - Footer BKU rapi kiri + angka tabel lebih mudah dibaca */
+        @media print {
+            body.print-buku-kas table.bk-print-table {
+                font-size: 7.15pt !important;
+                line-height: 1.12 !important;
+            }
+            body.print-buku-kas .bk-print-table th,
+            body.print-buku-kas .bk-print-table td {
+                padding: 0.045cm 0.055cm !important;
+            }
+            body.print-buku-kas .bk-print-table td:nth-last-child(-n+3),
+            body.print-buku-kas .bk-print-table tfoot td:nth-last-child(-n+3) {
+                font-size: 7.45pt !important;
+                font-weight: 700 !important;
+                white-space: nowrap !important;
+                letter-spacing: 0 !important;
+            }
+            body.print-buku-kas .bk-print-table td:nth-child(3),
+            body.print-buku-kas .bk-print-table th:nth-child(3) {
+                font-size: 6.4pt !important;
+                line-height: 1.05 !important;
+            }
+            body.print-buku-kas .bk-print-table tfoot td {
+                font-size: 7.35pt !important;
+                padding-top: 0.06cm !important;
+                padding-bottom: 0.06cm !important;
+            }
+            body.print-buku-kas .bk-print-footer {
+                text-align: left !important;
+                font-size: 7.05pt !important;
+                line-height: 1.12 !important;
+                padding-top: 0.08cm !important;
+            }
+            body.print-buku-kas .bk-print-footer * {
+                text-align: left !important;
+                font-size: 7.05pt !important;
+                line-height: 1.12 !important;
+            }
+            body.print-buku-kas .bk-foot-wrap {
+                width: 100% !important;
+                display: block !important;
+                color: #000 !important;
+            }
+            body.print-buku-kas .bk-foot-keterangan {
+                width: 58% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            body.print-buku-kas .bk-foot-title {
+                font-weight: 700 !important;
+                margin: 0 0 0.035cm 0 !important;
+            }
+            body.print-buku-kas .bk-foot-subtitle {
+                margin: 0.035cm 0 0.02cm 0.12cm !important;
+            }
+            body.print-buku-kas .bk-foot-subtitle-gap {
+                margin-top: 0.08cm !important;
+            }
+            body.print-buku-kas .bk-foot-table {
+                width: auto !important;
+                min-width: 9.8cm !important;
+                table-layout: auto !important;
+                border-collapse: collapse !important;
+                margin: 0 0 0.02cm 0.24cm !important;
+                border: 0 !important;
+            }
+            body.print-buku-kas .bk-foot-table td {
+                border: 0 !important;
+                padding: 0 !important;
+                vertical-align: top !important;
+            }
+            body.print-buku-kas .bk-foot-label {
+                width: 6.4cm !important;
+                padding-right: 0.03cm !important;
+                white-space: normal !important;
+            }
+            body.print-buku-kas .bk-foot-rp {
+                width: 0.48cm !important;
+                padding-left: 0 !important;
+                padding-right: 0.02cm !important;
+                white-space: nowrap !important;
+            }
+            body.print-buku-kas .bk-foot-value {
+                min-width: 2.5cm !important;
+                text-align: right !important;
+                font-weight: 700 !important;
+                padding-left: 0.03cm !important;
+                white-space: nowrap !important;
+            }
+            body.print-buku-kas .bk-foot-line {
+                border-top: 1px solid #000 !important;
+                padding-top: 0.02cm !important;
+            }
+            body.print-buku-kas .bk-foot-signatures {
+                margin-top: 0.32cm !important;
+                display: flex !important;
+                justify-content: space-between !important;
+                text-align: center !important;
+                width: 100% !important;
+            }
+            body.print-buku-kas .bk-foot-sign {
+                width: 32% !important;
+                text-align: center !important;
+            }
+            body.print-buku-kas .bk-foot-sign * {
+                text-align: center !important;
+            }
+            body.print-buku-kas .bk-sign-space {
+                height: 0.62cm !important;
+            }
+            body.print-buku-kas .bk-sign-name {
+                font-weight: 700 !important;
+                margin: 0 !important;
+            }
+        }
+    </style>
+
+
+
+    <style id="buku-kas-narrow-readable-v3826">
+        /* v3.8.27 - Cetak Buku Kas: margin default 0.5 inch, footer dekat tabel, teks lebih besar */
+        @media print {
+            @page bukuKasLandscapePage { size: A4 landscape; margin: 0.5in !important; }
+
+            body.print-buku-kas .bk-print-page {
+                min-height: auto !important;
+                height: auto !important;
+                overflow: visible !important;
+                justify-content: flex-start !important;
+            }
+
+            body.print-buku-kas .bk-print-header {
+                margin-bottom: 0.08cm !important;
+            }
+
+            body.print-buku-kas .bk-print-header h1 {
+                font-size: 10.2pt !important;
+                line-height: 1.08 !important;
+            }
+            body.print-buku-kas .bk-print-header h2,
+            body.print-buku-kas .bk-print-header h3,
+            body.print-buku-kas .bk-print-header p {
+                font-size: 9.1pt !important;
+                line-height: 1.08 !important;
+            }
+
+            body.print-buku-kas table.bk-print-table {
+                font-size: 8.05pt !important;
+                line-height: 1.12 !important;
+            }
+            body.print-buku-kas .bk-print-table th,
+            body.print-buku-kas .bk-print-table td {
+                padding: 0.045cm 0.055cm !important;
+            }
+            body.print-buku-kas .bk-print-table th {
+                font-size: 8.05pt !important;
+                line-height: 1.08 !important;
+            }
+            body.print-buku-kas .bk-print-table td:nth-child(3),
+            body.print-buku-kas .bk-print-table th:nth-child(3) {
+                font-size: 6.9pt !important;
+                line-height: 1.04 !important;
+            }
+            body.print-buku-kas .bk-print-table td:nth-child(4),
+            body.print-buku-kas .bk-print-table th:nth-child(4) {
+                font-size: 7.9pt !important;
+                line-height: 1.12 !important;
+            }
+            body.print-buku-kas .bk-print-table td:nth-last-child(-n+3),
+            body.print-buku-kas .bk-print-table tfoot td:nth-last-child(-n+3) {
+                font-size: 8.25pt !important;
+                line-height: 1.1 !important;
+                font-weight: 700 !important;
+                white-space: nowrap !important;
+            }
+            body.print-buku-kas .bk-print-table tfoot td {
+                font-size: 8.05pt !important;
+                padding-top: 0.055cm !important;
+                padding-bottom: 0.055cm !important;
+            }
+
+            /* Footer tidak lagi dipaksa turun ke bawah halaman. */
+            body.print-buku-kas .bk-print-footer {
+                margin-top: 0.18cm !important;
+                padding-top: 0 !important;
+                font-size: 7.7pt !important;
+                line-height: 1.08 !important;
+                text-align: left !important;
+            }
+            body.print-buku-kas .bk-print-footer * {
+                font-size: 7.7pt !important;
+                line-height: 1.08 !important;
+            }
+            body.print-buku-kas .bk-foot-keterangan {
+                width: 64% !important;
+            }
+            body.print-buku-kas .bk-foot-title {
+                margin-bottom: 0.025cm !important;
+            }
+            body.print-buku-kas .bk-foot-subtitle {
+                margin: 0.025cm 0 0.015cm 0.08cm !important;
+            }
+            body.print-buku-kas .bk-foot-subtitle-gap {
+                margin-top: 0.045cm !important;
+            }
+            body.print-buku-kas .bk-foot-table {
+                min-width: 8.7cm !important;
+                margin-left: 0.16cm !important;
+                margin-bottom: 0.01cm !important;
+            }
+            body.print-buku-kas .bk-foot-label {
+                width: 5.55cm !important;
+                padding-right: 0.015cm !important;
+            }
+            body.print-buku-kas .bk-foot-rp {
+                width: 0.32cm !important;
+                padding-right: 0.01cm !important;
+            }
+            body.print-buku-kas .bk-foot-value {
+                min-width: 2.45cm !important;
+                padding-left: 0.01cm !important;
+                text-align: right !important;
+            }
+            body.print-buku-kas .bk-foot-signatures {
+                margin-top: 0.22cm !important;
+            }
+            body.print-buku-kas .bk-sign-space {
+                height: 0.55cm !important;
+            }
+        }
+    </style>
+
+
+
+    <style id="buku-kas-margin-05-v3827">
+        /* v3.8.27 - Margin print Buku Kas default 0,5 inch */
+        @media print {
+            @page bukuKasLandscapePage { size: A4 landscape; margin: 0.5in !important; }
+            body.print-buku-kas .bk-print-page {
+                min-height: 184mm !important;
+                height: auto !important;
+                overflow: visible !important;
+            }
+            body.print-buku-kas .bk-print-footer {
+                margin-top: 0.16cm !important;
+            }
+        }
+    </style>
+
+
+
+    <style id="ai-agent-bendahara-style-v3828">
+        /* =========================================================
+           AI AGENT BENDAHARA DESA v3.8.28
+           Modul assistant lokal: membantu isi draft SPP, cek pagu,
+           baca ringkasan buku kas, dan memberi saran pajak awal.
+           Tidak mengubah data cloud sebelum user klik Simpan.
+        ========================================================= */
+        @media screen {
+            #aiAgentView .ai-agent-shell {
+                display: grid;
+                grid-template-columns: minmax(0, 1.35fr) minmax(320px, .65fr);
+                gap: 1rem;
+            }
+            #aiAgentView .ai-card {
+                border: 1px solid rgba(148,163,184,.24);
+                background: rgba(255,255,255,.92);
+                border-radius: 22px;
+                box-shadow: 0 18px 48px rgba(15,23,42,.10);
+                overflow: hidden;
+            }
+            #aiAgentView .ai-hero {
+                background:
+                    radial-gradient(circle at 92% 15%, rgba(214,168,79,.24), transparent 11rem),
+                    linear-gradient(135deg, #07111f, #1e4b6e);
+                color: #fff;
+                padding: 1.25rem;
+            }
+            #aiAgentView .ai-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: .35rem;
+                padding: .35rem .65rem;
+                border-radius: 999px;
+                font-size: 10px;
+                font-weight: 900;
+                letter-spacing: .04em;
+                text-transform: uppercase;
+                background: rgba(255,255,255,.14);
+                border: 1px solid rgba(255,255,255,.18);
+                color: #dbeafe;
+            }
+            #aiAgentView .ai-log {
+                height: 430px;
+                overflow-y: auto;
+                padding: 1rem;
+                background:
+                    radial-gradient(circle at top left, rgba(37,99,235,.06), transparent 18rem),
+                    linear-gradient(180deg, rgba(248,250,252,.92), rgba(255,255,255,.96));
+            }
+            #aiAgentView .ai-msg {
+                max-width: 86%;
+                margin-bottom: .75rem;
+                border-radius: 18px;
+                padding: .75rem .9rem;
+                font-size: .86rem;
+                line-height: 1.45;
+                box-shadow: 0 10px 24px rgba(15,23,42,.07);
+            }
+            #aiAgentView .ai-msg-user {
+                margin-left: auto;
+                background: linear-gradient(135deg, #1e4b6e, #0f172a);
+                color: #fff;
+                border-bottom-right-radius: 6px;
+            }
+            #aiAgentView .ai-msg-bot {
+                background: #fff;
+                color: #0f172a;
+                border: 1px solid rgba(148,163,184,.26);
+                border-bottom-left-radius: 6px;
+            }
+            #aiAgentView .ai-input-wrap {
+                padding: 1rem;
+                border-top: 1px solid rgba(148,163,184,.22);
+                background: rgba(255,255,255,.96);
+            }
+            #aiAgentView .ai-chip {
+                border: 1px solid rgba(30,75,110,.20);
+                background: rgba(30,75,110,.06);
+                color: #1e4b6e;
+                border-radius: 999px;
+                padding: .42rem .7rem;
+                font-size: .72rem;
+                font-weight: 800;
+                transition: .16s ease;
+            }
+            #aiAgentView .ai-chip:hover { transform: translateY(-1px); background: rgba(30,75,110,.12); }
+            #aiAgentView .ai-stat {
+                border-radius: 18px;
+                padding: .9rem;
+                background: linear-gradient(180deg, rgba(248,250,252,.96), rgba(255,255,255,.96));
+                border: 1px solid rgba(148,163,184,.22);
+            }
+            #aiAgentView .ai-draft-box {
+                background: #f8fafc;
+                border: 1px dashed rgba(30,75,110,.34);
+                border-radius: 18px;
+                padding: .9rem;
+                font-size: .82rem;
+            }
+            #aiAgentView .ai-warning {
+                border-left: 4px solid #d97706;
+                background: #fffbeb;
+                color: #92400e;
+                padding: .65rem .8rem;
+                border-radius: 12px;
+                font-size: .78rem;
+                font-weight: 700;
+            }
+            @media (max-width: 980px) {
+                #aiAgentView .ai-agent-shell { grid-template-columns: 1fr; }
+                #aiAgentView .ai-log { height: 360px; }
+                #aiAgentView .ai-msg { max-width: 94%; }
+            }
+        }
     </style>
 
 </head>
@@ -1037,7 +1942,7 @@
         <!-- SIDEBAR NAV -->
         <nav class="no-print w-full md:w-64 bg-[#1e4b6e] flex-shrink-0 flex flex-col h-auto md:h-screen sticky top-0 z-50 shadow-xl transition-all">
             <div class="p-4 md:p-5 border-b border-blue-800 flex justify-between items-center shrink-0">
-                <div class="text-white font-black text-lg leading-tight tracking-wide">SISTEM PELAPORAN DESA <span class="text-[10px] font-normal opacity-70 block md:inline mt-1 md:mt-0">v3.8.8 Prime</span></div>
+                <div class="text-white font-black text-lg leading-tight tracking-wide">SISTEM PELAPORAN DESA <span class="text-[10px] font-normal opacity-70 block md:inline mt-1 md:mt-0">v3.8.28</span></div>
                 <div id="mobileUserRole" class="md:hidden text-[10px] bg-blue-800 text-white px-2 py-1 rounded font-bold uppercase">ROLE</div>
             </div>
             
@@ -1051,6 +1956,8 @@
                 <button onclick="switchMainPage('pembiayaan')" id="nav_main_pembiayaan" class="non-ppkd-menu text-left px-4 py-2 rounded-md md:rounded-r-lg border-b-4 md:border-b-0 md:border-l-4 border-transparent text-teal-300 hover:text-white hover:bg-[#153650] transition whitespace-nowrap text-sm font-bold flex-shrink-0 hidden">🏛️ Pembiayaan</button>
                 <button onclick="switchMainPage('spj')" id="nav_main_spj" class="text-left px-4 py-2 rounded-md md:rounded-r-lg border-b-4 md:border-b-0 md:border-l-4 border-transparent text-yellow-300 hover:text-white hover:bg-[#153650] transition whitespace-nowrap text-sm font-bold flex-shrink-0">📄 Laporan SPJ</button>
                 <button onclick="switchMainPage('verifikasiSpj')" id="nav_main_verifikasiSpj" class="text-left px-4 py-2 rounded-md md:rounded-r-lg border-b-4 md:border-b-0 md:border-l-4 border-transparent text-lime-300 hover:text-white hover:bg-[#153650] transition whitespace-nowrap text-sm font-bold flex-shrink-0">✅ Verifikasi SPJ</button>
+                <button onclick="switchMainPage('bkk')" id="nav_main_bkk" class="text-left px-4 py-2 rounded-md md:rounded-r-lg border-b-4 md:border-b-0 md:border-l-4 border-transparent text-cyan-300 hover:text-white hover:bg-[#153650] transition whitespace-nowrap text-sm font-bold flex-shrink-0">📒 Buku Kas Kegiatan</button>
+                <button onclick="switchMainPage('aiAgent')" id="nav_main_aiAgent" class="text-left px-4 py-2 rounded-md md:rounded-r-lg border-b-4 md:border-b-0 md:border-l-4 border-transparent text-blue-200 hover:text-white hover:bg-[#153650] transition whitespace-nowrap text-sm font-bold flex-shrink-0">🤖 AI Agent</button>
                 
                 <div class="non-ppkd-menu hidden md:block text-[10px] font-bold text-blue-400 mt-2 px-4 uppercase tracking-widest border-b border-blue-800/50 pb-1 mb-1">Analitik</div>
                 <button onclick="switchMainPage('laporan')" id="nav_main_laporan" class="non-ppkd-menu text-left px-4 py-2 rounded-md md:rounded-r-lg border-b-4 md:border-b-0 md:border-l-4 border-transparent text-pink-300 hover:text-white hover:bg-[#153650] transition whitespace-nowrap text-sm font-bold flex-shrink-0 hidden">📈 Grafik Laporan</button>
@@ -1130,20 +2037,18 @@
                     </div>
                     <div class="p-4 md:p-6">
                         <div class="bg-blue-50 border-l-4 border-blue-500 p-3 mb-4 rounded-r text-xs text-blue-800">
-                            PPKD hanya melihat SPJ miliknya sendiri. Kolom tanggal memakai <b>Tanggal SPP</b> dari form input. Catatan batal ACC SPJ tampil di <b>Kelengkapan SPJ</b>, sedangkan catatan batal ACC SPP/KWT tampil di kolom <b>Catatan Bendahara</b>.
+                            PPKD hanya melihat SPJ miliknya sendiri. Setiap baris menampilkan <b>1 nomor urut kwitansi</b> sesuai item belanja yang sudah diinput, termasuk SPP yang <b>belum di-ACC</b>. Bendahara bisa melakukan <b>ACC SPP</b> langsung dari kolom Aksi.
                         </div>
                         <div class="verifikasi-table-wrap border border-slate-200 rounded-lg">
                             <table class="verifikasi-spj-table w-full text-left text-xs border-collapse table-fixed">
                                 <thead class="bg-slate-100 text-[10px] uppercase text-slate-600">
                                     <tr>
-                                        <th class="p-2 border border-slate-300 text-center">No</th>
+                                        <th class="p-2 border border-slate-300 text-center">No KWT</th>
                                         <th class="p-2 border border-slate-300">Uraian / Kegiatan</th>
                                         <th class="p-2 border border-slate-300">Nama PPKD</th>
-                                        <th class="p-2 border border-slate-300">Tgl SPP</th>
-                                        <th class="p-2 border border-slate-300">Dana</th>
+                                        <th class="p-2 border border-slate-300">Tanggal & Dana</th>
                                         <th class="p-2 border border-slate-300 text-right">Jumlah</th>
-                                        <th class="p-2 border border-slate-300">Kelengkapan SPJ</th>
-                                        <th class="p-2 border border-slate-300">Catatan Bendahara</th>
+                                        <th class="p-2 border border-slate-300">Kelengkapan & Catatan</th>
                                         <th class="p-2 border border-slate-300 text-center">Bayar</th>
                                         <th class="p-2 border border-slate-300 text-center">Aksi</th>
                                     </tr>
@@ -1730,6 +2635,70 @@
                 </div>
             </div>
 
+
+            <!-- VIEW BUKU KAS PEMBANTU KEGIATAN -->
+            <div id="bkkView" class="hidden max-w-[1600px] mx-auto px-4 md:px-6 lg:px-8 py-6 mt-2 print:p-0 print:m-0 print:min-h-0 print-landscape">
+                <div class="bg-white shadow-xl rounded-lg overflow-hidden border border-slate-200 print:shadow-none print:border-none">
+                    <div class="bg-sky-800 text-white p-4 flex flex-col lg:flex-row justify-between gap-4 no-print">
+                        <div>
+                            <h1 class="text-lg font-bold uppercase tracking-tight">Buku Kas Pembantu Kegiatan</h1>
+                            <p class="text-xs text-sky-100 opacity-90">Rekap belanja per PPKD dan per kegiatan berdasarkan kwitansi yang sudah dibayar</p>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 items-end w-full lg:w-auto">
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-sky-100 mb-1">PPKD</label>
+                                <select id="bkk_filter_ppkd" class="form-input text-black py-1.5 min-w-[180px]" onchange="renderBKK()"></select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-sky-100 mb-1">Kegiatan</label>
+                                <select id="bkk_filter_kegiatan" class="form-input text-black py-1.5 min-w-[260px]" onchange="renderBKK()"></select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-sky-100 mb-1">Tahun</label>
+                                <select id="bkk_filter_tahun" class="form-input text-black py-1.5 min-w-[110px]" onchange="renderBKK()"></select>
+                            </div>
+                            <button onclick="cetakBukuKas()" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-lg font-bold shadow-md transition flex items-center justify-center gap-2 border border-sky-500 whitespace-nowrap">🖨️ Cetak BKK</button>
+                        </div>
+                    </div>
+                    <div class="p-4 md:p-6 print:p-0 text-black">
+                        <div class="hidden print:block text-center mt-2 mb-5 text-black">
+                            <h1 class="font-bold text-base uppercase tracking-wide">Buku Kas Pembantu Kegiatan</h1>
+                            <h2 class="font-bold text-sm uppercase tracking-wide">Pemerintah Desa Pangek Kecamatan Simpang Teritip</h2>
+                            <h3 class="font-bold text-sm uppercase tracking-wide">Tahun Anggaran <span id="bkk_print_tahun">-</span></h3>
+                        </div>
+                        <div class="text-[12px] font-bold mb-4 grid grid-cols-[100px_10px_1fr] gap-y-1 print:text-[10pt]" id="bkkHeaderInfo">
+                            <div>Bidang</div><div>:</div><div id="bkk_info_bidang">-</div>
+                            <div>Sub Bidang</div><div>:</div><div id="bkk_info_subbidang">-</div>
+                            <div>Kegiatan</div><div>:</div><div id="bkk_info_kegiatan">-</div>
+                            <div>PPKD</div><div>:</div><div id="bkk_info_ppkd">-</div>
+                        </div>
+                        <div class="overflow-x-auto print:overflow-visible border border-slate-300 rounded-lg print:rounded-none print:border-black">
+                            <table class="w-full text-left text-xs border-collapse border border-slate-300 print:border-black bkk-table">
+                                <thead class="bg-slate-200 print:bg-gray-200 text-slate-800 print:text-black uppercase">
+                                    <tr>
+                                        <th rowspan="2" class="p-2 border border-slate-400 print:border-black text-center w-10">No.</th>
+                                        <th rowspan="2" class="p-2 border border-slate-400 print:border-black text-center w-24">Tanggal</th>
+                                        <th rowspan="2" class="p-2 border border-slate-400 print:border-black text-center w-32">Nomor Bukti</th>
+                                        <th rowspan="2" class="p-2 border border-slate-400 print:border-black text-center min-w-[280px]">Uraian</th>
+                                        <th rowspan="2" class="p-2 border border-slate-400 print:border-black text-center w-32">Penerimaan<br>dari Kas</th>
+                                        <th colspan="2" class="p-2 border border-slate-400 print:border-black text-center">Pengeluaran</th>
+                                        <th rowspan="2" class="p-2 border border-slate-400 print:border-black text-center w-32">Pengembalian<br>Kas</th>
+                                        <th rowspan="2" class="p-2 border border-slate-400 print:border-black text-center w-32">Saldo Kas</th>
+                                    </tr>
+                                    <tr>
+                                        <th class="p-2 border border-slate-400 print:border-black text-center w-32">Belanja Barang dan Jasa</th>
+                                        <th class="p-2 border border-slate-400 print:border-black text-center w-32">Belanja Modal</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bkkDataList"></tbody>
+                                <tfoot id="bkkFooter" class="bg-slate-50 print:bg-transparent font-bold"></tfoot>
+                            </table>
+                        </div>
+                        <div class="mt-3 text-[10px] text-slate-500 no-print">Catatan: Data Buku Kas Kegiatan diambil dari SPP/KWT yang sudah ACC dan sudah dikonfirmasi bayar. Belanja selain kode 5.3 otomatis masuk kolom Belanja Barang dan Jasa agar saldo kegiatan tetap terbaca.</div>
+                    </div>
+                </div>
+            </div>
+
             <!-- VIEW PREVIEW DOCUMENT -->
             <div id="previewView" class="hidden absolute inset-0 min-h-screen bg-slate-200 py-10 print:py-0 print:m-0 z-50 overflow-y-auto print:relative print:z-0 print:bg-white print:overflow-visible">
                 <div class="max-w-[210mm] mx-auto print-container">
@@ -1807,6 +2776,73 @@
                 </div>
             </div>
 
+
+
+            <!-- VIEW AI AGENT BENDAHARA DESA -->
+            <div id="aiAgentView" class="hidden max-w-7xl mx-auto px-4 md:px-6 lg:px-10 py-6 mt-2 no-print">
+                <div class="ai-card">
+                    <div class="ai-hero flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div>
+                            <span class="ai-badge">🤖 Agent Lokal v3.8.28</span>
+                            <h1 class="text-2xl font-black mt-3 uppercase tracking-tight">AI Agent Bendahara Desa</h1>
+                            <p class="text-sm text-blue-100 mt-1 max-w-2xl">Tulis perintah biasa. Agent akan bantu membuat draft SPP, memilih kegiatan, mengisi item belanja, menghitung pajak awal, dan membaca ringkasan data aplikasi.</p>
+                        </div>
+                        <div class="text-xs bg-white/10 border border-white/15 rounded-2xl p-3 max-w-md">
+                            <b>Catatan:</b> Agent ini berjalan lokal di browser. Ia tidak menyimpan data sebelum kamu klik <b>Simpan ke Database</b> di Form SPP. Hasil tetap wajib diperiksa bendahara/operator.
+                        </div>
+                    </div>
+
+                    <div class="p-4 md:p-5 ai-agent-shell">
+                        <div class="ai-card shadow-none">
+                            <div class="p-4 border-b border-slate-200 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                                <div>
+                                    <h2 class="font-black text-[#1e4b6e] uppercase text-sm tracking-wider">Ruang Chat Agent</h2>
+                                    <p class="text-xs text-slate-500">Contoh: “input belanja ATK 350rb untuk operasional kantor dari ADD”</p>
+                                </div>
+                                <button onclick="aiAgentClearChat()" class="text-xs font-bold px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600">Bersihkan Chat</button>
+                            </div>
+                            <div id="aiAgentLog" class="ai-log"></div>
+                            <div class="ai-input-wrap">
+                                <div class="flex flex-wrap gap-2 mb-3">
+                                    <button onclick="aiAgentQuick('Input belanja ATK Rp350.000 untuk operasional kantor dari ADD')" class="ai-chip">📝 Draft SPP ATK</button>
+                                    <button onclick="aiAgentQuick('Cek sisa pagu dan transaksi terbesar')" class="ai-chip">📊 Cek Anggaran</button>
+                                    <button onclick="aiAgentQuick('Hitung pajak untuk belanja konsumsi rapat Rp2.000.000')" class="ai-chip">🧾 Simulasi Pajak</button>
+                                    <button onclick="aiAgentQuick('Buat ringkasan laporan kas hari ini')" class="ai-chip">📒 Ringkasan Kas</button>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-2">
+                                    <textarea id="aiAgentInput" class="form-input min-h-[88px]" placeholder="Tulis perintah untuk agent... contoh: Bayar honor operator SID Rp1 juta kegiatan operasional desa sumber ADD"></textarea>
+                                    <button onclick="aiAgentSend()" class="bg-[#1e4b6e] text-white px-5 py-3 rounded-2xl font-black shadow hover:bg-[#153650] transition">Kirim</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="ai-card shadow-none p-4">
+                                <h3 class="text-sm font-black text-[#1e4b6e] uppercase tracking-wider mb-3">Status Cepat</h3>
+                                <div id="aiAgentStats" class="grid grid-cols-2 gap-3"></div>
+                            </div>
+                            <div class="ai-card shadow-none p-4">
+                                <div class="flex items-center justify-between gap-2 mb-3">
+                                    <h3 class="text-sm font-black text-[#1e4b6e] uppercase tracking-wider">Draft Terdeteksi</h3>
+                                    <button onclick="aiAgentApplyDraft()" class="action-btn bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-black shadow">Terapkan ke Form SPP</button>
+                                </div>
+                                <div id="aiAgentDraft" class="ai-draft-box text-slate-500">Belum ada draft. Tulis perintah transaksi dulu.</div>
+                                <div class="ai-warning mt-3">Saran kegiatan, kode belanja, dan pajak bersifat bantuan awal. Cek kembali dengan aturan desa/Siskeudes sebelum disimpan.</div>
+                            </div>
+                            <div class="ai-card shadow-none p-4">
+                                <h3 class="text-sm font-black text-[#1e4b6e] uppercase tracking-wider mb-3">Perintah yang Bisa Dipakai</h3>
+                                <div class="text-xs text-slate-600 space-y-2">
+                                    <p>• “Input belanja BBM 500rb operasional kantor ADD”</p>
+                                    <p>• “Buat SPP konsumsi rapat 2 juta kegiatan musdes”</p>
+                                    <p>• “Cek transaksi belum lunas”</p>
+                                    <p>• “Sisa pagu kegiatan Posyandu”</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div> <!-- End of mainContent -->
     </div> <!-- End of mainAppContainer -->
 
@@ -1872,13 +2908,46 @@
         // tetapi render Verifikasi SPJ berhenti dengan error "formatDateInput is not defined".
         function formatDateInput(value) { return formatDateForInput(value); }
 
-        function normalizeSppRecord(r) { r.tanggal = formatDateForInput(r.tanggal); r.tanggalBayar = formatDateForInput(r.tanggalBayar || r.tglBayar); r.statusAcc = (r.statusAcc === true || r.statusAcc === 'true'); r.spjAcc = (r.spjAcc === true || r.spjAcc === 'true'); r.statusBayar = (isStatusBayarAktif(r.statusBayar) || !!r.tanggalBayar); r.sppBatalMsg = r.sppBatalMsg || r.catatanBatalAcc || ''; r.spjBatalMsg = r.spjBatalMsg || r.catatanBatalSpj || ''; r.printLink = r.printLink || r.linkCetak || ''; r.tglSpj = formatDateForInput(r.tglSpj || r.tanggalSpj); return r; }
+        function normalizeSppRecord(r) { r.tanggalBayar = formatDateForInput(r.tanggalBayar || r.tglBayar); r.tanggal = formatDateForInput(r.tanggal || r.tanggalSpp || (isStatusBayarAktif(r.statusBayar) ? r.tanggalBayar : '')); r.statusAcc = (r.statusAcc === true || r.statusAcc === 'true'); r.spjAcc = (r.spjAcc === true || r.spjAcc === 'true'); r.statusBayar = (isStatusBayarAktif(r.statusBayar) || !!r.tanggalBayar); if(!r.tanggal && r.statusBayar && r.tanggalBayar) r.tanggal = r.tanggalBayar; r.sppBatalMsg = r.sppBatalMsg || r.catatanBatalAcc || ''; r.spjBatalMsg = r.spjBatalMsg || r.catatanBatalSpj || ''; r.printLink = r.printLink || r.linkCetak || ''; r.tglSpj = formatDateForInput(r.tglSpj || r.tanggalSpj); return r; }
         const LOGO_URL = 'https://drive.google.com/uc?id=1udqyICVQgZildQdBCepEvUwnWQrJ7OAp';
 
         function getBukuKasHelperHTML(totalIn, totalOut, saldo, isTunai) {
             const tgl = safeGetVal('in_tanggal') ? new Date(safeGetVal('in_tanggal')).toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'}) : '.......... ' + (safeGetVal('in_tahun') || new Date().getFullYear());
-            let detail = isTunai ? `<div class="font-bold">Keterangan Buku Kas Tunai :</div><table class="ml-4 w-auto border-none border-collapse mt-2"><tr><td class="pr-4 py-1">1. Total Penarikan Tunai</td><td>: Rp.</td><td class="text-right pl-2 font-mono font-bold">${formatRp(totalIn).replace('Rp ', '')}</td></tr><tr><td class="pr-4 py-1">2. Total Belanja Tunai</td><td>: Rp.</td><td class="text-right pl-2 font-mono font-bold">${formatRp(totalOut).replace('Rp ', '')}</td></tr><tr><td class="pr-4 py-1">3. Saldo Tunai Brankas</td><td>: Rp.</td><td class="text-right pl-2 font-mono font-bold border-t border-black pt-1">${formatRp(saldo).replace('Rp ', '')}</td></tr></table>` : `<div class="font-bold">Keterangan :</div><div class="ml-4 mt-1">1. Menurut Buku</div><table class="ml-8 w-auto border-none border-collapse mt-1 mb-3"><tr><td class="pr-4">a. Jumlah Penerimaan Bulan lalu s.d Bulan ini</td><td>: Rp.</td><td class="text-right pl-2">${formatRp(totalIn).replace('Rp ', '')}</td></tr><tr><td class="pr-4">b. Jumlah Pengeluaran Bulan lalu s.d Bulan ini</td><td>: Rp.</td><td class="text-right pl-2">${formatRp(totalOut).replace('Rp ', '')}</td></tr><tr><td class="pr-4">c. Saldo menurut buku (1.a - 1.b)</td><td>: Rp.</td><td class="text-right pl-2 border-t border-black">${formatRp(saldo).replace('Rp ', '')}</td></tr></table><div class="ml-4 mt-4">2. Menurut Kas</div><table class="ml-8 w-auto border-none border-collapse mt-1"><tr><td class="pr-4">a. Uang tunai</td><td>: Rp.</td><td class="text-right pl-2">-</td></tr><tr><td class="pr-4">b. Saldo di Bank</td><td>: Rp.</td><td class="text-right pl-2">${formatRp(saldo).replace('Rp ', '')}</td></tr><tr><td class="pr-4">c. Saldo menurut Kas</td><td>: Rp.</td><td class="text-right pl-2 border-t border-black">${formatRp(saldo).replace('Rp ', '')}</td></tr></table>`;
-            return `<div class="text-[12px] leading-relaxed font-sans mt-4"><div class="mb-8">${detail}</div><div class="flex justify-between mt-16 text-[12px] text-center"><div class="w-1/3"><p>Diverifikasi oleh :<br>Sekretaris Desa,</p><div class="h-20"></div><p class="font-bold">${safeGetVal('in_namaSekdes') || 'Kusmita Pandatika, S.M'}</p></div><div class="w-1/3"><p>Disetujui Oleh<br>Kepala Desa Pangek</p><div class="h-20"></div><p class="font-bold">${safeGetVal('in_namaKades') || 'Sarmin A.Ma.Pd'}</p></div><div class="w-1/3"><p>Pangek, ${tgl}<br>Kaur Keuangan</p><div class="h-20"></div><p class="font-bold">(${safeGetVal('in_namaKaurKeuangan') || 'Jefri Pratama, S.E'})</p></div></div></div>`;
+            const money = (v) => formatRp(v).replace('Rp ', '');
+            const row = (label, value, topLine=false) => `<tr><td class="bk-foot-label">${label}</td><td class="bk-foot-rp">: Rp.</td><td class="bk-foot-value ${topLine ? 'bk-foot-line' : ''}">${value}</td></tr>`;
+            let detail = '';
+            if (isTunai) {
+                detail = `
+                    <div class="bk-foot-title">Keterangan Buku Kas Tunai :</div>
+                    <table class="bk-foot-table">
+                        ${row('1. Total Penarikan Tunai', money(totalIn))}
+                        ${row('2. Total Belanja Tunai', money(totalOut))}
+                        ${row('3. Saldo Tunai Brankas', money(saldo), true)}
+                    </table>`;
+            } else {
+                detail = `
+                    <div class="bk-foot-title">Keterangan :</div>
+                    <div class="bk-foot-subtitle">1. Menurut Buku</div>
+                    <table class="bk-foot-table">
+                        ${row('a. Jumlah Penerimaan Bulan lalu s.d Bulan ini', money(totalIn))}
+                        ${row('b. Jumlah Pengeluaran Bulan lalu s.d Bulan ini', money(totalOut))}
+                        ${row('c. Saldo menurut buku (1.a - 1.b)', money(saldo), true)}
+                    </table>
+                    <div class="bk-foot-subtitle bk-foot-subtitle-gap">2. Menurut Kas</div>
+                    <table class="bk-foot-table">
+                        ${row('a. Uang tunai', '-')}
+                        ${row('b. Saldo di Bank', money(saldo))}
+                        ${row('c. Saldo menurut Kas', money(saldo), true)}
+                    </table>`;
+            }
+            return `<div class="bk-foot-wrap">
+                <div class="bk-foot-keterangan">${detail}</div>
+                <div class="bk-foot-signatures">
+                    <div class="bk-foot-sign"><p>Diverifikasi oleh :<br>Sekretaris Desa,</p><div class="bk-sign-space"></div><p class="bk-sign-name">${safeGetVal('in_namaSekdes') || 'Kusmita Pandatika, S.M'}</p></div>
+                    <div class="bk-foot-sign"><p>Disetujui Oleh<br>Kepala Desa Pangek</p><div class="bk-sign-space"></div><p class="bk-sign-name">${safeGetVal('in_namaKades') || 'Sarmin A.Ma.Pd'}</p></div>
+                    <div class="bk-foot-sign"><p>Pangek, ${tgl}<br>Kaur Keuangan</p><div class="bk-sign-space"></div><p class="bk-sign-name">(${safeGetVal('in_namaKaurKeuangan') || 'Jefri Pratama, S.E'})</p></div>
+                </div>
+            </div>`;
         }
 
         function processBukuKasTransactions(transactions, tbody, tfoot) {
@@ -2005,26 +3074,26 @@
         }
 
         function switchMainPage(page) {
-            const sidebarPages = ['spp', 'pagu', 'pendapatan', 'penarikan', 'pembiayaan', 'spj', 'verifikasiSpj', 'laporan'], topbarPages = ['bku', 'bkt', 'bksd', 'bkp'];
+            const sidebarPages = ['spp', 'pagu', 'pendapatan', 'penarikan', 'pembiayaan', 'spj', 'verifikasiSpj', 'bkk', 'aiAgent', 'laporan'], topbarPages = ['bku', 'bkt', 'bksd', 'bkp'];
             sidebarPages.forEach(p => {
                 const btn = document.getElementById('nav_main_' + p);
                 if(btn) { btn.classList.remove('bg-[#153650]', 'text-white', 'border-blue-400', 'border-emerald-400', 'border-purple-400', 'border-teal-400', 'border-pink-400', 'border-yellow-400', 'border-lime-400'); btn.classList.add('border-transparent');
-                    if (p === 'pendapatan') btn.classList.add('text-emerald-300'); else if (p === 'penarikan') btn.classList.add('text-purple-300'); else if (p === 'pembiayaan') btn.classList.add('text-teal-300'); else if (p === 'spj') btn.classList.add('text-yellow-300'); else if (p === 'verifikasiSpj') btn.classList.add('text-lime-300'); else if (p === 'laporan') btn.classList.add('text-pink-300'); else btn.classList.add('text-blue-200');
+                    if (p === 'pendapatan') btn.classList.add('text-emerald-300'); else if (p === 'penarikan') btn.classList.add('text-purple-300'); else if (p === 'pembiayaan') btn.classList.add('text-teal-300'); else if (p === 'spj') btn.classList.add('text-yellow-300'); else if (p === 'verifikasiSpj') btn.classList.add('text-lime-300'); else if (p === 'bkk') btn.classList.add('text-cyan-300'); else if (p === 'aiAgent') btn.classList.add('text-blue-200'); else if (p === 'laporan') btn.classList.add('text-pink-300'); else btn.classList.add('text-blue-200');
                 }
             });
             topbarPages.forEach(p => { const btn = document.getElementById('nav_top_' + p); if(btn) { btn.classList.remove('bg-blue-600', 'text-white', 'border-blue-600'); btn.classList.add('bg-white', 'text-slate-600', 'border-slate-200'); } });
             if (sidebarPages.includes(page)) {
                 const activeBtn = document.getElementById('nav_main_' + page);
-                if(activeBtn) { activeBtn.classList.remove('text-blue-200', 'text-emerald-300', 'text-purple-300', 'text-teal-300', 'text-pink-300', 'text-yellow-300', 'text-lime-300', 'border-transparent');
-                    let borderClass = 'border-blue-400'; if(page === 'pendapatan') borderClass = 'border-emerald-400'; else if(page === 'penarikan') borderClass = 'border-purple-400'; else if(page === 'pembiayaan') borderClass = 'border-teal-400'; else if(page === 'spj') borderClass = 'border-yellow-400'; else if(page === 'verifikasiSpj') borderClass = 'border-lime-400'; else if(page === 'laporan') borderClass = 'border-pink-400';
+                if(activeBtn) { activeBtn.classList.remove('text-blue-200', 'text-emerald-300', 'text-purple-300', 'text-teal-300', 'text-pink-300', 'text-yellow-300', 'text-lime-300', 'text-cyan-300', 'border-transparent');
+                    let borderClass = 'border-blue-400'; if(page === 'pendapatan') borderClass = 'border-emerald-400'; else if(page === 'penarikan') borderClass = 'border-purple-400'; else if(page === 'pembiayaan') borderClass = 'border-teal-400'; else if(page === 'spj') borderClass = 'border-yellow-400'; else if(page === 'verifikasiSpj') borderClass = 'border-lime-400'; else if(page === 'bkk') borderClass = 'border-cyan-400'; else if(page === 'aiAgent') borderClass = 'border-blue-400'; else if(page === 'laporan') borderClass = 'border-pink-400';
                     activeBtn.classList.add('bg-[#153650]', 'text-white', borderClass);
                 }
             } else if (topbarPages.includes(page)) {
                 const activeBtn = document.getElementById('nav_top_' + page);
                 if(activeBtn) { activeBtn.classList.remove('bg-white', 'text-slate-600', 'border-slate-200'); activeBtn.classList.add('bg-blue-600', 'text-white', 'border-blue-600'); }
             }
-            ['form', 'masterPagu', 'pendapatan', 'penarikan', 'pembiayaan', 'spj', 'verifikasiSpj', 'bku', 'bkt', 'bksd', 'bkp', 'laporan', 'preview'].forEach(v => { const el = document.getElementById(v + 'View'); if(el) el.classList.add('hidden'); });
-            if(page === 'spp') document.getElementById('formView').classList.remove('hidden'); else if(page === 'pagu') document.getElementById('masterPaguView').classList.remove('hidden'); else if(page === 'pendapatan') document.getElementById('pendapatanView').classList.remove('hidden'); else if(page === 'penarikan') document.getElementById('penarikanView').classList.remove('hidden'); else if(page === 'pembiayaan') document.getElementById('pembiayaanView').classList.remove('hidden'); else if(page === 'spj') { document.getElementById('spjView').classList.remove('hidden'); renderSPJ(); } else if(page === 'verifikasiSpj') { document.getElementById('verifikasiSpjView').classList.remove('hidden'); renderVerifikasiSPJ(); } else if(page === 'bku') { document.getElementById('bkuView').classList.remove('hidden'); renderBKU(); } else if(page === 'bkt') { document.getElementById('bktView').classList.remove('hidden'); renderBKT(); } else if(page === 'bksd') { document.getElementById('bksdView').classList.remove('hidden'); renderBKSD(); } else if(page === 'bkp') { document.getElementById('bkpView').classList.remove('hidden'); renderBKP(); } else if(page === 'laporan') { document.getElementById('laporanView').classList.remove('hidden'); renderLaporan(); }
+            ['form', 'masterPagu', 'pendapatan', 'penarikan', 'pembiayaan', 'spj', 'verifikasiSpj', 'bkk', 'aiAgent', 'bku', 'bkt', 'bksd', 'bkp', 'laporan', 'preview'].forEach(v => { const el = document.getElementById(v + 'View'); if(el) el.classList.add('hidden'); });
+            if(page === 'spp') document.getElementById('formView').classList.remove('hidden'); else if(page === 'pagu') document.getElementById('masterPaguView').classList.remove('hidden'); else if(page === 'pendapatan') document.getElementById('pendapatanView').classList.remove('hidden'); else if(page === 'penarikan') document.getElementById('penarikanView').classList.remove('hidden'); else if(page === 'pembiayaan') document.getElementById('pembiayaanView').classList.remove('hidden'); else if(page === 'spj') { document.getElementById('spjView').classList.remove('hidden'); renderSPJ(); } else if(page === 'verifikasiSpj') { document.getElementById('verifikasiSpjView').classList.remove('hidden'); renderVerifikasiSPJ(); } else if(page === 'bkk') { document.getElementById('bkkView').classList.remove('hidden'); renderBKK(); } else if(page === 'aiAgent') { document.getElementById('aiAgentView').classList.remove('hidden'); renderAiAgentDashboard(); } else if(page === 'bku') { document.getElementById('bkuView').classList.remove('hidden'); renderBKU(); } else if(page === 'bkt') { document.getElementById('bktView').classList.remove('hidden'); renderBKT(); } else if(page === 'bksd') { document.getElementById('bksdView').classList.remove('hidden'); renderBKSD(); } else if(page === 'bkp') { document.getElementById('bkpView').classList.remove('hidden'); renderBKP(); } else if(page === 'laporan') { document.getElementById('laporanView').classList.remove('hidden'); renderLaporan(); }
         }
 
         function angkaTerbilang(angka) {
@@ -2062,7 +3131,7 @@
             return out;
         }
 
-        // Cloud Safe v3.8.13: semua data utama wajib berasal dari backend Google Sheet.
+        // Cloud Safe v3.8.26: semua data utama wajib berasal dari backend Google Sheet; tanggal SPP tersinkron dari tanggal bayar.
         // Tidak ada fallback ke localStorage/dummy. Loader ini hanya membuat pembacaan lebih tahan terhadap variasi format respons Apps Script.
         const CLOUD_DATA_STATUS = {
             spp: { source: 'Google Sheet', ok: false, count: 0, message: 'Belum dimuat' },
@@ -2152,7 +3221,7 @@
             if(!SCRIPT_URL) {
                 savedRecords = [];
                 setCloudStatus('spp', false, 0, 'SCRIPT_URL belum diisi. Data SPP tidak dibaca dari localStorage/dummy.');
-                renderSavedData(); renderSPJ(); renderVerifikasiSPJ(); calculate();
+                renderSavedData(); renderSPJ(); renderVerifikasiSPJ(); renderBKK(); calculate();
                 showToast('SCRIPT_URL belum diisi. Data SPP tidak dibaca dari penyimpanan lokal.', true);
                 return;
             }
@@ -2161,7 +3230,7 @@
                 const msg = 'SCRIPT_URL memakai URL Library Apps Script. Pakai Web App URL yang berakhiran /exec.';
                 setCloudStatus('spp', false, 0, msg);
                 if(listContainer) listContainer.innerHTML = `<div class="cloud-safe-panel text-center text-red-700 text-xs font-bold">⚠️ Data SPP gagal dimuat dari Google Sheet.<br><span class="font-normal text-red-600">${escapeHtml(msg)}</span><br><span class="font-normal text-slate-500">Buka Apps Script → Deploy → Manage deployments → salin Web app URL.</span></div>`;
-                renderSPJ(); renderVerifikasiSPJ(); calculate();
+                renderSPJ(); renderVerifikasiSPJ(); renderBKK(); calculate();
                 showToast(msg, true);
                 return;
             }
@@ -2180,7 +3249,7 @@
                 savedRecords = [];
                 setCloudStatus('spp', false, 0, 'Gagal memuat Data SPP dari Google Sheet: ' + e.message);
                 if(listContainer) listContainer.innerHTML = `<div class="cloud-safe-panel text-center text-red-700 text-xs font-bold">⚠️ Data SPP gagal dimuat dari Google Sheet.<br><span class="font-normal text-red-600">${escapeHtml(e.message)}</span><br><span class="font-normal text-slate-500">Aplikasi tidak memakai data dummy/localStorage.</span></div>`;
-                renderSPJ(); renderVerifikasiSPJ(); calculate();
+                renderSPJ(); renderVerifikasiSPJ(); renderBKK(); calculate();
                 showToast('Gagal memuat Data SPP dari Google Sheet: ' + e.message, true);
                 return;
             }
@@ -2189,6 +3258,7 @@
                 renderSavedData();
                 renderSPJ();
                 renderVerifikasiSPJ();
+                renderBKK();
             } catch(renderErr) {
                 console.error('[Cloud Safe] Data SPP berhasil dimuat, tetapi renderer gagal:', renderErr);
                 setCloudStatus('spp', true, savedRecords.length, `Data SPP berhasil dimuat, tetapi ada error tampilan: ${renderErr.message}`);
@@ -2693,6 +3763,17 @@ function getBelanjaOptionsHTML(selectedValue) {
             }
         }
 
+        function refreshAfterPaymentSync() {
+            renderSavedData();
+            renderVerifikasiSPJ();
+            if (document.getElementById('bkuDataList')) renderBKU();
+            if (document.getElementById('bktDataList')) renderBKT();
+            if (document.getElementById('bksdDataList')) renderBKSD();
+            if (document.getElementById('bkpDataList')) renderBKP();
+            if (document.getElementById('lap_total_masuk')) renderLaporan();
+            calculate();
+        }
+
         async function confirmPayment(id) {
             if(currentUserRole !== 'bendahara') return;
             const r = savedRecords.find(x => x.id === id);
@@ -2700,7 +3781,7 @@ function getBelanjaOptionsHTML(selectedValue) {
             const isAcc = r.statusAcc === true || r.statusAcc === "true";
             if(!isAcc) return showToast('SPP harus di-ACC terlebih dahulu sebelum dikonfirmasi dibayar.', true);
             const today = new Date().toISOString().slice(0, 10);
-            const oldDate = r.tanggalBayar || today;
+            const oldDate = formatDateForInput(r.tanggalBayar || r.tanggal || today);
             const input = prompt('Masukkan tanggal bayar real (format YYYY-MM-DD):', oldDate);
             if(input === null) return;
             const tglBayar = String(input || '').trim();
@@ -2708,10 +3789,18 @@ function getBelanjaOptionsHTML(selectedValue) {
             const parsedDate = new Date(tglBayar + 'T00:00:00');
             if(!validFormat || Number.isNaN(parsedDate.getTime())) return showToast('Format tanggal bayar tidak valid. Gunakan YYYY-MM-DD.', true);
             try {
-                await postToBackendOrFail('confirm_bayar', { id: r.id, tanggalBayar: tglBayar, statusBayar: 'Lunas' });
+                // Tanggal Bayar dan Tanggal SPP disamakan agar Form SPP dan Buku Kas memakai tanggal transaksi yang sama.
+                await postToBackendOrFail('confirm_bayar', { id: r.id, tanggalBayar: tglBayar, tanggal: tglBayar, tanggalSpp: tglBayar, statusBayar: 'Lunas' });
+                r.tanggalBayar = tglBayar;
+                r.tanggal = tglBayar;
+                r.statusBayar = 'Lunas';
+                if(currentEditId === r.id) {
+                    const tglInput = document.getElementById('in_tanggal');
+                    if(tglInput) tglInput.value = tglBayar;
+                }
                 await loadDataFromCloud();
-                renderVerifikasiSPJ();
-                showToast('Pembayaran dikonfirmasi dan tersimpan permanen ke Google Sheet.');
+                refreshAfterPaymentSync();
+                showToast('Pembayaran dikonfirmasi. Tanggal SPP otomatis mengikuti tanggal bayar dan Buku Kas sudah diperbarui.');
             } catch(e) {
                 showToast('Gagal menyimpan pembayaran ke backend: ' + e.message, true);
             }
@@ -2747,7 +3836,7 @@ function getBelanjaOptionsHTML(selectedValue) {
             // Set Nomor SPP manual
             setVal('display_spp_no', r.noSpp);
             
-            setVal('in_bulan', r.bulan); setVal('in_tahun', r.tahun); setVal('in_tanggal', formatDateForInput(r.tanggal)); setVal('in_kegiatan_select', r.kegiatan); setVal('in_sumberDana', r.sumberDana); setVal('in_pagu', r.pagu); setVal('in_lalu', r.lalu); setVal('in_namaKades', r.pejabat?.kades); setVal('in_namaSekdes', r.pejabat?.sekdes); setVal('in_namaPpkd', r.pejabat?.ppkd); setVal('in_jabatanPpkd', r.pejabat?.jabatanPpkd); setVal('in_namaKaurKeuangan', r.pejabat?.bendahara);
+            setVal('in_bulan', r.bulan); setVal('in_tahun', r.tahun); setVal('in_tanggal', formatDateForInput(r.tanggal || r.tanggalBayar)); setVal('in_kegiatan_select', r.kegiatan); setVal('in_sumberDana', r.sumberDana); setVal('in_pagu', r.pagu); setVal('in_lalu', r.lalu); setVal('in_namaKades', r.pejabat?.kades); setVal('in_namaSekdes', r.pejabat?.sekdes); setVal('in_namaPpkd', r.pejabat?.ppkd); setVal('in_jabatanPpkd', r.pejabat?.jabatanPpkd); setVal('in_namaKaurKeuangan', r.pejabat?.bendahara);
             belanjaItems = (Array.isArray(r.items) ? r.items : []).map(item => ({ ...item, keterangan: item.keterangan || '', pajak: item.pajak || {ppn:0, pph21:0, pph22:0, pph23:0, restoran:0, galian_c:0} }));
             updateInfoAuto(true); renderBelanjaList(); calculate();
             const btnSave = document.getElementById('btnSave'), btnCetak = document.getElementById('btnCetakPreview'), btnAddBelanja = document.getElementById('btnAddBelanja');
@@ -2762,6 +3851,7 @@ function getBelanjaOptionsHTML(selectedValue) {
                     await postToBackendOrFail('delete', { id: id });
                     await loadDataFromCloud();
                     renderVerifikasiSPJ();
+                    renderBKK();
                     showToast('Data berhasil dihapus dari Google Sheet.');
                 } catch(e) {
                     showToast('Gagal menghapus di backend: ' + e.message, true);
@@ -2807,29 +3897,76 @@ function getBelanjaOptionsHTML(selectedValue) {
             }).join('');
         }
 
+        function getTotalSpp(r) {
+            return (r.items || []).reduce((sum, item) => sum + (parseFloat(item.jumlah) || 0), 0);
+        }
+
+        function getVerifikasiKwitansiRows(records, kwtStartMap) {
+            const rows = [];
+            [...records].sort((a, b) => (a.id || 0) - (b.id || 0)).forEach(r => {
+                const items = Array.isArray(r.items) && r.items.length ? r.items : [{ uraian: r.kegiatan || '-', jumlah: getTotalSpp(r), keterangan: '' }];
+                const startNo = kwtStartMap[r.id] || 1;
+                items.forEach((item, itemIndex) => {
+                    const kwtNumber = startNo + itemIndex;
+                    rows.push({ r, item, itemIndex, kwtNumber });
+                });
+            });
+            return rows.sort((a, b) => a.kwtNumber - b.kwtNumber);
+        }
+
+        function formatKwitansiUrut(kwtNumber) {
+            return String(kwtNumber || 1).padStart(4, '0');
+        }
+
+        function formatKwitansiFull(kwtNumber, tahun) {
+            return `${formatKwitansiUrut(kwtNumber)}/KWT/02.2011/${tahun || new Date().getFullYear()}`;
+        }
+
+        function getUraianKwitansiForVerifikasi(r, item) {
+            const namaKeg = (r.kegiatan || '').replace(/^[0-9.]+\s*/, '').trim();
+            const kodeKeg = (r.kegiatan || '').split(' ')[0] || '';
+            const keteranganTambahan = item && item.keterangan ? " " + item.keterangan : "";
+            const uraianItem = (item && item.uraian) ? String(item.uraian) : (r.kegiatan || '-');
+            const kodeBelanja = uraianItem.split(' ')[0] || '';
+            const namaBelanja = uraianItem.substring(kodeBelanja.length).trim();
+            const teksKwitansi = `${kodeKeg}-${kodeBelanja} ${namaBelanja} Kegiatan ${namaKeg}${keteranganTambahan}, SPP Nomor ${r.noSpp || '-'} dari ${r.sumberDana || '-'}`.replace(/\s+/g, ' ').trim();
+            return escapeHtml(teksKwitansi || uraianItem || '-');
+        }
+
         function renderVerifikasiSPJ() {
             const list = document.getElementById('verifikasiSpjDataList');
             if (!list) return;
             list.innerHTML = '';
-            const records = savedRecords.filter(r => ((r.statusAcc === true || r.statusAcc === "true") || String(r.sppBatalMsg || r.catatanBatalAcc || '').trim()) && isOwnedByCurrentPpkd(r));
+            // v3.8.26: Verifikasi SPJ harus menampilkan semua SPP/KWT, termasuk yang belum ACC.
+            // Untuk PPKD tetap dibatasi hanya data miliknya sendiri melalui isOwnedByCurrentPpkd().
+            const records = savedRecords.filter(r => isOwnedByCurrentPpkd(r));
             if (records.length === 0) {
-                list.innerHTML = `<tr><td colspan="10" class="text-center p-4 text-gray-500">${currentUserRole === 'ppkd' ? 'Belum ada SPJ milik Anda.' : 'Belum ada data SPJ untuk diverifikasi.'}</td></tr>`;
+                list.innerHTML = `<tr><td colspan="8" class="text-center p-4 text-gray-500">${currentUserRole === 'ppkd' ? 'Belum ada SPP/KWT milik Anda.' : 'Belum ada SPP/KWT untuk diverifikasi.'}</td></tr>`;
                 return;
             }
+
             const kwtStartMap = getKwitansiStartMap();
-            records.forEach((r, idx) => {
+            const kwitansiRows = getVerifikasiKwitansiRows(records, kwtStartMap);
+            if (kwitansiRows.length === 0) {
+                list.innerHTML = `<tr><td colspan="8" class="text-center p-4 text-gray-500">Belum ada item kwitansi untuk ditampilkan.</td></tr>`;
+                return;
+            }
+
+            kwitansiRows.forEach(({ r, item, itemIndex, kwtNumber }) => {
+                const isAcc = r.statusAcc === true || r.statusAcc === "true";
                 const isSpjAcc = r.spjAcc === true || r.spjAcc === "true";
                 const isPaid = r.statusBayar === true || r.statusBayar === "true" || r.statusBayar === "Lunas" || !!r.tanggalBayar;
                 const pesanBendahara = String(r.spjBatalMsg || r.catatanBatalSpj || '').trim();
                 const hasNote = !!pesanBendahara;
                 const catatanAccSpp = String(r.sppBatalMsg || r.catatanBatalAcc || '').trim();
-                const isSppAcc = r.statusAcc === true || r.statusAcc === "true";
-                const catatanAccSppHtml = catatanAccSpp
-                    ? `<div class="bg-amber-50 border border-amber-200 text-amber-800 rounded-lg p-2 leading-snug break-words"><b>⚠️ Batal ACC SPP/KWT:</b><br>${escapeHtml(catatanAccSpp)}</div>`
-                    : `<span class="text-slate-400 italic text-[10px]">Tidak ada catatan</span>`;
                 const spjUrl = safeUrl(r.spjLink);
+                const kwtUrut = formatKwitansiUrut(kwtNumber);
+                const kwtFull = formatKwitansiFull(kwtNumber, r.tahun);
+
                 let statusFileSpj = '';
-                if (isSpjAcc) {
+                if (!isAcc) {
+                    statusFileSpj = `<span class="inline-block bg-orange-100 text-orange-800 border border-orange-300 px-2 py-1 rounded font-bold">⏳ SPP belum ACC</span><div class="text-[10px] text-slate-500 mt-1 leading-tight">SPJ dapat diproses setelah SPP/KWT di-ACC Bendahara.</div>`;
+                } else if (isSpjAcc) {
                     statusFileSpj = `<span class="inline-block bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-1 rounded font-bold">✅ Lengkap / ACC</span>`;
                 } else if (spjUrl) {
                     statusFileSpj = `<a href="${spjUrl}" target="_blank" rel="noopener noreferrer" class="inline-block bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 px-2 py-1 rounded font-bold underline">📎 File SPJ terkirim</a><div class="text-[10px] text-orange-700 mt-1 font-semibold">⏳ Menunggu verifikasi Bendahara</div>`;
@@ -2837,19 +3974,27 @@ function getBelanjaOptionsHTML(selectedValue) {
                     statusFileSpj = `<span class="inline-block bg-slate-100 text-slate-600 border border-slate-300 px-2 py-1 rounded font-bold">Belum kirim SPJ</span>`;
                 }
                 const catatanBendahara = hasNote
-                    ? `<div class="mt-2 bg-red-50 border border-red-200 text-red-700 rounded p-2 leading-snug break-words"><b>⚠️ Pesan Bendahara:</b><br>${escapeHtml(pesanBendahara)}</div>`
+                    ? `<div class="mt-2 bg-red-50 border border-red-200 text-red-700 rounded p-2 leading-snug break-words"><b>⚠️ Batal ACC SPJ:</b><br>${escapeHtml(pesanBendahara)}</div>`
                     : '';
-                const kelengkapan = `<div class="space-y-1">${statusFileSpj}${catatanBendahara}</div>`;
+                const catatanAccSppGabung = catatanAccSpp
+                    ? `<div class="mt-2 bg-amber-50 border border-amber-200 text-amber-800 rounded p-2 leading-snug break-words"><b>⚠️ Batal ACC SPP/KWT:</b><br>${escapeHtml(catatanAccSpp)}</div>`
+                    : '';
+                const kelengkapan = `<div class="space-y-1">${statusFileSpj}${catatanBendahara}${catatanAccSppGabung}</div>`;
+                const tanggalDanaValue = formatDateForInput(r.tanggal || r.tanggalBayar) || r.tanggal || r.tanggalBayar || '-';
+                const tanggalDanaHtml = `<div class="font-bold text-slate-700">${escapeHtml(tanggalDanaValue)}</div><div class="mt-1 inline-block bg-slate-100 border border-slate-200 text-slate-700 px-1.5 py-0.5 rounded text-[10px] font-bold">${escapeHtml(r.sumberDana || '-')}</div>`;
 
                 let aksi = '';
                 if (currentUserRole === 'bendahara') {
                     const bukaSpj = safeUrl(r.spjLink) ? `<a href="${safeUrl(r.spjLink)}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline font-bold">Buka SPJ</a>` : `<span class="text-slate-400 italic">Belum ada link SPJ</span>`;
-                    const btnSpj = r.spjLink ? (isSpjAcc
+                    const btnAccSpp = isAcc
+                        ? `<button onclick="toggleAccSpp(${r.id}, false)" class="text-orange-700 font-bold border border-orange-300 bg-orange-50 hover:bg-orange-100 px-2 py-1 rounded">Batal ACC SPP</button>`
+                        : `<button onclick="toggleAccSpp(${r.id}, true)" class="text-emerald-700 font-bold border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 rounded">✅ ACC SPP</button>`;
+                    const btnSpj = (isAcc && r.spjLink) ? (isSpjAcc
                         ? `<button onclick="batalAccSPJ(${r.id})" class="text-orange-700 font-bold border border-orange-300 bg-orange-50 hover:bg-orange-100 px-2 py-1 rounded">Batal ACC SPJ</button>`
                         : `<button onclick="accSPJ(${r.id})" class="text-emerald-700 font-bold border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 rounded">✅ ACC SPJ</button>`)
                         : '';
-                    const btnBayar = `<button onclick="confirmPayment(${r.id})" class="text-green-700 font-bold border border-green-300 bg-green-50 hover:bg-green-100 px-2 py-1 rounded">💵 ${isPaid ? 'Ubah Tgl Bayar' : 'Konfirmasi Bayar'}</button>`;
-                    aksi = `<div class="verif-action-grid">${bukaSpj}${btnSpj}${btnBayar}<button onclick="editRec(${r.id})" class="text-blue-700 font-bold border border-blue-300 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded">✏️ Edit</button><button onclick="deleteRec(${r.id})" class="text-red-700 font-bold border border-red-300 bg-red-50 hover:bg-red-100 px-2 py-1 rounded">🗑️ Hapus</button>${isSpjAcc ? `<button onclick="previewRekomendasi(${r.id})" class="bg-slate-700 text-white font-bold px-2 py-1 rounded">Preview Surat</button>` : ''}</div>`;
+                    const btnBayar = isAcc ? `<button onclick="confirmPayment(${r.id})" class="text-green-700 font-bold border border-green-300 bg-green-50 hover:bg-green-100 px-2 py-1 rounded">💵 ${isPaid ? 'Ubah Tgl Bayar' : 'Konfirmasi Bayar'}</button>` : '';
+                    aksi = `<div class="verif-action-grid">${btnAccSpp}${bukaSpj}${btnSpj}${btnBayar}<button onclick="editRec(${r.id})" class="text-blue-700 font-bold border border-blue-300 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded">✏️ Edit</button><button onclick="deleteRec(${r.id})" class="text-red-700 font-bold border border-red-300 bg-red-50 hover:bg-red-100 px-2 py-1 rounded">🗑️ Hapus</button>${isSpjAcc ? `<button onclick="previewRekomendasi(${r.id})" class="bg-slate-700 text-white font-bold px-2 py-1 rounded">Preview Surat</button>` : ''}</div>`;
                 } else if (currentUserRole === 'ppkd') {
                     aksi = `<div class="verif-action-grid">${safeUrl(r.spjLink) ? `<a href="${safeUrl(r.spjLink)}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline font-bold">Lihat SPJ</a>` : `<span class="text-slate-500">Upload melalui menu Laporan SPJ</span>`}<button onclick="editRec(${r.id})" class="text-blue-700 font-bold border border-blue-300 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded">🖨️ Buka / Cetak</button></div>`;
                 } else {
@@ -2859,14 +4004,12 @@ function getBelanjaOptionsHTML(selectedValue) {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-50';
                 tr.innerHTML = `
-                    <td data-label="No" class="p-2 border border-slate-300 align-top text-center font-bold verif-no-cell">${idx + 1}</td>
-                    <td data-label="Uraian / Kegiatan" class="p-2 border border-slate-300 align-top leading-snug text-[11px] verif-uraian-cell">${getUraianBkuForVerifikasi(r)}</td>
+                    <td data-label="No KWT" class="p-2 border border-slate-300 align-top text-center font-bold verif-no-cell" title="${escapeHtml(kwtFull)}"><div class="font-mono text-slate-800">${escapeHtml(kwtUrut)}</div><div class="text-[9px] text-slate-400 leading-none">KWT</div></td>
+                    <td data-label="Uraian / Kegiatan" class="p-2 border border-slate-300 align-top leading-snug text-[11px] verif-uraian-cell"><div>${getUraianKwitansiForVerifikasi(r, item)}</div><div class="mt-1 text-[10px] text-slate-400">Item ${itemIndex + 1} dari ${(Array.isArray(r.items) && r.items.length) ? r.items.length : 1}</div></td>
                     <td data-label="Nama PPKD" class="p-2 border border-slate-300 align-top verif-ppkd-cell"><div class="font-bold text-slate-700">${escapeHtml(r.pejabat?.ppkd || '-')}</div><div class="text-[10px] text-slate-500 leading-tight mt-0.5">${escapeHtml(r.pejabat?.jabatanPpkd || '')}</div></td>
-                    <td data-label="Tgl SPP" class="p-2 border border-slate-300 align-top verif-date-cell">${escapeHtml(formatDateForInput(r.tanggal) || r.tanggal || '-')}</td>
-                    <td data-label="Dana" class="p-2 border border-slate-300 align-top verif-dana-cell">${escapeHtml(r.sumberDana || '-')}</td>
-                    <td data-label="Jumlah" class="p-2 border border-slate-300 align-top text-right font-bold verif-jumlah-cell">Rp ${formatRp(getTotalSpp(r))}</td>
-                    <td data-label="Kelengkapan SPJ" class="p-2 border border-slate-300 align-top verif-kelengkapan-cell">${kelengkapan}</td>
-                    <td data-label="Catatan Bendahara" class="p-2 border border-slate-300 align-top verif-catatan-bendahara-cell">${catatanAccSppHtml}</td>
+                    <td data-label="Tanggal & Dana" class="p-2 border border-slate-300 align-top verif-date-cell">${tanggalDanaHtml}</td>
+                    <td data-label="Jumlah" class="p-2 border border-slate-300 align-top text-right font-bold verif-jumlah-cell">Rp ${formatRp(parseFloat(item?.jumlah) || 0)}</td>
+                    <td data-label="Kelengkapan & Catatan" class="p-2 border border-slate-300 align-top verif-kelengkapan-cell">${kelengkapan}</td>
                     <td data-label="Bayar" class="p-2 border border-slate-300 align-top text-center verif-bayar-cell">${isPaid ? `<span class="bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-1 rounded font-bold">Lunas</span><div class="text-[10px] text-slate-500 mt-1">${escapeHtml(r.tanggalBayar || '')}</div>` : `<span class="bg-orange-100 text-orange-800 border border-orange-300 px-2 py-1 rounded font-bold">Belum</span>`}</td>
                     <td data-label="Aksi" class="p-2 border border-slate-300 align-top text-center verif-aksi-cell">${aksi}</td>
                 `;
@@ -3047,6 +4190,187 @@ function getBelanjaOptionsHTML(selectedValue) {
 
         // ===============================================
         // FUNGSI RENDER BUKU KAS & BUKU PAJAK
+
+        // ===============================================
+        // BUKU KAS PEMBANTU KEGIATAN (PPKD)
+        // ===============================================
+        function getKegiatanMeta(kegiatanValue) {
+            const val = String(kegiatanValue || '').trim();
+            for (const group of KEGIATAN_OPTIONS) {
+                for (const opt of group.options) {
+                    if (String(opt.val || '').trim() === val) {
+                        return { bidang: opt.bid || '-', subBidang: opt.sub || '-', kegiatan: opt.val || val, label: opt.text || opt.val || val, group: group.label || '' };
+                    }
+                }
+            }
+            return { bidang: '-', subBidang: '-', kegiatan: val || '-', label: val || '-', group: '' };
+        }
+
+        function getPpkdKey(r) {
+            return String(r?.pejabat?.jabatanPpkd || '').trim() || 'Tanpa Jabatan PPKD';
+        }
+
+        function getPpkdLabelFromKey(key) {
+            const rec = savedRecords.find(r => getPpkdKey(r) === key);
+            if (!rec) return key || '-';
+            const nama = rec?.pejabat?.ppkd ? ` - ${rec.pejabat.ppkd}` : '';
+            return `${key}${nama}`;
+        }
+
+        function isBelanjaModalItem(item) {
+            const u = String(item?.uraian || '').toLowerCase().trim();
+            return u.startsWith('5.3') || u.includes('belanja modal');
+        }
+
+        function getBkkEligibleRecords() {
+            return savedRecords.filter(r => {
+                const isAcc = r.statusAcc === true || r.statusAcc === 'true';
+                const isPaid = r.statusBayar === true || r.statusBayar === 'true' || r.statusBayar === 'Lunas' || !!r.tanggalBayar;
+                return isOwnedByCurrentPpkd(r) && isAcc && isPaid;
+            });
+        }
+
+        function updateBkkFilters() {
+            const ppkdEl = document.getElementById('bkk_filter_ppkd');
+            const kegEl = document.getElementById('bkk_filter_kegiatan');
+            const tahunEl = document.getElementById('bkk_filter_tahun');
+            if (!ppkdEl || !kegEl || !tahunEl) return;
+
+            const eligible = getBkkEligibleRecords();
+            const oldPpkd = ppkdEl.value;
+            const oldKeg = kegEl.value;
+            const oldTahun = tahunEl.value;
+
+            const ppkdKeys = Array.from(new Set(eligible.map(getPpkdKey).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'id'));
+            let ppkdHtml = currentUserRole === 'ppkd' ? '' : '<option value="">-- Semua PPKD --</option>';
+            ppkdKeys.forEach(key => { ppkdHtml += `<option value="${escapeHtml(key)}">${escapeHtml(getPpkdLabelFromKey(key))}</option>`; });
+            ppkdEl.innerHTML = ppkdHtml || '<option value="">Belum ada PPKD</option>';
+            if (currentUserRole === 'ppkd') {
+                ppkdEl.value = currentPpkdJabatan || (ppkdKeys[0] || '');
+                ppkdEl.disabled = true;
+                ppkdEl.classList.add('bg-slate-100');
+            } else {
+                ppkdEl.disabled = false;
+                ppkdEl.classList.remove('bg-slate-100');
+                ppkdEl.value = ppkdKeys.includes(oldPpkd) ? oldPpkd : (oldPpkd === '' ? '' : '');
+            }
+
+            const selectedPpkd = ppkdEl.value;
+            const filteredForKeg = eligible.filter(r => !selectedPpkd || getPpkdKey(r) === selectedPpkd);
+            const kegiatanVals = Array.from(new Set(filteredForKeg.map(r => String(r.kegiatan || '').trim()).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'id', { numeric: true }));
+            let kegHtml = '<option value="">-- Semua Kegiatan --</option>';
+            kegiatanVals.forEach(k => { const meta = getKegiatanMeta(k); kegHtml += `<option value="${escapeHtml(k)}">${escapeHtml(meta.kegiatan)}</option>`; });
+            kegEl.innerHTML = kegHtml;
+            kegEl.value = kegiatanVals.includes(oldKeg) ? oldKeg : '';
+
+            const filteredForTahun = filteredForKeg.filter(r => !kegEl.value || String(r.kegiatan || '').trim() === kegEl.value);
+            const years = Array.from(new Set(filteredForTahun.map(r => String(r.tahun || (r.tanggalBayar ? new Date(r.tanggalBayar).getFullYear() : '')).trim()).filter(Boolean))).sort();
+            let tahunHtml = '<option value="">Semua</option>';
+            years.forEach(y => { tahunHtml += `<option value="${escapeHtml(y)}">${escapeHtml(y)}</option>`; });
+            tahunEl.innerHTML = tahunHtml;
+            tahunEl.value = years.includes(oldTahun) ? oldTahun : (years.length === 1 ? years[0] : '');
+        }
+
+        function renderBKK() {
+            updateBkkFilters();
+            const tbody = document.getElementById('bkkDataList');
+            const tfoot = document.getElementById('bkkFooter');
+            if (!tbody || !tfoot) return;
+
+            const selectedPpkd = safeGetVal('bkk_filter_ppkd');
+            const selectedKegiatan = safeGetVal('bkk_filter_kegiatan');
+            const selectedTahun = safeGetVal('bkk_filter_tahun');
+            const records = getBkkEligibleRecords().filter(r => {
+                const tahun = String(r.tahun || (r.tanggalBayar ? new Date(r.tanggalBayar).getFullYear() : '') || '');
+                return (!selectedPpkd || getPpkdKey(r) === selectedPpkd) && (!selectedKegiatan || String(r.kegiatan || '').trim() === selectedKegiatan) && (!selectedTahun || tahun === selectedTahun);
+            }).sort((a, b) => {
+                const da = new Date(a.tanggalBayar || a.tanggal || 0).getTime() || 0;
+                const db = new Date(b.tanggalBayar || b.tanggal || 0).getTime() || 0;
+                if (da !== db) return da - db;
+                return String(a.noSpp || '').localeCompare(String(b.noSpp || ''), 'id', { numeric: true });
+            });
+
+            const meta = selectedKegiatan ? getKegiatanMeta(selectedKegiatan) : { bidang: records.length ? getKegiatanMeta(records[0].kegiatan).bidang : '-', subBidang: records.length ? getKegiatanMeta(records[0].kegiatan).subBidang : '-', kegiatan: selectedKegiatan ? selectedKegiatan : 'Semua kegiatan terpilih' };
+            safeSetText('bkk_info_bidang', meta.bidang || '-');
+            safeSetText('bkk_info_subbidang', meta.subBidang || '-');
+            safeSetText('bkk_info_kegiatan', meta.kegiatan || '-');
+            safeSetText('bkk_info_ppkd', selectedPpkd ? getPpkdLabelFromKey(selectedPpkd) : (currentUserRole === 'ppkd' ? getPpkdLabelFromKey(currentPpkdJabatan) : 'Semua PPKD'));
+            safeSetText('bkk_print_tahun', selectedTahun || (records[0]?.tahun || new Date().getFullYear()));
+
+            if (records.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center p-4 text-gray-500">Belum ada data SPP/KWT yang sudah ACC dan sudah dibayar untuk filter ini.</td></tr>';
+                tfoot.innerHTML = '';
+                return;
+            }
+
+            const kwtStartMap = getKwitansiStartMap();
+            let transaksi = [];
+            records.forEach(r => {
+                const items = Array.isArray(r.items) && r.items.length ? r.items : [{ uraian: r.kegiatan || '-', jumlah: getTotalSpp(r), keterangan: '' }];
+                const tgl = new Date(r.tanggalBayar || r.tanggal);
+                const totalSpp = items.reduce((sum, item) => sum + (parseFloat(item.jumlah) || 0), 0);
+                const namaKeg = (r.kegiatan || '').replace(/^[0-9.]+\s*/, '').trim();
+                transaksi.push({
+                    date: tgl,
+                    ref: `${r.noSpp || '-'}/SPP/2011/${r.tahun || ''}`,
+                    uraian: `Penerimaan dari Kas Bendahara untuk kegiatan ${namaKeg || r.kegiatan || '-'} (${r.sumberDana || '-'})`,
+                    masuk: totalSpp,
+                    barangJasa: 0,
+                    modal: 0,
+                    kembali: 0
+                });
+                const startNo = kwtStartMap[r.id] || 1;
+                items.forEach((item, idx) => {
+                    const amount = parseFloat(item.jumlah) || 0;
+                    const modal = isBelanjaModalItem(item) ? amount : 0;
+                    const barangJasa = isBelanjaModalItem(item) ? 0 : amount;
+                    const uraianItem = String(item.uraian || '').trim();
+                    const ket = item.keterangan ? ` - ${item.keterangan}` : '';
+                    transaksi.push({
+                        date: tgl,
+                        ref: formatKwitansiFull(startNo + idx, r.tahun),
+                        uraian: `${uraianItem || 'Belanja kegiatan'}${ket}`,
+                        masuk: 0,
+                        barangJasa,
+                        modal,
+                        kembali: 0
+                    });
+                });
+            });
+
+            let saldo = 0, totalMasuk = 0, totalBarangJasa = 0, totalModal = 0, totalKembali = 0;
+            let html = '';
+            transaksi.forEach((t, idx) => {
+                const keluar = (t.barangJasa || 0) + (t.modal || 0) + (t.kembali || 0);
+                saldo += (t.masuk || 0) - keluar;
+                totalMasuk += t.masuk || 0;
+                totalBarangJasa += t.barangJasa || 0;
+                totalModal += t.modal || 0;
+                totalKembali += t.kembali || 0;
+                const tgl = !isNaN(t.date.getTime()) ? t.date.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-';
+                html += `<tr class="hover:bg-slate-50 print:hover:bg-transparent">
+                    <td class="p-2 border border-slate-300 print:border-black text-center whitespace-nowrap">${idx + 1}</td>
+                    <td class="p-2 border border-slate-300 print:border-black text-center whitespace-nowrap">${tgl}</td>
+                    <td class="p-2 border border-slate-300 print:border-black font-mono text-[11px] break-all">${escapeHtml(t.ref || '')}</td>
+                    <td class="p-2 border border-slate-300 print:border-black bkk-uraian">${escapeHtml(t.uraian || '')}</td>
+                    <td class="p-2 border border-slate-300 print:border-black text-right whitespace-nowrap">${t.masuk ? formatRp(t.masuk) : '-'}</td>
+                    <td class="p-2 border border-slate-300 print:border-black text-right whitespace-nowrap">${t.barangJasa ? formatRp(t.barangJasa) : '-'}</td>
+                    <td class="p-2 border border-slate-300 print:border-black text-right whitespace-nowrap">${t.modal ? formatRp(t.modal) : '-'}</td>
+                    <td class="p-2 border border-slate-300 print:border-black text-right whitespace-nowrap">${t.kembali ? formatRp(t.kembali) : '-'}</td>
+                    <td class="p-2 border border-slate-300 print:border-black text-right font-bold whitespace-nowrap">${formatRp(saldo)}</td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+            tfoot.innerHTML = `<tr>
+                <td colspan="4" class="p-2 border border-slate-300 print:border-black text-right uppercase">Jumlah</td>
+                <td class="p-2 border border-slate-300 print:border-black text-right">${formatRp(totalMasuk)}</td>
+                <td class="p-2 border border-slate-300 print:border-black text-right">${formatRp(totalBarangJasa)}</td>
+                <td class="p-2 border border-slate-300 print:border-black text-right">${formatRp(totalModal)}</td>
+                <td class="p-2 border border-slate-300 print:border-black text-right">${totalKembali ? formatRp(totalKembali) : '-'}</td>
+                <td class="p-2 border border-slate-300 print:border-black text-right text-blue-700 print:text-black">${formatRp(saldo)}</td>
+            </tr>`;
+        }
+
         // ===============================================
         function renderBKU() {
             const tbody = document.getElementById('bkuDataList'), tfoot = document.getElementById('bkuFooter'); if(!tbody || !tfoot) return;
@@ -3531,8 +4855,202 @@ function getBelanjaOptionsHTML(selectedValue) {
         }
 
         // Fungsi mencetak untuk buku kas
+        function ensureBukuKasPrintContainer() {
+            let container = document.getElementById('bukuKasPrintPages');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'bukuKasPrintPages';
+                document.body.appendChild(container);
+            }
+            return container;
+        }
+
+        function removeHiddenPrintClasses(root) {
+            if (!root) return root;
+            const nodes = [root, ...root.querySelectorAll('*')];
+            nodes.forEach(el => {
+                if (!el.classList) return;
+                el.classList.remove('hidden');
+                el.classList.remove('print:block');
+                el.classList.remove('print:hidden');
+                el.classList.remove('print:text-black');
+                el.classList.remove('print:bg-transparent');
+                el.classList.remove('print:border-black');
+                el.classList.remove('print:p-0');
+                el.classList.remove('print:m-0');
+                el.removeAttribute('id');
+            });
+            return root;
+        }
+
+        function cloneForBukuKasPrint(node) {
+            if (!node) return null;
+            const clone = node.cloneNode(true);
+            clone.querySelectorAll('.no-print, button, input, select, textarea, script, style').forEach(el => el.remove());
+            clone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
+            return removeHiddenPrintClasses(clone);
+        }
+
+        function getActiveBukuKasViewId() {
+            const ids = ['bkuView', 'bktView', 'bksdView', 'bkpView', 'bkkView'];
+            return ids.find(id => {
+                const el = document.getElementById(id);
+                return el && !el.classList.contains('hidden');
+            }) || 'bkuView';
+        }
+
+        function getRowsPerBukuKasPrintPage(viewId) {
+            // v3.8.26: margin narrow + footer dekat tabel, sehingga baris per halaman bisa ditambah.
+            if (viewId === 'bkkView') return 8;
+            if (viewId === 'bkpView') return 9;
+            return 9;
+        }
+
+        function getBukuKasPrintColWidths(viewId, colCount) {
+            if (viewId === 'bkkView') return ['4%', '8%', '10%', '31%', '10%', '12%', '8%', '8%', '9%'];
+            if (viewId === 'bkpView') return ['4%', '8%', '46%', '14%', '14%', '14%'];
+            return ['4%', '8%', '10%', '34%', '8%', '12%', '12%', '12%'].slice(0, colCount);
+        }
+
+        function buildBukuKasColGroup(viewId, colCount) {
+            const colgroup = document.createElement('colgroup');
+            const widths = getBukuKasPrintColWidths(viewId, colCount);
+            for (let i = 0; i < colCount; i++) {
+                const col = document.createElement('col');
+                col.style.width = widths[i] || `${Math.floor(100 / Math.max(colCount, 1))}%`;
+                colgroup.appendChild(col);
+            }
+            return colgroup;
+        }
+
+        function getBukuKasCompactSignatureHTML(title) {
+            const tgl = safeGetVal('in_tanggal') ? new Date(safeGetVal('in_tanggal')).toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'}) : '.......... ' + (safeGetVal('in_tahun') || new Date().getFullYear());
+            return `<div class="text-center mt-2"><div class="flex justify-between text-center">
+                <div class="w-1/3"><p>Diverifikasi oleh :<br>Sekretaris Desa,</p><div class="h-16"></div><p class="font-bold">${safeGetVal('in_namaSekdes') || 'Kusmita Pandatika S.M'}</p></div>
+                <div class="w-1/3"><p>Disetujui Oleh<br>Kepala Desa Pangek</p><div class="h-16"></div><p class="font-bold">${safeGetVal('in_namaKades') || 'Sarmin A.Ma.Pd'}</p></div>
+                <div class="w-1/3"><p>Pangek, ${tgl}<br>Kaur Keuangan</p><div class="h-16"></div><p class="font-bold">(${safeGetVal('in_namaKaurKeuangan') || 'Jefri Pratama S.E'})</p></div>
+            </div></div>`;
+        }
+
+        function refreshActiveBukuKasView(viewId) {
+            try {
+                if (viewId === 'bkuView' && typeof renderBKU === 'function') renderBKU();
+                if (viewId === 'bktView' && typeof renderBKT === 'function') renderBKT();
+                if (viewId === 'bksdView' && typeof renderBKSD === 'function') renderBKSD();
+                if (viewId === 'bkpView' && typeof renderBKP === 'function') renderBKP();
+                if (viewId === 'bkkView' && typeof renderBKK === 'function') renderBKK();
+            } catch (err) {
+                console.warn('Gagal refresh buku kas sebelum cetak:', err);
+            }
+        }
+
+        function prepareBukuKasPaginatedPrint() {
+            const container = ensureBukuKasPrintContainer();
+            container.innerHTML = '';
+            const viewId = getActiveBukuKasViewId();
+            refreshActiveBukuKasView(viewId);
+            const view = document.getElementById(viewId);
+            if (!view) return false;
+
+            const table = view.querySelector('table');
+            const originalThead = table ? table.querySelector('thead') : null;
+            const originalTbody = table ? table.querySelector('tbody') : null;
+            const originalTfoot = table ? table.querySelector('tfoot') : null;
+            if (!table || !originalThead || !originalTbody) return false;
+
+            const rows = Array.from(originalTbody.querySelectorAll('tr')).filter(row => row && row.textContent.trim());
+            const rowsPerPage = getRowsPerBukuKasPrintPage(viewId);
+            const chunks = [];
+            for (let i = 0; i < rows.length; i += rowsPerPage) chunks.push(rows.slice(i, i + rowsPerPage));
+            if (chunks.length === 0) chunks.push([]);
+
+            const titleHeader = view.querySelector('.hidden.print\\:block.text-center, .hidden.print\\:block');
+            const bkkInfo = viewId === 'bkkView' ? document.getElementById('bkkHeaderInfo') : null;
+            const footerMap = {
+                bkuView: 'bkuPrintFooter',
+                bktView: 'bktPrintFooter',
+                bksdView: 'bksdPrintFooter'
+            };
+            const explicitFooter = footerMap[viewId] ? document.getElementById(footerMap[viewId]) : null;
+
+            chunks.forEach((chunk, pageIndex) => {
+                const page = document.createElement('section');
+                page.className = 'bk-print-page';
+
+                const header = document.createElement('div');
+                header.className = 'bk-print-header';
+                const clonedTitle = cloneForBukuKasPrint(titleHeader);
+                if (clonedTitle) header.appendChild(clonedTitle);
+                const clonedInfo = cloneForBukuKasPrint(bkkInfo);
+                if (clonedInfo) {
+                    clonedInfo.classList.add('bk-print-info');
+                    header.appendChild(clonedInfo);
+                }
+                page.appendChild(header);
+
+                const tableWrap = document.createElement('div');
+                tableWrap.className = 'bk-print-table-wrap';
+                const printTable = document.createElement('table');
+                printTable.className = `bk-print-table bk-${viewId}`;
+
+                const clonedThead = cloneForBukuKasPrint(originalThead);
+                const clonedTfoot = cloneForBukuKasPrint(originalTfoot);
+                const colCount = clonedThead ? Math.max(...Array.from(clonedThead.querySelectorAll('tr')).map(tr => Array.from(tr.children).filter(c => !c.classList.contains('no-print')).reduce((sum, cell) => sum + (parseInt(cell.getAttribute('colspan') || '1', 10) || 1), 0))) : 8;
+                printTable.appendChild(buildBukuKasColGroup(viewId, colCount));
+                if (clonedThead) printTable.appendChild(clonedThead);
+
+                const body = document.createElement('tbody');
+                chunk.forEach(row => {
+                    const clonedRow = cloneForBukuKasPrint(row);
+                    if (clonedRow) body.appendChild(clonedRow);
+                });
+                if (chunk.length === 0) {
+                    const emptyRow = document.createElement('tr');
+                    const td = document.createElement('td');
+                    td.colSpan = colCount;
+                    td.textContent = 'Belum ada data transaksi.';
+                    td.style.textAlign = 'center';
+                    emptyRow.appendChild(td);
+                    body.appendChild(emptyRow);
+                }
+                printTable.appendChild(body);
+                if (clonedTfoot && clonedTfoot.textContent.trim()) printTable.appendChild(clonedTfoot);
+                tableWrap.appendChild(printTable);
+                page.appendChild(tableWrap);
+
+                const footer = document.createElement('div');
+                footer.className = 'bk-print-footer';
+                const clonedFooter = cloneForBukuKasPrint(explicitFooter);
+                if (clonedFooter && clonedFooter.textContent.trim()) {
+                    footer.appendChild(clonedFooter);
+                } else {
+                    footer.innerHTML = getBukuKasCompactSignatureHTML(viewId);
+                }
+                page.appendChild(footer);
+                container.appendChild(page);
+            });
+            return true;
+        }
+
+        function clearBukuKasPaginatedPrint() {
+            const container = document.getElementById('bukuKasPrintPages');
+            if (container) container.innerHTML = '';
+        }
+
         function cetakBukuKas() {
-            window.print();
+            const originalTitle = document.title;
+            const prepared = prepareBukuKasPaginatedPrint();
+            document.body.classList.add('print-buku-kas');
+            document.title = 'Buku Kas - A4 Landscape';
+            window.focus();
+            setTimeout(function() {
+                try { window.print(); } catch (e) { alert('Gunakan shortcut cetak (Ctrl+P/Cmd+P).'); }
+                setTimeout(function() {
+                    document.title = originalTitle;
+                    document.body.classList.remove('print-buku-kas');
+                    if (prepared) clearBukuKasPaginatedPrint();
+                }, 1000);
+            }, 150);
         }
 
         function cetakDokumen() {
@@ -3567,6 +5085,314 @@ function getBelanjaOptionsHTML(selectedValue) {
                 }, 2000); 
             }, 150);
         }
+
+
+
+        // =========================================================
+        // AI AGENT BENDAHARA DESA v3.8.28
+        // Agent lokal berbasis aturan + data aplikasi.
+        // Aman untuk HTML statis karena tidak menaruh API key di frontend.
+        // =========================================================
+        let aiAgentLastDraft = null;
+
+        function aiAgentNormalizeText(text) {
+            return String(text || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim();
+        }
+
+        function aiAgentMoney(n) {
+            const val = Math.round(Number(n || 0));
+            return 'Rp ' + (typeof formatRp === 'function' ? formatRp(val) : val.toLocaleString('id-ID'));
+        }
+
+        function aiAgentExtractAmount(text) {
+            const raw = aiAgentNormalizeText(text).replace(/rp\s*/g, '');
+            const unitMatch = raw.match(/(\d+(?:[\.,]\d+)?)\s*(miliar|milyar|juta|jt|ribu|rb|k)\b/);
+            if (unitMatch) {
+                const num = parseFloat(unitMatch[1].replace(',', '.')) || 0;
+                const unit = unitMatch[2];
+                if (unit === 'miliar' || unit === 'milyar') return Math.round(num * 1000000000);
+                if (unit === 'juta' || unit === 'jt') return Math.round(num * 1000000);
+                return Math.round(num * 1000);
+            }
+            const numeric = raw.match(/(\d{1,3}(?:[\.\s]\d{3})+|\d{4,}|\d+)/);
+            if (!numeric) return 0;
+            return parseInt(numeric[1].replace(/[\.\s]/g, ''), 10) || 0;
+        }
+
+        function aiAgentDetectDate(text) {
+            const raw = String(text || '');
+            let m = raw.match(/\b(20\d{2})-(\d{1,2})-(\d{1,2})\b/);
+            if (m) return `${m[1]}-${String(m[2]).padStart(2,'0')}-${String(m[3]).padStart(2,'0')}`;
+            m = raw.match(/\b(\d{1,2})[\/\-](\d{1,2})[\/\-](20\d{2})\b/);
+            if (m) return `${m[3]}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}`;
+            return new Date().toISOString().slice(0, 10);
+        }
+
+        function aiAgentAllKegiatan() {
+            const arr = [];
+            (KEGIATAN_OPTIONS || []).forEach(group => (group.options || []).forEach(opt => arr.push(opt)));
+            return arr;
+        }
+
+        function aiAgentPickKnownKegiatan(value) {
+            return aiAgentAllKegiatan().find(opt => opt.val === value)?.val || '';
+        }
+
+        function aiAgentDetectKegiatan(text) {
+            const t = aiAgentNormalizeText(text);
+            const rules = [
+                { keys: ['blt', 'bantuan langsung tunai', 'mendesak'], val: '5.3.00 Keadaan Mendesak (BLT DD)' },
+                { keys: ['posyandu', 'pmt', 'kader kesehatan', 'balita'], val: '2.2.02 Penyelenggaraan Posyandu' },
+                { keys: ['paud', 'tk', 'tpa', 'tpq', 'guru paud'], val: '2.1.01 Penyelenggaraan PAUD/TK/TPA/TKA/TPQ/Madrasah' },
+                { keys: ['drainase', 'gorong'], val: '2.3.14 Pembangunan/Rehabilitasi Drainase/Gorong-gorong' },
+                { keys: ['jalan desa', 'pengerasan jalan', 'rehab jalan', 'pembangunan jalan'], val: '2.3.10 Pembangunan/Rehabilitasi/Peningkatan Jalan Desa' },
+                { keys: ['pemeliharaan jalan'], val: '2.3.01 Pemeliharaan Jalan Desa' },
+                { keys: ['hut', '17 agustus', 'festival', 'hari besar', 'kesenian'], val: '3.2.03 Penyelenggaraan Festival Kesenian/HUT RI/Hari Besar' },
+                { keys: ['karang taruna', 'olah raga', 'olahraga'], val: '3.3.06 Pembinaan Karang Taruna/Klub Olah raga' },
+                { keys: ['pkk'], val: '3.4.03 Pembinaan PKK' },
+                { keys: ['bimtek', 'pelatihan', 'kapasitas perangkat'], val: '4.3.02 Peningkatan kapasitas perangkat Desa' },
+                { keys: ['bumdes', 'bum desa', 'penyertaan modal'], val: '4.6.01 Pembentukan/Penyertaan Modal BUM Desa' },
+                { keys: ['bpjs', 'jaminan sosial', 'ketenagakerjaan'], val: '1.1.03 Penyediaan Jaminan Sosial bagi Kepala Desa dan Perangkat Desa' },
+                { keys: ['bpd operasional', 'operasional bpd'], val: '1.1.06 Penyediaan Operasional BPD' },
+                { keys: ['tunjangan bpd'], val: '1.1.05 Penyediaan Tunjangan BPD' },
+                { keys: ['rt', 'rw', 'insentif rt', 'operasional rt'], val: '1.1.07 Penyediaan Insentif/Operasional RT/RW' },
+                { keys: ['siltap kades', 'penghasilan tetap kepala desa', 'gaji kepala desa'], val: '1.1.01 Penyediaan Penghasilan Tetap dan Tunjangan Kepala Desa' },
+                { keys: ['siltap', 'penghasilan tetap', 'gaji perangkat', 'tunjangan perangkat'], val: '1.1.02 Penyediaan Penghasilan Tetap dan Tunjangan Perangkat Desa' },
+                { keys: ['operasional kantor', 'operasional desa', 'atk', 'bbm', 'internet', 'wifi', 'listrik kantor', 'spanduk kantor', 'administrasi kantor'], val: '1.1.04 Penyediaan Operasional Pemerintah Desa' },
+                { keys: ['musdes', 'musyawarah desa', 'musrenbang', 'apbdes'], val: '1.4.01 Penyelenggaraan Musyawarah Perencanaan Desa/Pembahasan APBDes' },
+                { keys: ['rkpdes', 'rpjmdes'], val: '1.4.03 Penyusunan Dokumen Perencanaan Desa (RPJMDes/RKPDes,dll)' }
+            ];
+            const rule = rules.find(r => r.keys.some(k => t.includes(k)) && aiAgentPickKnownKegiatan(r.val));
+            if (rule) return rule.val;
+
+            const tokens = t.split(' ').filter(w => w.length > 3);
+            let best = { score: 0, val: '' };
+            aiAgentAllKegiatan().forEach(opt => {
+                const hay = aiAgentNormalizeText((opt.val || '') + ' ' + (opt.text || '') + ' ' + (opt.bid || '') + ' ' + (opt.sub || ''));
+                const score = tokens.reduce((sum, token) => sum + (hay.includes(token) ? 1 : 0), 0);
+                if (score > best.score) best = { score, val: opt.val };
+            });
+            return best.score > 0 ? best.val : '';
+        }
+
+        function aiAgentDetectBelanja(text) {
+            const t = aiAgentNormalizeText(text);
+            const rules = [
+                { keys: ['blt', 'bantuan langsung tunai'], val: '5.4.1 Belanja Bantuan Langsung Tunai' },
+                { keys: ['upah tukang', 'tukang', 'pekerja bangunan'], val: '5.3.5 Belanja Upah Tukang-bangunan' },
+                { keys: ['sewa alat berat', 'alat berat'], val: '5.3.6 Belanja Sewa peralatan berat-bangunan' },
+                { keys: ['motor', 'kendaraan roda 2'], val: '5.3.3 Belanja modal Kendaraan roda 2' },
+                { keys: ['mobil', 'kendaraan roda 4'], val: '5.3.4 Belanja modal Kendaraan roda 4' },
+                { keys: ['gedung', 'bangunan'], val: '5.3.2 Belanja Modal Gedung' },
+                { keys: ['laptop', 'komputer', 'printer', 'meja', 'kursi', 'peralatan kantor'], val: '5.3.1 Belanja Modal Peralatan Kantor' },
+                { keys: ['spanduk', 'banner'], val: '5.2.13 Belanja Spanduk' },
+                { keys: ['barang diserahkan', 'bantuan barang'], val: '5.2.12 Belanja Barang yang diserahkan ke Masyarakat' },
+                { keys: ['bbm', 'bensin', 'solar', 'pertalite', 'pemeliharaan kendaraan', 'service kendaraan', 'servis kendaraan'], val: '5.2.11 Belanja Jasa Pemeliharaan Kendaraan Operasional Desa' },
+                { keys: ['pemeliharaan kantor', 'servis printer', 'service printer', 'jasa pemeliharaan'], val: '5.2.10 Belanja Jasa Pemeliharaan Peralatan Kantor' },
+                { keys: ['perjalanan luar', 'dinas luar'], val: '5.2.9 Belanja Perjalanan Dinas luar Kabupaten' },
+                { keys: ['perjalanan', 'transport', 'dinas dalam'], val: '5.2.8 Belanja Perjalanan Dinas dalam Kabupaten' },
+                { keys: ['narasumber'], val: '5.2.7 Belanja Honorarium Narasumber' },
+                { keys: ['honor tim'], val: '5.2.6 Belanja Honorarium Tim yang Melaksanakan Kegiatan' },
+                { keys: ['honor', 'operator', 'kader', 'petugas', 'insentif'], val: '5.2.5 Belanja Honorarium Petugas' },
+                { keys: ['konsumsi', 'makan', 'minum', 'snack', 'nasi kotak', 'rapat'], val: '5.2.4 Belanja Konsumsi' },
+                { keys: ['rumah tangga', 'peralatan rumah'], val: '5.2.3 Belanja Peralatan Rumah Tangga' },
+                { keys: ['listrik', 'lampu', 'kabel'], val: '5.2.2 Belanja Alat-Alat Listrik' },
+                { keys: ['atk', 'alat tulis', 'benda pos', 'map', 'kertas', 'tinta'], val: '5.2.1 Belanja Alat Tulis dan Benda Pos' },
+                { keys: ['jaminan ketenagakerjaan perangkat'], val: '5.1.6 Jaminan Ketenagakerjaan Perangkat Desa' },
+                { keys: ['jaminan ketenagakerjaan kades'], val: '5.1.5 Jaminan ketenagakerjaan Kepala Desa' },
+                { keys: ['tunjangan perangkat'], val: '5.1.4 Tunjangan Perangkat Desa' },
+                { keys: ['tunjangan kepala desa', 'tunjangan kades'], val: '5.1.3 Tunjangan Kepala Desa' },
+                { keys: ['siltap perangkat', 'penghasilan tetap perangkat'], val: '5.1.2 Penghasilan Tetap Perangkat Desa' },
+                { keys: ['siltap kades', 'penghasilan tetap kepala desa'], val: '5.1.1 Penghasilan Tetap Kepala Desa' }
+            ];
+            return (rules.find(r => r.keys.some(k => t.includes(k))) || {}).val || '5.2.1 Belanja Alat Tulis dan Benda Pos';
+        }
+
+        function aiAgentDetectSumberDana(text) {
+            const t = aiAgentNormalizeText(text);
+            const sorted = [...(SUMBER_DANA_OPTIONS || [])].sort((a,b) => b.length - a.length);
+            const found = sorted.find(sd => t.includes(aiAgentNormalizeText(sd)));
+            return found || safeGetVal('in_sumberDana') || 'ADD';
+        }
+
+        function aiAgentCalculateTax(uraian, nominal) {
+            const p = { ppn:0, pph21:0, pph22:0, pph23:0, restoran:0, galian_c:0 };
+            const n = Number(nominal || 0);
+            if (n <= 0) return p;
+            if (String(uraian).startsWith('5.1.4')) p.pph21 = n * 0.05;
+            else if (String(uraian).startsWith('5.2.3')) { const dpp = n / 1.10; p.restoran = dpp * 0.10; p.pph23 = dpp * 0.02; }
+            else if (String(uraian).startsWith('5.2.5') || String(uraian).startsWith('5.2.9')) p.pph23 = n * 0.02;
+            else if (/^(5\.2\.(1|2|7|8|10|11|12)|5\.3\.)/.test(String(uraian)) && n > 2000000) { const dpp = n / 1.11; p.ppn = dpp * 0.11; p.pph22 = dpp * 0.015; }
+            Object.keys(p).forEach(k => p[k] = Math.round(p[k]));
+            return p;
+        }
+
+        function aiAgentBuildDraft(text) {
+            const nominal = aiAgentExtractAmount(text);
+            const kegiatan = aiAgentDetectKegiatan(text);
+            const belanja = aiAgentDetectBelanja(text);
+            const sumberDana = aiAgentDetectSumberDana(text);
+            const pajak = aiAgentCalculateTax(belanja, nominal);
+            const cleanText = String(text || '').replace(/\s+/g, ' ').trim();
+            const keterangan = cleanText.length > 135 ? cleanText.slice(0, 132) + '...' : cleanText;
+            return { tanggal: aiAgentDetectDate(text), kegiatan, belanja, sumberDana, nominal, pajak, keterangan };
+        }
+
+        function aiAgentDraftHTML(d) {
+            if (!d) return 'Belum ada draft. Tulis perintah transaksi dulu.';
+            const meta = d.kegiatan ? getKegiatanMeta(d.kegiatan) : { bidang: '-', subBidang: '-', label: '-' };
+            const pajakTotal = Object.values(d.pajak || {}).reduce((a,b) => a + (Number(b) || 0), 0);
+            const sisaInfo = (() => {
+                if (!d.kegiatan) return '<span class="text-orange-700 font-bold">Kegiatan belum terdeteksi</span>';
+                const pagu = parseFloat((paguRecords.find(p => p.kegiatan === d.kegiatan) || {}).pagu) || 0;
+                const lalu = savedRecords.filter(r => r.kegiatan === d.kegiatan).reduce((sum, r) => sum + (r.items || []).reduce((a, i) => a + (parseFloat(i.jumlah) || 0), 0), 0);
+                const sisa = pagu - lalu - (Number(d.nominal) || 0);
+                const cls = sisa < 0 ? 'text-red-700' : 'text-emerald-700';
+                return `<span class="${cls} font-black">Sisa setelah draft: ${aiAgentMoney(sisa)}</span>`;
+            })();
+            return `
+                <div class="space-y-2">
+                    <div><b>Tanggal:</b> ${escapeHtml(d.tanggal)}</div>
+                    <div><b>Kegiatan:</b> ${escapeHtml(d.kegiatan || 'Belum terdeteksi')}</div>
+                    <div class="text-xs text-slate-500"><b>Bidang:</b> ${escapeHtml(meta.bidang || '-')} / ${escapeHtml(meta.subBidang || '-')}</div>
+                    <div><b>Sumber Dana:</b> ${escapeHtml(d.sumberDana)}</div>
+                    <div><b>Kode Belanja:</b> ${escapeHtml(d.belanja)}</div>
+                    <div><b>Nominal:</b> <span class="font-black text-[#1e4b6e]">${aiAgentMoney(d.nominal)}</span></div>
+                    <div><b>Estimasi Pajak:</b> ${pajakTotal ? aiAgentMoney(pajakTotal) : 'Tidak terdeteksi / Rp 0'}</div>
+                    <div class="pt-2 border-t border-slate-200">${sisaInfo}</div>
+                </div>`;
+        }
+
+        function aiAgentAppend(role, content, isHtml = false) {
+            const log = document.getElementById('aiAgentLog');
+            if (!log) return;
+            const div = document.createElement('div');
+            div.className = role === 'user' ? 'ai-msg ai-msg-user' : 'ai-msg ai-msg-bot';
+            div.innerHTML = isHtml ? content : escapeHtml(content);
+            log.appendChild(div);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function renderAiAgentDashboard() {
+            const stats = document.getElementById('aiAgentStats');
+            if (stats) {
+                const totalPagu = paguRecords.reduce((a, r) => a + (parseFloat(r.pagu) || 0), 0);
+                const totalSpp = savedRecords.reduce((a, r) => a + (r.items || []).reduce((s, i) => s + (parseFloat(i.jumlah) || 0), 0), 0);
+                const belumLunas = savedRecords.filter(r => !(r.statusBayar === true || r.statusBayar === 'true' || r.statusBayar === 'Lunas')).length;
+                const pajakBelumSetor = Math.max(0, savedRecords.reduce((a, r) => a + (r.items || []).reduce((s, i) => s + Object.values(i.pajak || {}).reduce((p, v) => p + (parseFloat(v) || 0), 0), 0), 0) - setoranPajakRecords.reduce((a, r) => a + (parseFloat(r.nominal) || 0), 0));
+                stats.innerHTML = `
+                    <div class="ai-stat"><div class="text-[10px] font-black text-slate-400 uppercase">Total Pagu</div><div class="font-black text-[#1e4b6e]">${aiAgentMoney(totalPagu)}</div></div>
+                    <div class="ai-stat"><div class="text-[10px] font-black text-slate-400 uppercase">Total SPP</div><div class="font-black text-[#1e4b6e]">${aiAgentMoney(totalSpp)}</div></div>
+                    <div class="ai-stat"><div class="text-[10px] font-black text-slate-400 uppercase">Belum Lunas</div><div class="font-black text-orange-600">${belumLunas} SPP</div></div>
+                    <div class="ai-stat"><div class="text-[10px] font-black text-slate-400 uppercase">Pajak Belum Setor</div><div class="font-black text-red-600">${aiAgentMoney(pajakBelumSetor)}</div></div>`;
+            }
+            const draft = document.getElementById('aiAgentDraft');
+            if (draft) draft.innerHTML = aiAgentDraftHTML(aiAgentLastDraft);
+            const log = document.getElementById('aiAgentLog');
+            if (log && !log.dataset.ready) {
+                log.dataset.ready = '1';
+                aiAgentAppend('bot', 'Halo, saya AI Agent Bendahara Desa. Saya bisa bantu buat draft SPP dari bahasa biasa, cek sisa pagu, dan membaca ringkasan buku kas. Coba tulis: “input belanja ATK 350rb operasional kantor ADD”.');
+            }
+        }
+
+        function aiAgentAnalyze(text) {
+            const t = aiAgentNormalizeText(text);
+            const totalPagu = paguRecords.reduce((a, r) => a + (parseFloat(r.pagu) || 0), 0);
+            const totalSpp = savedRecords.reduce((a, r) => a + (r.items || []).reduce((s, i) => s + (parseFloat(i.jumlah) || 0), 0), 0);
+            const belumLunas = savedRecords.filter(r => !(r.statusBayar === true || r.statusBayar === 'true' || r.statusBayar === 'Lunas'));
+            const transaksi = savedRecords.flatMap(r => (r.items || []).map(i => ({ noSpp: r.noSpp || '-', kegiatan: r.kegiatan || '-', uraian: i.uraian || '-', jumlah: parseFloat(i.jumlah) || 0 })) ).sort((a,b) => b.jumlah - a.jumlah);
+            const top = transaksi.slice(0, 5).map((x, i) => `<li>${i+1}. SPP ${escapeHtml(x.noSpp)} — ${escapeHtml(x.uraian)}: <b>${aiAgentMoney(x.jumlah)}</b></li>`).join('') || '<li>Belum ada transaksi SPP.</li>';
+            const detectedKegiatan = aiAgentDetectKegiatan(text);
+            let kegiatanInfo = '';
+            if (detectedKegiatan) {
+                const pagu = parseFloat((paguRecords.find(p => p.kegiatan === detectedKegiatan) || {}).pagu) || 0;
+                const terpakai = savedRecords.filter(r => r.kegiatan === detectedKegiatan).reduce((sum, r) => sum + (r.items || []).reduce((a,i) => a + (parseFloat(i.jumlah) || 0), 0), 0);
+                kegiatanInfo = `<div class="mt-3 p-3 rounded-xl bg-blue-50 border border-blue-100"><b>Kegiatan terdeteksi:</b> ${escapeHtml(detectedKegiatan)}<br><b>Pagu:</b> ${aiAgentMoney(pagu)}<br><b>Terpakai:</b> ${aiAgentMoney(terpakai)}<br><b>Sisa:</b> ${aiAgentMoney(pagu - terpakai)}</div>`;
+            }
+            return `
+                <div class="space-y-2">
+                    <div><b>Ringkasan data aplikasi:</b></div>
+                    <div>• Total pagu: <b>${aiAgentMoney(totalPagu)}</b></div>
+                    <div>• Total SPP tercatat: <b>${aiAgentMoney(totalSpp)}</b></div>
+                    <div>• Sisa global: <b>${aiAgentMoney(totalPagu - totalSpp)}</b></div>
+                    <div>• SPP belum lunas: <b>${belumLunas.length}</b></div>
+                    ${kegiatanInfo}
+                    <div class="mt-3"><b>Transaksi terbesar:</b><ol class="list-decimal pl-5 mt-1">${top}</ol></div>
+                </div>`;
+        }
+
+        function aiAgentSend() {
+            const input = document.getElementById('aiAgentInput');
+            if (!input) return;
+            const text = input.value.trim();
+            if (!text) return showToast('Tulis perintah untuk AI Agent dulu.', true);
+            aiAgentAppend('user', text);
+            input.value = '';
+            const t = aiAgentNormalizeText(text);
+            if (/\b(cek|laporan|ringkasan|sisa|anggaran|bku|buku kas|belum lunas|transaksi terbesar)\b/.test(t)) {
+                aiAgentAppend('bot', aiAgentAnalyze(text), true);
+                renderAiAgentDashboard();
+                return;
+            }
+            const draft = aiAgentBuildDraft(text);
+            aiAgentLastDraft = draft;
+            const missing = [];
+            if (!draft.nominal) missing.push('nominal');
+            if (!draft.kegiatan) missing.push('kegiatan');
+            const taxTotal = Object.values(draft.pajak || {}).reduce((a,b) => a + (Number(b) || 0), 0);
+            let response = `<div><b>Saya buatkan draft transaksi dari perintahmu.</b></div><div class="mt-3">${aiAgentDraftHTML(draft)}</div>`;
+            if (missing.length) response += `<div class="mt-3 ai-warning">Data yang belum kuat terdeteksi: ${missing.join(', ')}. Kamu bisa lengkapi manual setelah diterapkan ke Form SPP.</div>`;
+            if (taxTotal) response += `<div class="mt-3 text-xs text-slate-600">Estimasi potongan mengikuti rumus pajak yang sudah ada di aplikasi. Tetap cek ulang sebelum simpan.</div>`;
+            response += `<div class="mt-3 font-bold text-emerald-700">Klik “Terapkan ke Form SPP” jika draft ini sudah cocok.</div>`;
+            aiAgentAppend('bot', response, true);
+            renderAiAgentDashboard();
+        }
+
+        function aiAgentQuick(text) {
+            const input = document.getElementById('aiAgentInput');
+            if (input) input.value = text;
+            aiAgentSend();
+        }
+
+        function aiAgentClearChat() {
+            const log = document.getElementById('aiAgentLog');
+            if (log) { log.innerHTML = ''; log.dataset.ready = ''; }
+            aiAgentLastDraft = null;
+            renderAiAgentDashboard();
+        }
+
+        function aiAgentApplyDraft() {
+            if (!aiAgentLastDraft) return showToast('Belum ada draft AI Agent untuk diterapkan.', true);
+            if (currentUserRole === 'pengunjung') return showToast('Mode pengunjung hanya bisa membaca. Masuk sebagai Bendahara/PPKD untuk mengisi form.', true);
+            const d = aiAgentLastDraft;
+            resetForm();
+            const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+            setVal('in_tanggal', d.tanggal);
+            const kegSelect = document.getElementById('in_kegiatan_select');
+            if (kegSelect && d.kegiatan) kegSelect.value = d.kegiatan;
+            if (typeof updateInfoAuto === 'function') updateInfoAuto(false);
+            setVal('in_sumberDana', d.sumberDana);
+            belanjaItems = [{
+                id: Date.now(),
+                uraian: d.belanja,
+                jumlah: Number(d.nominal || 0),
+                keterangan: d.keterangan,
+                pajak: d.pajak || {ppn:0, pph21:0, pph22:0, pph23:0, restoran:0, galian_c:0}
+            }];
+            renderBelanjaList();
+            if (typeof autoCalculatePajak === 'function') autoCalculatePajak(0);
+            calculate();
+            switchMainPage('spp');
+            showToast('Draft AI Agent sudah diterapkan ke Form SPP. Periksa ulang sebelum simpan.');
+        }
+
+        // Enter untuk kirim chat agent, Shift+Enter untuk baris baru.
+        window.addEventListener('DOMContentLoaded', () => {
+            const input = document.getElementById('aiAgentInput');
+            if (input) input.addEventListener('keydown', ev => {
+                if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); aiAgentSend(); }
+            });
+        });
 
         window.onload = () => { /* Aplikasi dimuat */ };
     </script>
