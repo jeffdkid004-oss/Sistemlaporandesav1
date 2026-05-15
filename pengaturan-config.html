@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pengaturan Silades Ai Pro</title>
+  <script src="./config-desa.js"></script>
+  <script src="./config-pejabat.js"></script>
+  <script src="./config-rekening.js"></script>
+  <script src="./config-kode-rekening.js"></script>
+  <style>
+    :root{
+      --navy:#07111f;--navy2:#16324f;--green:#16a34a;--green2:#047857;--bg:#f4f8f6;--text:#0f172a;--muted:#64748b;--line:#dbe5dd;--card:#fff;--danger:#dc2626;--warn:#d97706;--blue:#2563eb;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:radial-gradient(circle at 10% 0%,rgba(22,163,74,.15),transparent 30rem),linear-gradient(180deg,#f8fafc,var(--bg));color:var(--text)}
+    header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+    .wrap{width:min(1220px,94vw);margin:auto}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0}
+    .brand{display:flex;align-items:center;gap:12px;font-weight:1000}
+    .logo{width:42px;height:42px;border-radius:16px;background:linear-gradient(135deg,var(--green),var(--navy));color:#fff;display:grid;place-items:center}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+    button,.btn{border:0;border-radius:14px;padding:11px 14px;font-weight:900;cursor:pointer;transition:.18s;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+    button:hover,.btn:hover{transform:translateY(-1px)}
+    .primary{background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;box-shadow:0 12px 26px rgba(22,163,74,.22)}
+    .dark{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff}
+    .light{background:#fff;color:#14532d;border:1px solid var(--line)}
+    .danger{background:#fee2e2;color:#991b1b}
+    .blue{background:#dbeafe;color:#1d4ed8}
+    main{padding:28px 0 70px}
+    .hero{background:linear-gradient(135deg,#07111f,#16324f);border-radius:30px;padding:26px;color:#fff;box-shadow:0 22px 70px rgba(15,23,42,.18);margin-bottom:18px}
+    .hero h1{margin:0 0 8px;font-size:clamp(28px,4vw,44px);letter-spacing:-.04em}
+    .hero p{margin:0;color:#cbd5e1;line-height:1.65}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
+    .tab{background:#fff;border:1px solid var(--line);color:#334155}
+    .tab.active{background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border-color:transparent}
+    .panel{display:none}
+    .panel.active{display:block}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .card{background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:24px;padding:18px;box-shadow:0 14px 42px rgba(15,23,42,.06)}
+    .card h2,.card h3{margin:0 0 12px}
+    label{display:block;font-size:12px;font-weight:900;color:#475569;text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px}
+    input,select,textarea{width:100%;border:1px solid #cbd5e1;border-radius:14px;padding:11px 12px;font:inherit;background:#fff;outline:none}
+    input:focus,select:focus,textarea:focus{border-color:var(--green);box-shadow:0 0 0 4px rgba(22,163,74,.12)}
+    textarea{min-height:120px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px}
+    .field{margin-bottom:12px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .list{display:grid;gap:10px}
+    .item{border:1px solid var(--line);border-radius:18px;padding:14px;background:#fff}
+    .item-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}
+    .item-head b{font-size:14px}
+    .small{font-size:12px;color:var(--muted);line-height:1.5}
+    .notice{border:1px solid #fde68a;background:#fffbeb;color:#92400e;border-radius:18px;padding:14px;font-size:13px;line-height:1.6;margin:14px 0;font-weight:700}
+    .success{border-color:#bbf7d0;background:#f0fdf4;color:#166534}
+    .output{display:none;margin-top:16px}
+    .output.show{display:block}
+    .download-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    pre{white-space:pre-wrap;background:#0f172a;color:#dbeafe;padding:14px;border-radius:16px;max-height:320px;overflow:auto;font-size:12px}
+    .pill{display:inline-flex;align-items:center;gap:6px;background:#ecfdf5;color:#047857;border:1px solid #bbf7d0;border-radius:999px;padding:6px 10px;font-size:11px;font-weight:1000}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+    .split{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+    @media(max-width:900px){.grid,.grid-3,.row,.split,.download-grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}.actions{width:100%}.actions .btn,.actions button{flex:1}.hero{border-radius:22px}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap top">
+    <div class="brand"><div class="logo">⚙️</div><div><div>Pengaturan Silades Ai Pro</div><span class="small">Edit nama desa, pejabat, rekening, kegiatan, dan belanja</span></div></div>
+    <div class="actions">
+      <a class="btn light" href="./silades-ai-pro-full-config-editor.html" target="_blank">Buka Aplikasi Full</a>
+      <a class="btn light" href="./silades-ai-pro-demo-config-editor.html" target="_blank">Buka Demo</a>
+      <button class="primary" onclick="generateAll()">Generate File Config</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <span class="pill">Editor Config Terpisah</span>
+    <h1>Ubah data aplikasi tanpa bongkar kode utama.</h1>
+    <p>Halaman ini membantu membuat file config untuk nama desa, pejabat, nomor rekening, kode rekening kegiatan, dan kode rekening belanja. Setelah selesai, klik generate lalu download file config dan upload bersama aplikasi.</p>
+  </section>
+
+  <div class="notice">
+    Browser tidak boleh menimpa file langsung di hosting. Jadi halaman ini akan membuat file <b>.js</b> baru untuk di-download. Setelah download, upload file config tersebut ke folder aplikasi.
+  </div>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="desa" onclick="openTab('desa')">🏛️ Nama Desa</button>
+    <button class="tab" data-tab="pejabat" onclick="openTab('pejabat')">👥 Pejabat</button>
+    <button class="tab" data-tab="rekening" onclick="openTab('rekening')">🏦 Rekening</button>
+    <button class="tab" data-tab="kegiatan" onclick="openTab('kegiatan')">📋 Kode Kegiatan</button>
+    <button class="tab" data-tab="belanja" onclick="openTab('belanja')">🧾 Kode Belanja</button>
+    <button class="tab" data-tab="hasil" onclick="openTab('hasil')">⬇️ Hasil Download</button>
+  </nav>
+
+  <section id="tab-desa" class="panel active">
+    <div class="card">
+      <h2>Data Desa</h2>
+      <div class="grid">
+        <div class="field"><label>Nama Desa</label><input id="desa_nama" placeholder="Pangek"></div>
+        <div class="field"><label>Kecamatan</label><input id="desa_kecamatan" placeholder="Simpang Teritip"></div>
+        <div class="field"><label>Kabupaten</label><input id="desa_kabupaten" placeholder="Bangka Barat"></div>
+        <div class="field"><label>Provinsi</label><input id="desa_provinsi" placeholder="Kepulauan Bangka Belitung"></div>
+        <div class="field"><label>Kode Pos</label><input id="desa_kodepos" placeholder="33366"></div>
+        <div class="field"><label>Tahun Anggaran</label><input id="desa_tahun" placeholder="2026"></div>
+      </div>
+      <div class="field"><label>Alamat Desa</label><input id="desa_alamat" placeholder="Alamat kantor desa"></div>
+      <div class="field"><label>URL Logo Desa</label><input id="desa_logo" placeholder="https://..."></div>
+    </div>
+  </section>
+
+  <section id="tab-pejabat" class="panel">
+    <div class="grid">
+      <div class="card">
+        <h2>Pejabat Utama</h2>
+        <div class="field"><label>Nama Kepala Desa</label><input id="pej_kades"></div>
+        <div class="field"><label>Nama Sekdes</label><input id="pej_sekdes"></div>
+        <div class="field"><label>Nama Bendahara</label><input id="pej_bendahara"></div>
+      </div>
+      <div class="card">
+        <h2>PPKD</h2>
+        <div class="field"><label>Kaur TU dan Umum</label><input id="ppkd_tu"></div>
+        <div class="field"><label>Kaur Perencanaan</label><input id="ppkd_perencanaan"></div>
+        <div class="field"><label>Kasi Pemerintahan</label><input id="ppkd_pemerintahan"></div>
+        <div class="field"><label>Kasi Kesejahteraan</label><input id="ppkd_kesejahteraan"></div>
+        <div class="field"><label>Kasi Pelayanan</label><input id="ppkd_pelayanan"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-rekening" class="panel">
+    <div class="card">
+      <h2>Nomor Rekening Desa</h2>
+      <div class="grid">
+        <div class="field"><label>Nama Rekening</label><input id="rek_nama"></div>
+        <div class="field"><label>Bank</label><input id="rek_bank"></div>
+        <div class="field"><label>Cabang</label><input id="rek_cabang"></div>
+        <div class="field"><label>Nomor Rekening</label><input id="rek_nomor"></div>
+      </div>
+      <div class="field"><label>Atas Nama</label><input id="rek_atasnama"></div>
+    </div>
+  </section>
+
+  <section id="tab-kegiatan" class="panel">
+    <div class="split">
+      <div class="card">
+        <h2>Tambah Kode Rekening Kegiatan</h2>
+        <div class="field"><label>Nama Grup/Bidang</label><input id="kg_label" placeholder="1. BIDANG PENYELENGGARAAN PEMERINTAHAN DESA"></div>
+        <div class="row">
+          <div class="field"><label>Kode Kegiatan</label><input id="kg_kode" placeholder="1.1.01"></div>
+          <div class="field"><label>Nama Kegiatan</label><input id="kg_nama" placeholder="Penyediaan Penghasilan Tetap..."></div>
+        </div>
+        <div class="row">
+          <div class="field"><label>Bidang Otomatis</label><input id="kg_bidang"></div>
+          <div class="field"><label>Sub Bidang Otomatis</label><input id="kg_sub"></div>
+        </div>
+        <button class="primary" onclick="addKegiatan()">Tambah Kegiatan</button>
+        <button class="light" onclick="clearKegiatanForm()">Bersihkan Form</button>
+      </div>
+      <div class="card">
+        <h2>Daftar Kegiatan</h2>
+        <div class="toolbar"><button class="blue" onclick="loadDefaultKegiatan()">Muat dari Config</button><button class="danger" onclick="clearAllKegiatan()">Kosongkan</button></div>
+        <div id="kegiatanList" class="list"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-belanja" class="panel">
+    <div class="split">
+      <div class="card">
+        <h2>Tambah Kode Rekening Belanja</h2>
+        <div class="field"><label>Nama Grup Belanja</label><input id="bl_label" placeholder="5.2 BELANJA BARANG DAN JASA"></div>
+        <div class="row">
+          <div class="field"><label>Kode Belanja</label><input id="bl_kode" placeholder="5.2.1"></div>
+          <div class="field"><label>Nama/Uraian Belanja</label><input id="bl_nama" placeholder="Belanja Alat Tulis Kantor"></div>
+        </div>
+        <button class="primary" onclick="addBelanja()">Tambah Belanja</button>
+        <button class="light" onclick="clearBelanjaForm()">Bersihkan Form</button>
+      </div>
+      <div class="card">
+        <h2>Daftar Belanja</h2>
+        <div class="toolbar"><button class="blue" onclick="loadDefaultBelanja()">Muat dari Config</button><button class="danger" onclick="clearAllBelanja()">Kosongkan</button></div>
+        <div id="belanjaList" class="list"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-hasil" class="panel">
+    <div class="card">
+      <h2>Download File Config</h2>
+      <p class="small">Klik Generate File Config, lalu download file yang ingin diperbarui. Upload file hasil download ke folder aplikasi.</p>
+      <div class="toolbar">
+        <button class="primary" onclick="generateAll()">Generate Semua</button>
+        <button class="dark" onclick="downloadAllZipLike()">Download Panduan Upload</button>
+      </div>
+      <div id="resultNotice" class="notice success" style="display:none">File config sudah dibuat di browser. Silakan download satu per satu.</div>
+      <div class="download-grid" id="downloadButtons"></div>
+    </div>
+    <div class="grid">
+      <div class="card"><h3>Preview config-desa.js</h3><pre id="previewDesa"></pre></div>
+      <div class="card"><h3>Preview config-pejabat.js</h3><pre id="previewPejabat"></pre></div>
+      <div class="card"><h3>Preview config-rekening.js</h3><pre id="previewRekening"></pre></div>
+      <div class="card"><h3>Preview config-kode-rekening.js</h3><pre id="previewKode"></pre></div>
+    </div>
+  </section>
+</main>
+
+<script>
+  let kegiatanGroups = [];
+  let belanjaGroups = [];
+  let generatedFiles = {};
+
+  function qs(id){ return document.getElementById(id); }
+  function val(id){ return (qs(id)?.value || '').trim(); }
+  function setVal(id, value){ if(qs(id)) qs(id).value = value || ''; }
+
+  function openTab(name){
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    qs('tab-' + name).classList.add('active');
+    document.querySelector(`[data-tab="${name}"]`).classList.add('active');
+  }
+
+  function initFromConfig(){
+    const desa = window.SILADES_DESA_CONFIG || {};
+    setVal('desa_nama', desa.namaDesa || 'Pangek');
+    setVal('desa_kecamatan', desa.kecamatan || 'Simpang Teritip');
+    setVal('desa_kabupaten', desa.kabupaten || 'Bangka Barat');
+    setVal('desa_provinsi', desa.provinsi || 'Kepulauan Bangka Belitung');
+    setVal('desa_alamat', desa.alamat || '');
+    setVal('desa_kodepos', desa.kodePos || '');
+    setVal('desa_tahun', desa.tahunAnggaran || new Date().getFullYear());
+    setVal('desa_logo', desa.logoUrl || '');
+
+    const pej = window.SILADES_PEJABAT_CONFIG || {};
+    setVal('pej_kades', pej.kades?.nama || '');
+    setVal('pej_sekdes', pej.sekdes?.nama || '');
+    setVal('pej_bendahara', pej.bendahara?.nama || '');
+    setVal('ppkd_tu', pej.ppkd?.['Kaur TU dan Umum']?.nama || '');
+    setVal('ppkd_perencanaan', pej.ppkd?.['Kaur Perencanaan']?.nama || '');
+    setVal('ppkd_pemerintahan', pej.ppkd?.['Kasi Pemerintahan']?.nama || '');
+    setVal('ppkd_kesejahteraan', pej.ppkd?.['Kasi Kesejahteraan']?.nama || '');
+    setVal('ppkd_pelayanan', pej.ppkd?.['Kasi Pelayanan']?.nama || '');
+
+    const rek = window.SILADES_REKENING_CONFIG || {};
+    setVal('rek_nama', rek.namaRekening || 'Rekening Kas Desa');
+    setVal('rek_bank', rek.bank || '');
+    setVal('rek_cabang', rek.cabang || '');
+    setVal('rek_nomor', rek.nomorRekening || '');
+    setVal('rek_atasnama', rek.atasNama || '');
+
+    loadDefaultKegiatan();
+    loadDefaultBelanja();
+    generateAll(false);
+  }
+
+  function groupByLabel(groups, label){
+    label = label || 'Lainnya';
+    let g = groups.find(x => x.label === label);
+    if(!g){
+      g = { label, options: [] };
+      groups.push(g);
+    }
+    return g;
+  }
+
+  function addKegiatan(){
+    const label = val('kg_label') || 'Lainnya';
+    const kode = val('kg_kode');
+    const nama = val('kg_nama');
+    if(!kode || !nama){ alert('Kode dan nama kegiatan wajib diisi.'); return; }
+    const text = `${kode} ${nama}`;
+    const item = {
+      val: text,
+      text: text,
+      bid: val('kg_bidang'),
+      sub: val('kg_sub')
+    };
+    groupByLabel(kegiatanGroups, label).options.push(item);
+    renderKegiatan();
+    clearKegiatanForm();
+  }
+
+  function clearKegiatanForm(){
+    ['kg_kode','kg_nama','kg_bidang','kg_sub'].forEach(id => setVal(id,''));
+  }
+
+  function removeKegiatan(groupIndex, itemIndex){
+    kegiatanGroups[groupIndex].options.splice(itemIndex,1);
+    kegiatanGroups = kegiatanGroups.filter(g => (g.options || []).length);
+    renderKegiatan();
+  }
+
+  function renderKegiatan(){
+    const box = qs('kegiatanList');
+    if(!kegiatanGroups.length){ box.innerHTML = '<div class="small">Belum ada kode kegiatan.</div>'; return; }
+    box.innerHTML = kegiatanGroups.map((g, gi) => `
+      <div class="item">
+        <div class="item-head"><b>${escapeHtml(g.label)}</b><button class="danger" onclick="removeGroupKegiatan(${gi})">Hapus Grup</button></div>
+        ${(g.options || []).map((o, oi) => `
+          <div class="item" style="box-shadow:none;margin-top:8px">
+            <b>${escapeHtml(o.text || o.val)}</b>
+            <div class="small">Bidang: ${escapeHtml(o.bid || '-')}<br>Sub: ${escapeHtml(o.sub || '-')}</div>
+            <button class="danger" onclick="removeKegiatan(${gi},${oi})">Hapus</button>
+          </div>
+        `).join('')}
+      </div>
+    `).join('');
+  }
+
+  function removeGroupKegiatan(index){
+    kegiatanGroups.splice(index,1);
+    renderKegiatan();
+  }
+
+  function clearAllKegiatan(){
+    if(confirm('Kosongkan semua kode kegiatan?')){
+      kegiatanGroups = [];
+      renderKegiatan();
+    }
+  }
+
+  function loadDefaultKegiatan(){
+    const cfg = window.SILADES_KODE_REKENING_CONFIG || {};
+    kegiatanGroups = JSON.parse(JSON.stringify(cfg.kegiatanGroups || []));
+    renderKegiatan();
+  }
+
+  function addBelanja(){
+    const label = val('bl_label') || 'Lainnya';
+    const kode = val('bl_kode');
+    const nama = val('bl_nama');
+    if(!kode || !nama){ alert('Kode dan nama belanja wajib diisi.'); return; }
+    let g = belanjaGroups.find(x => x.label === label);
+    if(!g){
+      g = { label, opts: [] };
+      belanjaGroups.push(g);
+    }
+    g.opts.push(`${kode} ${nama}`);
+    renderBelanja();
+    clearBelanjaForm();
+  }
+
+  function clearBelanjaForm(){
+    ['bl_kode','bl_nama'].forEach(id => setVal(id,''));
+  }
+
+  function removeBelanja(groupIndex, itemIndex){
+    belanjaGroups[groupIndex].opts.splice(itemIndex,1);
+    belanjaGroups = belanjaGroups.filter(g => (g.opts || []).length);
+    renderBelanja();
+  }
+
+  function renderBelanja(){
+    const box = qs('belanjaList');
+    if(!belanjaGroups.length){ box.innerHTML = '<div class="small">Belum ada kode belanja.</div>'; return; }
+    box.innerHTML = belanjaGroups.map((g, gi) => `
+      <div class="item">
+        <div class="item-head"><b>${escapeHtml(g.label)}</b><button class="danger" onclick="removeGroupBelanja(${gi})">Hapus Grup</button></div>
+        ${(g.opts || g.options || []).map((o, oi) => `
+          <div class="item" style="box-shadow:none;margin-top:8px">
+            <b>${escapeHtml(typeof o === 'string' ? o : (o.text || o.val || o.nama || ''))}</b>
+            <button class="danger" onclick="removeBelanja(${gi},${oi})">Hapus</button>
+          </div>
+        `).join('')}
+      </div>
+    `).join('');
+  }
+
+  function removeGroupBelanja(index){
+    belanjaGroups.splice(index,1);
+    renderBelanja();
+  }
+
+  function clearAllBelanja(){
+    if(confirm('Kosongkan semua kode belanja?')){
+      belanjaGroups = [];
+      renderBelanja();
+    }
+  }
+
+  function loadDefaultBelanja(){
+    const cfg = window.SILADES_KODE_REKENING_CONFIG || {};
+    belanjaGroups = JSON.parse(JSON.stringify(cfg.belanjaGroups || []));
+    renderBelanja();
+  }
+
+  function makeDesaConfig(){
+    return {
+      namaDesa: val('desa_nama'),
+      kecamatan: val('desa_kecamatan'),
+      kabupaten: val('desa_kabupaten'),
+      provinsi: val('desa_provinsi'),
+      alamat: val('desa_alamat'),
+      kodePos: val('desa_kodepos'),
+      tahunAnggaran: val('desa_tahun'),
+      namaAplikasi: 'Silades Ai Pro',
+      versi: 'v3.8.34',
+      logoUrl: val('desa_logo')
+    };
+  }
+
+  function makePejabatConfig(){
+    return {
+      kades: { jabatan: "Kepala Desa", nama: val('pej_kades') },
+      sekdes: { jabatan: "Sekretaris Desa", nama: val('pej_sekdes') },
+      bendahara: { jabatan: "Bendahara Desa", nama: val('pej_bendahara') },
+      ppkd: {
+        "Kaur TU dan Umum": { nama: val('ppkd_tu') },
+        "Kaur Perencanaan": { nama: val('ppkd_perencanaan') },
+        "Kasi Pemerintahan": { nama: val('ppkd_pemerintahan') },
+        "Kasi Kesejahteraan": { nama: val('ppkd_kesejahteraan') },
+        "Kasi Pelayanan": { nama: val('ppkd_pelayanan') }
+      }
+    };
+  }
+
+  function makeRekeningConfig(){
+    return {
+      namaRekening: val('rek_nama'),
+      bank: val('rek_bank'),
+      cabang: val('rek_cabang'),
+      nomorRekening: val('rek_nomor'),
+      atasNama: val('rek_atasnama')
+    };
+  }
+
+  function jsFile(varName, obj, title){
+    return `/*\n  ${title}\n  Dibuat dari halaman pengaturan Silades Ai Pro.\n*/\nwindow.${varName} = ${JSON.stringify(obj, null, 2)};\n`;
+  }
+
+  function generateAll(show = true){
+    generatedFiles = {
+      'config-desa.js': jsFile('SILADES_DESA_CONFIG', makeDesaConfig(), 'CONFIG DATA DESA - SILADES AI PRO'),
+      'config-pejabat.js': jsFile('SILADES_PEJABAT_CONFIG', makePejabatConfig(), 'CONFIG PEJABAT - SILADES AI PRO'),
+      'config-rekening.js': jsFile('SILADES_REKENING_CONFIG', makeRekeningConfig(), 'CONFIG NOMOR REKENING - SILADES AI PRO'),
+      'config-kode-rekening.js': jsFile('SILADES_KODE_REKENING_CONFIG', { kegiatanGroups, belanjaGroups }, 'CONFIG KODE REKENING KEGIATAN & BELANJA - SILADES AI PRO')
+    };
+
+    qs('previewDesa').textContent = generatedFiles['config-desa.js'];
+    qs('previewPejabat').textContent = generatedFiles['config-pejabat.js'];
+    qs('previewRekening').textContent = generatedFiles['config-rekening.js'];
+    qs('previewKode').textContent = generatedFiles['config-kode-rekening.js'];
+
+    const box = qs('downloadButtons');
+    box.innerHTML = Object.keys(generatedFiles).map(name => `<button class="primary" onclick="downloadFile('${name}')">Download ${name}</button>`).join('');
+    qs('resultNotice').style.display = 'block';
+    if(show) openTab('hasil');
+  }
+
+  function downloadFile(name){
+    if(!generatedFiles[name]) generateAll(false);
+    const blob = new Blob([generatedFiles[name]], {type:'text/javascript'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function downloadAllZipLike(){
+    const guide = `PANDUAN UPLOAD CONFIG SILADES AI PRO
+
+1. Download semua file config:
+   - config-desa.js
+   - config-pejabat.js
+   - config-rekening.js
+   - config-kode-rekening.js
+
+2. Upload semua file tersebut ke folder yang sama dengan file aplikasi:
+   - silades-ai-pro-full-config-editor.html
+   - silades-ai-pro-demo-config-editor.html
+
+3. Jika di Cloudflare Pages / Netlify:
+   - upload ulang folder project
+   - pastikan file config tidak berubah nama
+
+4. Refresh aplikasi.
+`;
+    const blob = new Blob([guide], {type:'text/plain'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'PANDUAN_UPLOAD_CONFIG.txt';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function escapeHtml(v){
+    return String(v ?? '').replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[s]));
+  }
+
+  initFromConfig();
+</script>
+</body>
+</html>

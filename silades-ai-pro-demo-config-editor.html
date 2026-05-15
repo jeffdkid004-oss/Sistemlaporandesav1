@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Pelaporan Desa v3.8.34 Offline Sync</title>
+    <title>Sistem Pelaporan Desa v3.8.34 Compact 75</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -1922,7 +1922,7 @@
 
     <style id="offline-sync-v3830">
         /* =========================================================
-           v3.8.34 - OFFLINE INPUT + AUTO SYNC
+           v3.8.30 - OFFLINE INPUT + AUTO SYNC
            Data yang gagal terkirim ke Google Sheet disimpan sementara
            di localStorage, diberi tanda khusus, lalu dikirim otomatis
            saat koneksi internet kembali online.
@@ -6753,6 +6753,457 @@ function getBelanjaOptionsHTML(selectedValue) {
 
         window.onload = () => { /* Aplikasi dimuat */ };
     </script>
+
+
+    <!-- =========================================================
+         DEMO MODE UNTUK PENAWARAN / PENJUALAN
+         - Tidak menyentuh database asli.
+         - Data contoh tersimpan di localStorage browser calon pembeli.
+         - Semua request ke Apps Script diblok dan disimulasikan.
+    ========================================================== -->
+    <style id="demo-sales-mode-style">
+        @media screen {
+            .demo-sales-ribbon {
+                position: fixed;
+                left: 50%;
+                top: 10px;
+                transform: translateX(-50%);
+                z-index: 9999;
+                display: flex;
+                align-items: center;
+                gap: .55rem;
+                padding: .6rem .95rem;
+                border-radius: 999px;
+                background: linear-gradient(135deg, #f59e0b, #b45309);
+                color: #fff;
+                font-size: 12px;
+                font-weight: 900;
+                letter-spacing: .03em;
+                text-transform: uppercase;
+                box-shadow: 0 18px 50px rgba(15,23,42,.25);
+                border: 1px solid rgba(255,255,255,.36);
+            }
+            .demo-sales-ribbon button {
+                border: 1px solid rgba(255,255,255,.34);
+                background: rgba(255,255,255,.18);
+                color: #fff;
+                border-radius: 999px;
+                padding: .28rem .6rem;
+                font-size: 10px;
+                font-weight: 900;
+            }
+            .demo-watermark {
+                position: fixed;
+                inset: 0;
+                pointer-events: none;
+                z-index: 1;
+                opacity: .055;
+                background-image: repeating-linear-gradient(-32deg, transparent 0 120px, rgba(15,23,42,.26) 120px 124px, transparent 124px 245px);
+            }
+            .demo-watermark::after {
+                content: "DEMO PENJUALAN";
+                position: absolute;
+                top: 48%;
+                left: 50%;
+                transform: translate(-50%, -50%) rotate(-24deg);
+                font-size: clamp(44px, 10vw, 132px);
+                line-height: 1;
+                font-weight: 1000;
+                color: #0f172a;
+                white-space: nowrap;
+                letter-spacing: .12em;
+            }
+            .demo-card-note {
+                border: 1px dashed rgba(180,83,9,.42);
+                background: #fffbeb;
+                color: #92400e;
+                border-radius: 14px;
+                padding: .8rem 1rem;
+                font-size: 12px;
+                font-weight: 800;
+                margin-top: .75rem;
+            }
+            #loginView .demo-card-note { text-align: left; }
+            .demo-local-chip {
+                display: inline-flex;
+                align-items: center;
+                gap: .35rem;
+                padding: .18rem .5rem;
+                border-radius: 999px;
+                background: #fffbeb;
+                color: #92400e;
+                border: 1px solid #fde68a;
+                font-size: 10px;
+                font-weight: 900;
+                margin-left: .35rem;
+                vertical-align: middle;
+            }
+        }
+        @media print {
+            .demo-sales-ribbon, .demo-watermark, .demo-card-note { display: none !important; }
+        }
+    </style>
+    <script id="demo-sales-mode-script">
+        (function(){
+            'use strict';
+            const DEMO_MODE = true;
+            const DEMO_STORE_KEY = 'sistem_pelaporan_desa_demo_jual_store_v1';
+            window.DEMO_MODE = DEMO_MODE;
+
+            const realFetch = window.fetch ? window.fetch.bind(window) : null;
+            window.fetch = function(input, init) {
+                const url = typeof input === 'string' ? input : (input && input.url ? input.url : '');
+                if (url && url.includes('script.google.com/macros/s/')) {
+                    const body = JSON.stringify(demoApiResponse(url, init));
+                    return Promise.resolve(new Response(body, { status: 200, headers: { 'Content-Type': 'application/json' } }));
+                }
+                return realFetch ? realFetch(input, init) : Promise.reject(new Error('Fetch tidak tersedia'));
+            };
+
+            function demoTodayOffset(day) {
+                const d = new Date(2026, 4, day);
+                return d.toISOString().slice(0,10);
+            }
+            function clone(obj) { return JSON.parse(JSON.stringify(obj)); }
+            function pajakKosong() { return {ppn:0, pph21:0, pph22:0, pph23:0, restoran:0, galian_c:0}; }
+            function totalSppRecord(r) { return (r.items || []).reduce((a,i) => a + (Number(i.jumlah) || 0), 0); }
+            function demoDefaults() {
+                const spp = [
+                    {
+                        id: 260501001,
+                        noSpp: '001', bulan: 'Mei', tahun: '2026', tanggal: demoTodayOffset(2), tanggalBayar: demoTodayOffset(3), statusBayar: 'Lunas',
+                        bidang: 'Penyelenggaraan Pemerintahan Desa', subBidang: 'Penyelenggaraan Belanja Penghasilan Tetap, Tunjangan dan Operasional Pemerintahan Desa',
+                        kegiatan: '1.1.04 Penyediaan Operasional Pemerintah Desa', sumberDana: 'ADD', pagu: 25000000, lalu: 0, statusAcc: true, spjAcc: true,
+                        spjLink: 'https://drive.google.com/demo/spj-operasional', printLink: 'https://drive.google.com/demo/berkas-cetak-operasional', tglSpj: demoTodayOffset(4),
+                        pejabat: { kades: 'Sarmin A.Ma.Pd', sekdes: 'Kusmita Pandatika S.M', ppkd: 'Mawar Melati', jabatanPpkd: 'Kaur TU dan Umum', bendahara: 'Jefri Pratama S.E' },
+                        items: [
+                            { id: 2605010011, uraian: '5.2.1 Belanja Alat Tulis dan Benda Pos', jumlah: 750000, keterangan: 'ATK pelayanan kantor bulan Mei', pajak: pajakKosong() },
+                            { id: 2605010012, uraian: '5.2.13 Belanja Spanduk', jumlah: 1250000, keterangan: 'Spanduk informasi pelayanan desa', pajak: pajakKosong() }
+                        ]
+                    },
+                    {
+                        id: 260501002,
+                        noSpp: '002', bulan: 'Mei', tahun: '2026', tanggal: demoTodayOffset(6), tanggalBayar: '', statusBayar: false,
+                        bidang: 'Pelaksanaan Pembangunan Desa', subBidang: 'Kesehatan',
+                        kegiatan: '2.2.02 Penyelenggaraan Posyandu', sumberDana: 'APBN', pagu: 18000000, lalu: 0, statusAcc: true, spjAcc: false,
+                        spjLink: 'https://drive.google.com/demo/spj-posyandu', printLink: '', tglSpj: '',
+                        pejabat: { kades: 'Sarmin A.Ma.Pd', sekdes: 'Kusmita Pandatika S.M', ppkd: 'Sari Wulandari', jabatanPpkd: 'Kasi Kesejahteraan', bendahara: 'Jefri Pratama S.E' },
+                        items: [
+                            { id: 2605010021, uraian: '5.2.4 Belanja Konsumsi', jumlah: 2000000, keterangan: 'Konsumsi kader dan peserta posyandu', pajak: {ppn:0, pph21:0, pph22:0, pph23:36000, restoran:182000, galian_c:0} },
+                            { id: 2605010022, uraian: '5.2.12 Belanja Barang yang diserahkan ke Masyarakat', jumlah: 2500000, keterangan: 'PMT balita dan ibu hamil', pajak: {ppn:248000, pph21:0, pph22:34000, pph23:0, restoran:0, galian_c:0} }
+                        ]
+                    },
+                    {
+                        id: 260501003,
+                        noSpp: '003', bulan: 'Mei', tahun: '2026', tanggal: demoTodayOffset(8), tanggalBayar: '', statusBayar: false,
+                        bidang: 'Penyelenggaraan Pemerintahan Desa', subBidang: 'Penyelenggaraan Musyawarah Desa',
+                        kegiatan: '1.4.01 Penyelenggaraan Musyawarah Perencanaan Desa/Pembahasan APBDes', sumberDana: 'ADD', pagu: 12000000, lalu: 0, statusAcc: false, spjAcc: false,
+                        spjLink: '', printLink: '', tglSpj: '', sppBatalMsg: '',
+                        pejabat: { kades: 'Sarmin A.Ma.Pd', sekdes: 'Kusmita Pandatika S.M', ppkd: 'Budi Santoso', jabatanPpkd: 'Kaur Perencanaan', bendahara: 'Jefri Pratama S.E' },
+                        items: [
+                            { id: 2605010031, uraian: '5.2.4 Belanja Konsumsi', jumlah: 1750000, keterangan: 'Rapat pembahasan RKPDes/APBDes', pajak: {ppn:0, pph21:0, pph22:0, pph23:32000, restoran:159000, galian_c:0} },
+                            { id: 2605010032, uraian: '5.2.13 Belanja Spanduk', jumlah: 450000, keterangan: 'Banner musyawarah desa', pajak: pajakKosong() }
+                        ]
+                    },
+                    {
+                        id: 260501004,
+                        noSpp: '004', bulan: 'Mei', tahun: '2026', tanggal: demoTodayOffset(10), tanggalBayar: demoTodayOffset(11), statusBayar: 'Lunas',
+                        bidang: 'Pelaksanaan Pembangunan Desa', subBidang: 'Pekerjaan Umum dan Penataan Ruang',
+                        kegiatan: '2.3.10 Pembangunan/Rehabilitasi/Peningkatan Jalan Desa', sumberDana: 'BANKAB', pagu: 150000000, lalu: 0, statusAcc: true, spjAcc: true,
+                        spjLink: 'https://drive.google.com/demo/spj-jalan', printLink: 'https://drive.google.com/demo/berkas-cetak-jalan', tglSpj: demoTodayOffset(12),
+                        pejabat: { kades: 'Sarmin A.Ma.Pd', sekdes: 'Kusmita Pandatika S.M', ppkd: 'Andi Saputra', jabatanPpkd: 'Kasi Pemerintahan', bendahara: 'Jefri Pratama S.E' },
+                        items: [
+                            { id: 2605010041, uraian: '5.3.5 Belanja Upah Tukang-bangunan', jumlah: 7000000, keterangan: 'Upah pekerjaan jalan lingkungan tahap awal', pajak: {ppn:0, pph21:350000, pph22:0, pph23:0, restoran:0, galian_c:0} },
+                            { id: 2605010042, uraian: '5.3.6 Belanja Sewa peralatan berat-bangunan', jumlah: 4500000, keterangan: 'Sewa alat pemadatan jalan', pajak: {ppn:446000, pph21:0, pph22:61000, pph23:0, restoran:0, galian_c:0} }
+                        ]
+                    }
+                ];
+                return {
+                    seedVersion: 1,
+                    savedRecords: spp,
+                    paguRecords: [
+                        { id: 260500101, kegiatan: '1.1.04 Penyediaan Operasional Pemerintah Desa', bidang: 'Penyelenggaraan Pemerintahan Desa', subBidang: 'Penyelenggaraan Belanja Penghasilan Tetap, Tunjangan dan Operasional Pemerintahan Desa', pagu: 25000000 },
+                        { id: 260500102, kegiatan: '2.2.02 Penyelenggaraan Posyandu', bidang: 'Pelaksanaan Pembangunan Desa', subBidang: 'Kesehatan', pagu: 18000000 },
+                        { id: 260500103, kegiatan: '1.4.01 Penyelenggaraan Musyawarah Perencanaan Desa/Pembahasan APBDes', bidang: 'Penyelenggaraan Pemerintahan Desa', subBidang: 'Penyelenggaraan Musyawarah Desa', pagu: 12000000 },
+                        { id: 260500104, kegiatan: '2.3.10 Pembangunan/Rehabilitasi/Peningkatan Jalan Desa', bidang: 'Pelaksanaan Pembangunan Desa', subBidang: 'Pekerjaan Umum dan Penataan Ruang', pagu: 150000000 },
+                        { id: 260500105, kegiatan: '3.4.03 Pembinaan PKK', bidang: 'Pembinaan Kemasyarakatan Desa', subBidang: 'Kelembagaan Masyarakat', pagu: 9500000 }
+                    ],
+                    pendapatanRecords: [
+                        { id: 260500201, tanggal: demoTodayOffset(1), sumberDana: 'ADD', uraian: 'Pencairan ADD Tahap I Tahun Anggaran 2026', nominal: 50000000 },
+                        { id: 260500202, tanggal: demoTodayOffset(1), sumberDana: 'APBN', uraian: 'Pencairan Dana Desa Tahap I Tahun Anggaran 2026', nominal: 30000000 },
+                        { id: 260500203, tanggal: demoTodayOffset(7), sumberDana: 'BANKAB', uraian: 'Transfer bantuan keuangan kabupaten untuk pembangunan jalan desa', nominal: 100000000 }
+                    ],
+                    penarikanRecords: [
+                        { id: 260500301, tanggal: demoTodayOffset(2), sumberDana: 'ADD', uraian: 'Penarikan tunai kebutuhan operasional kantor dan musyawarah', nominal: 10000000 },
+                        { id: 260500302, tanggal: demoTodayOffset(6), sumberDana: 'APBN', uraian: 'Penarikan tunai kegiatan Posyandu', nominal: 7000000 },
+                        { id: 260500303, tanggal: demoTodayOffset(10), sumberDana: 'BANKAB', uraian: 'Penarikan tunai awal kegiatan pembangunan jalan desa', nominal: 20000000 }
+                    ],
+                    pembiayaanRecords: [
+                        { id: 260500401, tanggal: demoTodayOffset(1), jenis: 'Penerimaan', sumberDana: 'SILPA ADD', uraian: 'Input SILPA ADD tahun sebelumnya untuk demo', nominal: 5000000 }
+                    ],
+                    setoranPajakRecords: [
+                        { id: 260500501, idPotongan: '2605010021', tanggal: demoTodayOffset(9), jenis: 'Gabungan / Beberapa Pajak', uraian: 'Setoran pajak konsumsi dan barang Posyandu - data demo', ntpn: 'DEMO-NTPN-001', nominal: 500000, linkBukti: 'https://drive.google.com/demo/ntpn-posyandu' }
+                    ]
+                };
+            }
+            function getStore() {
+                try {
+                    const raw = localStorage.getItem(DEMO_STORE_KEY);
+                    if (raw) {
+                        const parsed = JSON.parse(raw);
+                        if (parsed && parsed.seedVersion === 1) return parsed;
+                    }
+                } catch(e) {}
+                const fresh = demoDefaults();
+                localStorage.setItem(DEMO_STORE_KEY, JSON.stringify(fresh));
+                return fresh;
+            }
+            function writeStore(store) {
+                const clean = {
+                    seedVersion: 1,
+                    savedRecords: clone(store.savedRecords || savedRecords || []),
+                    paguRecords: clone(store.paguRecords || paguRecords || []),
+                    pendapatanRecords: clone(store.pendapatanRecords || pendapatanRecords || []),
+                    penarikanRecords: clone(store.penarikanRecords || penarikanRecords || []),
+                    pembiayaanRecords: clone(store.pembiayaanRecords || pembiayaanRecords || []),
+                    setoranPajakRecords: clone(store.setoranPajakRecords || setoranPajakRecords || [])
+                };
+                localStorage.setItem(DEMO_STORE_KEY, JSON.stringify(clean));
+            }
+            function loadStoreToMemory() {
+                const s = getStore();
+                savedRecords = clone(s.savedRecords || []).map(r => typeof normalizeSppRecord === 'function' ? normalizeSppRecord(r) : r);
+                paguRecords = clone(s.paguRecords || []);
+                pendapatanRecords = clone(s.pendapatanRecords || []);
+                penarikanRecords = clone(s.penarikanRecords || []);
+                pembiayaanRecords = clone(s.pembiayaanRecords || []);
+                setoranPajakRecords = clone(s.setoranPajakRecords || []);
+                if (typeof setCloudStatus === 'function') {
+                    setCloudStatus('spp', true, savedRecords.length, 'MODE DEMO: data contoh lokal, database asli tidak disentuh.');
+                    setCloudStatus('pagu', true, paguRecords.length, 'MODE DEMO: data contoh lokal.');
+                    setCloudStatus('pendapatan', true, pendapatanRecords.length, 'MODE DEMO: data contoh lokal.');
+                    setCloudStatus('penarikan', true, penarikanRecords.length, 'MODE DEMO: data contoh lokal.');
+                    setCloudStatus('pembiayaan', true, pembiayaanRecords.length, 'MODE DEMO: data contoh lokal.');
+                    setCloudStatus('pajak', true, setoranPajakRecords.length, 'MODE DEMO: data contoh lokal.');
+                }
+                return s;
+            }
+            function persistMemory() {
+                writeStore({ savedRecords, paguRecords, pendapatanRecords, penarikanRecords, pembiayaanRecords, setoranPajakRecords });
+            }
+            function renderDemoAll() {
+                try { renderSavedData(); } catch(e) {}
+                try { renderPaguData(); } catch(e) {}
+                try { renderPendapatanData(); } catch(e) {}
+                try { renderPenarikanData(); } catch(e) {}
+                try { renderPembiayaanData(); } catch(e) {}
+                try { renderSetoranPajakData(); } catch(e) {}
+                try { renderSPJ(); } catch(e) {}
+                try { renderVerifikasiSPJ(); } catch(e) {}
+                try { renderBKU(); } catch(e) {}
+                try { renderBKT(); } catch(e) {}
+                try { renderBKSD(); } catch(e) {}
+                try { renderBKP(); } catch(e) {}
+                try { renderBKK(); } catch(e) {}
+                try { renderLaporan(); } catch(e) {}
+                try { renderAiAgentDashboard(); } catch(e) {}
+                try { calculate(); } catch(e) {}
+            }
+            function demoApiResponse(url, init) {
+                const actionMatch = String(url || '').match(/[?&]action=([^&]+)/);
+                const action = actionMatch ? decodeURIComponent(actionMatch[1]) : 'get';
+                let payload = {};
+                try { payload = init && init.body ? JSON.parse(init.body) : {}; } catch(e) {}
+                demoApplyAction(action, payload);
+                const s = getStore();
+                if (action.includes('pagu')) return { status: 'success', data: s.paguRecords || [] };
+                if (action.includes('pendapatan')) return { status: 'success', data: s.pendapatanRecords || [] };
+                if (action.includes('penarikan')) return { status: 'success', data: s.penarikanRecords || [] };
+                if (action.includes('pembiayaan')) return { status: 'success', data: s.pembiayaanRecords || [] };
+                if (action.includes('pajak')) return { status: 'success', data: s.setoranPajakRecords || [] };
+                return { status: 'success', data: s.savedRecords || [] };
+            }
+            function upsertById(list, rec) {
+                const idx = list.findIndex(x => String(x.id) === String(rec.id));
+                if (idx >= 0) list[idx] = rec; else list.unshift(rec);
+            }
+            function demoApplyAction(action, payload) {
+                loadStoreToMemory();
+                action = String(action || '').toLowerCase();
+                if (action === 'save') upsertById(savedRecords, normalizeSppRecord(payload));
+                if (action === 'save_pagu') {
+                    const idx = paguRecords.findIndex(x => String(x.id) === String(payload.id) || String(x.kegiatan) === String(payload.kegiatan));
+                    if (idx >= 0) paguRecords[idx] = payload; else paguRecords.unshift(payload);
+                }
+                if (action === 'save_pendapatan') upsertById(pendapatanRecords, payload);
+                if (action === 'save_penarikan') upsertById(penarikanRecords, payload);
+                if (action === 'save_pembiayaan') upsertById(pembiayaanRecords, payload);
+                if (action === 'save_setoran_pajak') upsertById(setoranPajakRecords, payload);
+                if (action === 'update_acc') {
+                    const r = savedRecords.find(x => String(x.id) === String(payload.id));
+                    if (r) {
+                        r.statusAcc = !!payload.statusAcc;
+                        r.sppBatalMsg = payload.sppBatalMsg || payload.catatanBatalAcc || '';
+                        if (!r.statusAcc) { r.statusBayar = false; r.tanggalBayar = ''; }
+                    }
+                }
+                if (action === 'confirm_bayar') {
+                    const r = savedRecords.find(x => String(x.id) === String(payload.id));
+                    if (r) { r.tanggalBayar = payload.tanggalBayar || payload.tanggal || new Date().toISOString().slice(0,10); r.tanggal = r.tanggalBayar; r.statusBayar = 'Lunas'; }
+                }
+                if (action.startsWith('delete_')) {
+                    const id = String(payload.id || '');
+                    if (action.includes('pagu')) paguRecords = paguRecords.filter(x => String(x.id) !== id);
+                    else if (action.includes('pendapatan')) pendapatanRecords = pendapatanRecords.filter(x => String(x.id) !== id);
+                    else if (action.includes('penarikan')) penarikanRecords = penarikanRecords.filter(x => String(x.id) !== id);
+                    else if (action.includes('pembiayaan')) pembiayaanRecords = pembiayaanRecords.filter(x => String(x.id) !== id);
+                    else if (action.includes('pajak')) setoranPajakRecords = setoranPajakRecords.filter(x => String(x.id) !== id);
+                    else savedRecords = savedRecords.filter(x => String(x.id) !== id);
+                }
+                persistMemory();
+            }
+
+            window.resetDemoData = function() {
+                localStorage.setItem(DEMO_STORE_KEY, JSON.stringify(demoDefaults()));
+                loadStoreToMemory();
+                renderDemoAll();
+                if (typeof showToast === 'function') showToast('Data demo sudah direset ke contoh awal.');
+            };
+
+            getOfflineQueue = window.getOfflineQueue = function(){ return []; };
+            setOfflineQueue = window.setOfflineQueue = function(){ if (typeof updateOfflineBadge === 'function') updateOfflineBadge(); };
+            syncOfflineQueue = window.syncOfflineQueue = async function(){ return { demo: true }; };
+            updateOfflineBadge = window.updateOfflineBadge = function(){
+                let badge = document.getElementById('offlineSyncBadge');
+                if (!badge) {
+                    badge = document.createElement('div');
+                    badge.id = 'offlineSyncBadge';
+                    badge.className = 'no-print fixed bottom-5 left-5 z-[200] px-4 py-2 rounded-full shadow-2xl text-xs font-black bg-amber-500 text-white border border-white/40';
+                    badge.textContent = '🧪 MODE DEMO LOKAL';
+                    document.body.appendChild(badge);
+                }
+                badge.textContent = '🧪 MODE DEMO - DATA LOKAL';
+                badge.title = 'Demo penjualan: aman, tidak terhubung ke database asli.';
+            };
+
+            postToBackendOrFail = async function(action, payload) {
+                demoApplyAction(action, payload || {});
+                await new Promise(resolve => setTimeout(resolve, 180));
+                return { status: 'success', demo: true, message: 'Mode demo: perubahan disimpan lokal.' };
+            };
+            loadDataFromCloud = async function(){ loadStoreToMemory(); renderSavedData(); return savedRecords; };
+            loadPaguFromCloud = async function(){ loadStoreToMemory(); renderPaguData(); return paguRecords; };
+            loadPendapatanFromCloud = async function(){ loadStoreToMemory(); renderPendapatanData(); return pendapatanRecords; };
+            loadPenarikanFromCloud = async function(){ loadStoreToMemory(); renderPenarikanData(); return penarikanRecords; };
+            loadPembiayaanFromCloud = async function(){ loadStoreToMemory(); renderPembiayaanData(); return pembiayaanRecords; };
+            loadSetoranPajakFromCloud = async function(){ loadStoreToMemory(); renderSetoranPajakData(); return setoranPajakRecords; };
+
+            handleLogin = function() {
+                const roleSel = document.getElementById('login_role').value || 'Bendahara Desa';
+                if (roleSel === 'Bendahara Desa') { currentUserRole = 'bendahara'; currentPpkdJabatan = ''; }
+                else if (roleSel.startsWith('PPKD')) { currentUserRole = 'ppkd'; currentPpkdJabatan = roleSel.replace('PPKD - ', ''); }
+                else { currentUserRole = 'pengunjung'; currentPpkdJabatan = ''; }
+                initDropdowns();
+                loadStoreToMemory();
+                applyRolePermissions();
+                document.getElementById('loginView').classList.add('hidden');
+                document.getElementById('mainAppContainer').classList.remove('hidden');
+                switchMainPage('dashboard');
+                renderDemoAll();
+                updateOfflineBadge();
+                showToast('Mode demo aktif. Data tersimpan lokal dan database asli aman.');
+            };
+
+            function nextDemoNoSpp() {
+                const nums = savedRecords.map(r => parseInt(r.noSpp, 10)).filter(n => !Number.isNaN(n));
+                return String((nums.length ? Math.max(...nums) + 1 : 1)).padStart(3, '0');
+            }
+            saveData = async function() {
+                const keg = safeGetVal('in_kegiatan_select');
+                if(!keg) return showToast('Pilih kegiatan terlebih dahulu!', true);
+                if((belanjaItems || []).some(i => !i.uraian || !(Number(i.jumlah) > 0))) return showToast('Lengkapi item belanja dan nominal terlebih dahulu.', true);
+                const oldRec = currentEditId ? savedRecords.find(x => String(x.id) === String(currentEditId)) : null;
+                let finalNoSpp = safeGetVal('display_spp_no') || (oldRec ? oldRec.noSpp : nextDemoNoSpp());
+                const rec = normalizeSppRecord({
+                    id: currentEditId || Date.now(), noSpp: finalNoSpp, bulan: safeGetVal('in_bulan'), tahun: safeGetVal('in_tahun'), tanggal: safeGetVal('in_tanggal'),
+                    tanggalBayar: oldRec ? (oldRec.tanggalBayar || '') : '', statusBayar: oldRec ? oldRec.statusBayar : false,
+                    bidang: safeGetVal('in_bidang'), subBidang: safeGetVal('in_subBidang'), kegiatan: keg, sumberDana: safeGetVal('in_sumberDana'),
+                    pagu: safeGetVal('in_pagu'), lalu: safeGetVal('in_lalu'),
+                    pejabat: { kades: safeGetVal('in_namaKades'), sekdes: safeGetVal('in_namaSekdes'), ppkd: safeGetVal('in_namaPpkd'), jabatanPpkd: safeGetVal('in_jabatanPpkd'), bendahara: safeGetVal('in_namaKaurKeuangan') },
+                    items: clone(belanjaItems), statusAcc: currentUserRole === 'bendahara' ? true : false,
+                    spjLink: oldRec ? (oldRec.spjLink || '') : '', printLink: oldRec ? (oldRec.printLink || '') : '', spjAcc: oldRec ? (oldRec.spjAcc || false) : false,
+                    tglSpj: oldRec ? (oldRec.tglSpj || '') : '', spjBatalMsg: oldRec ? (oldRec.spjBatalMsg || '') : '', sppBatalMsg: oldRec ? (oldRec.sppBatalMsg || '') : ''
+                });
+                upsertById(savedRecords, rec);
+                persistMemory();
+                renderDemoAll();
+                resetForm();
+                showToast('DEMO: Data SPP disimpan lokal. Database asli tidak berubah.');
+            };
+            savePaguData = async function() {
+                const keg = safeGetVal('pagu_kegiatan_select'), jumlah = Number(safeGetVal('pagu_jumlah')) || 0;
+                if(!keg || jumlah <= 0) return showToast('Data pagu tidak valid.', true);
+                const rec = { id: Date.now(), kegiatan: keg, bidang: safeGetVal('pagu_bidang'), subBidang: safeGetVal('pagu_subBidang'), pagu: jumlah };
+                const idx = paguRecords.findIndex(p => p.kegiatan === keg);
+                if (idx >= 0) { rec.id = paguRecords[idx].id; paguRecords[idx] = rec; } else paguRecords.unshift(rec);
+                persistMemory(); renderDemoAll(); showToast('DEMO: Pagu disimpan lokal.');
+            };
+            savePendapatanData = async function(){
+                const nominal = Number(safeGetVal('in_pendapatan_nominal')) || 0;
+                if(!safeGetVal('in_pendapatan_tgl') || !safeGetVal('in_pendapatan_uraian') || nominal <= 0) return showToast('Data pendapatan tidak valid.', true);
+                pendapatanRecords.unshift({ id: Date.now(), tanggal: safeGetVal('in_pendapatan_tgl'), sumberDana: safeGetVal('in_pendapatan_sumber'), uraian: safeGetVal('in_pendapatan_uraian'), nominal });
+                persistMemory(); renderDemoAll(); document.getElementById('in_pendapatan_uraian').value=''; document.getElementById('in_pendapatan_nominal').value='0'; showToast('DEMO: Pendapatan disimpan lokal.');
+            };
+            savePenarikanData = async function(){
+                const nominal = Number(safeGetVal('in_penarikan_nominal')) || 0;
+                if(!safeGetVal('in_penarikan_tgl') || !safeGetVal('in_penarikan_uraian') || nominal <= 0) return showToast('Data penarikan tidak valid.', true);
+                penarikanRecords.unshift({ id: Date.now(), tanggal: safeGetVal('in_penarikan_tgl'), sumberDana: safeGetVal('in_penarikan_sumber'), uraian: safeGetVal('in_penarikan_uraian'), nominal });
+                persistMemory(); renderDemoAll(); document.getElementById('in_penarikan_uraian').value=''; document.getElementById('in_penarikan_nominal').value='0'; showToast('DEMO: Penarikan disimpan lokal.');
+            };
+            savePembiayaanData = async function(){
+                const nominal = Number(safeGetVal('in_pembiayaan_nominal')) || 0;
+                if(!safeGetVal('in_pembiayaan_tgl') || !safeGetVal('in_pembiayaan_uraian') || nominal <= 0) return showToast('Data pembiayaan tidak valid.', true);
+                pembiayaanRecords.unshift({ id: Date.now(), tanggal: safeGetVal('in_pembiayaan_tgl'), jenis: safeGetVal('in_pembiayaan_jenis'), sumberDana: safeGetVal('in_pembiayaan_sumber'), uraian: safeGetVal('in_pembiayaan_uraian'), nominal });
+                persistMemory(); renderDemoAll(); document.getElementById('in_pembiayaan_uraian').value=''; document.getElementById('in_pembiayaan_nominal').value='0'; showToast('DEMO: Pembiayaan disimpan lokal.');
+            };
+            saveSetoranPajakData = async function(){
+                const nominal = Number(safeGetVal('in_pajak_nominal')) || 0;
+                if(!safeGetVal('in_pajak_tgl') || !safeGetVal('in_pajak_uraian') || nominal <= 0) return showToast('Data setoran pajak tidak valid.', true);
+                setoranPajakRecords.unshift({ id: Date.now(), idPotongan: safeGetVal('in_pajak_id_potongan'), tanggal: safeGetVal('in_pajak_tgl'), jenis: safeGetVal('in_pajak_jenis'), uraian: safeGetVal('in_pajak_uraian'), ntpn: safeGetVal('in_pajak_ntpn'), nominal, linkBukti: safeGetVal('in_pajak_link') });
+                persistMemory(); renderDemoAll(); document.getElementById('in_pajak_uraian').value=''; document.getElementById('in_pajak_nominal').value='0'; document.getElementById('in_pajak_ntpn').value=''; document.getElementById('in_pajak_link').value=''; showToast('DEMO: Setoran pajak disimpan lokal.');
+            };
+
+            const originalGetOfflinePendingBadge = window.getOfflinePendingBadge;
+            getOfflinePendingBadge = window.getOfflinePendingBadge = function(record){
+                const base = originalGetOfflinePendingBadge ? originalGetOfflinePendingBadge(record) : '';
+                return base + '<span class="demo-local-chip">🧪 Demo Local</span>';
+            };
+
+            document.addEventListener('DOMContentLoaded', function(){
+                const wm = document.createElement('div'); wm.className = 'demo-watermark no-print'; document.body.appendChild(wm);
+                const ribbon = document.createElement('div');
+                ribbon.className = 'demo-sales-ribbon no-print';
+                ribbon.innerHTML = '<span>🧪 Demo Penjualan - Database Asli Aman</span><button type="button" onclick="resetDemoData()">Reset Data Demo</button>';
+                document.body.appendChild(ribbon);
+
+                const role = document.getElementById('login_role');
+                const pass = document.getElementById('login_password');
+                if (role) role.value = 'Bendahara Desa';
+                if (pass) pass.value = 'demo';
+                const loginBox = document.querySelector('#loginView > div');
+                if (loginBox && !document.getElementById('demoLoginInfo')) {
+                    const info = document.createElement('div');
+                    info.id = 'demoLoginInfo';
+                    info.className = 'demo-card-note';
+                    info.innerHTML = '<b>Mode Demo untuk calon pembeli.</b><br>Login bebas: klik <b>Masuk</b> langsung. Data contoh sudah tersedia dan hanya tersimpan di browser ini, bukan Google Sheet asli.';
+                    loginBox.appendChild(info);
+                }
+                loadStoreToMemory();
+                updateOfflineBadge();
+            });
+        })();
+    </script>
+
 
 <script src="./config-pejabat.js"></script>
 <script src="./config-rekening.js"></script>
